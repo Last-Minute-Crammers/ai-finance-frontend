@@ -1,0 +1,19 @@
+import App from './App.uvue'
+
+import { createSSRApp } from 'vue'
+export function createApp() {
+	const app = createSSRApp(App)
+	return {
+		app
+	}
+}
+// common/api/finance.ts
+interface Transaction {
+  amount: number;
+  category: string;
+  date: string;
+}
+
+export const addTransaction = (data: Transaction) => {
+  return uni.request({ url: '/api/transaction', method: 'POST', data })
+}

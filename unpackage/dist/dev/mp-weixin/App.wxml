@@ -1,0 +1,1 @@
+<view id="{{a}}" change:eS="{{uV.sS}}" eS="{{$eS[a]}}" change:eA="{{uV.sA}}" eA="{{$eA[a]}}" class="{{['app-container', virtualHostClass]}}" style="{{virtualHostStyle}}" hidden="{{virtualHostHidden || false}}"><router-view u-i="4d56291d-0" bind:__l="__l"></router-view></view><wxs src="/common/uniView.wxs" module="uV"/>

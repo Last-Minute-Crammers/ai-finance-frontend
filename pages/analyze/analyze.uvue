@@ -1,0 +1,189 @@
+<template>
+  <view class="container">
+    <!-- 顶部 -->
+    <view class="header">
+      <text class="back">←</text>
+      <text class="title">财务分析</text>
+      <text class="subtitle">可视化您的消费情况</text>
+
+      <view class="tabs">
+        <view
+          v-for="tab in tabs"
+          :key="tab"
+          :class="['tab', activeTab === tab ? 'active' : '']"
+          @click="activeTab = tab"
+        >
+          {{ tab }}
+        </view>
+      </view>
+    </view>
+
+    <!-- 收支趋势图 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">收支趋势</text>
+        <text class="card-link">详情</text>
+      </view>
+      <view class="chart-placeholder">[此处为收支趋势折线图]</view>
+    </view>
+
+    <!-- 总收入 / 总支出 -->
+    <view class="summary-row">
+      <view class="summary-card">
+        <text class="label">总支出</text>
+        <text class="value">¥2,458</text>
+        <text class="trend green">↓12% 较上周</text>
+      </view>
+      <view class="summary-card">
+        <text class="label">总收入</text>
+        <text class="value">¥8,500</text>
+        <text class="trend red">↑5% 较上月</text>
+      </view>
+    </view>
+
+    <!-- 消费分类 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">消费分类</text>
+        <text class="card-link">详情</text>
+      </view>
+      <view class="chart-placeholder">[此处为消费分类饼图]</view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+// 修改后的 tabs 数组，只保留 "周", "月", "年"
+const tabs = ['周', '月', '年']
+const activeTab = ref('周')  // 默认选中"周"
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部区域 */
+.header {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 40rpx;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  position: relative;
+  text-align: center;
+}
+.back {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+}
+.title, .subtitle {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+}
+.subtitle {
+  font-size: 24rpx;
+  color: #f0f0f0;
+  margin-top: 10rpx;
+}
+
+/* Tabs */
+.tabs {
+  margin-top: 40rpx;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 40rpx;
+  padding: 6rpx;
+}
+.tab {
+  font-size: 26rpx;
+  color: white;
+  padding: 12rpx 24rpx;
+  border-radius: 30rpx;
+}
+.tab.active {
+  background: #fff;
+  color: #4e54c8;
+  font-weight: bold;
+}
+
+/* 卡片通用 */
+.card {
+  background: #fff;
+  margin: 30rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.card-title {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+.card-link {
+  font-size: 24rpx;
+  color: #4e54c8;
+}
+.chart-placeholder {
+  height: 200rpx;
+  background-color: #f0f0f0;
+  border-radius: 16rpx;
+  color: #888;
+  font-size: 22rpx;
+  text-align: center;
+  line-height: 200rpx;
+}
+
+/* 总收入支出 */
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  padding: 0 30rpx;
+  margin-bottom: 30rpx;
+}
+.summary-card {
+  width: 48%;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+.label {
+  font-size: 24rpx;
+  color: #999;
+}
+.value {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin: 10rpx 0;
+}
+.trend {
+  font-size: 22rpx;
+}
+.green {
+  color: #35b765;
+}
+.red {
+  color: #e74c3c;
+}
+</style>

@@ -1,0 +1,185 @@
+<template>
+  <view class="container">
+    <!-- 顶部 -->
+    <view class="header">
+      <text class="back">←</text>
+      <text class="title">注册</text>
+      <text class="subtitle">创建您的账户</text>
+    </view>
+
+    <!-- 注册表单 -->
+    <view class="form">
+      <view class="input-group">
+        <input
+          v-model="username"
+          class="input-field"
+          placeholder="请输入用户名"
+        />
+      </view>
+      <view class="input-group">
+        <input
+          v-model="password"
+          class="input-field"
+          :type="passwordType"
+          placeholder="请输入密码"
+        />
+        <text class="toggle-password" @click="togglePasswordVisibility">
+          {{ passwordVisible ? '隐藏' : '显示' }}
+        </text>
+      </view>
+      <view class="input-group">
+        <input
+          v-model="confirmPassword"
+          class="input-field"
+          :type="passwordType"
+          placeholder="确认密码"
+        />
+      </view>
+
+      <!-- 注册按钮 -->
+      <view class="button-group">
+        <button class="register-btn" @click="register">注册</button>
+      </view>
+
+      <!-- 跳转到登录页面 -->
+      <view class="footer-links">
+        <text class="have-account" @click="goToLogin">已有账号? 登录</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const username = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const passwordVisible = ref(false)
+const passwordType = ref('password')
+
+// 切换密码显示/隐藏
+function togglePasswordVisibility() {
+  passwordVisible.value = !passwordVisible.value
+  passwordType.value = passwordVisible.value ? 'text' : 'password'
+}
+
+// 注册操作
+function register() {
+  if (!username.value || !password.value || !confirmPassword.value) {
+    uni.showToast({
+      title: '请填写所有字段',
+      icon: 'none',
+    })
+    return
+  }
+
+  if (password.value !== confirmPassword.value) {
+    uni.showToast({
+      title: '两次密码输入不一致',
+      icon: 'none',
+    })
+    return
+  }
+
+  // 模拟注册成功操作
+  uni.showToast({
+    title: '注册成功',
+    icon: 'success',
+    duration: 2000,
+  })
+
+  // 注册成功后跳转到登录页面
+  uni.navigateTo({
+    url: '/pages/login/login',
+  })
+}
+
+// 跳转到登录页面
+function goToLogin() {
+  uni.navigateTo({
+    url: '/pages/login/login',
+  })
+}
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部区域 */
+.header {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 90rpx;
+  text-align: center;
+  align-items: center;
+  color: white;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+.subtitle {
+  font-size: 24rpx;
+  margin-top: 10rpx;
+}
+
+/* 注册表单 */
+.form {
+  padding: 30rpx;
+  background-color: white;
+  border-radius: 20rpx;
+  margin-top: -40rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.input-field {
+  width: 100%;
+  padding: 16rpx 20rpx;
+  font-size: 24rpx;
+  border-radius: 12rpx;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.toggle-password {
+  font-size: 20rpx;
+  color: #4e54c8;
+  cursor: pointer;
+}
+
+.button-group {
+  margin-top: 20rpx;
+}
+
+.register-btn {
+  width: 100%;
+  padding: 16rpx;
+  font-size: 28rpx;
+  background-color: #4e54c8;
+  color: white;
+  border-radius: 30rpx;
+  border: none;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  margin-top: 20rpx;
+}
+
+.have-account {
+  font-size: 24rpx;
+  color: #4e54c8;
+  cursor: pointer;
+}
+</style>

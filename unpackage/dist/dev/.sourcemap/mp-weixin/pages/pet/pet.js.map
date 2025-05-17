@@ -1,0 +1,1 @@
+{"version":3,"file":"pet.js","sources":["../../HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvcGV0L3BldC51dnVl"],"sourcesContent":["import MiniProgramPage from 'E:/app/uniapp/project/AI Financial Management/pages/pet/pet.uvue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AACA,GAAG,WAAW,eAAe;"}

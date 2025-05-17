@@ -1,0 +1,159 @@
+<template>
+  <view class="chat-wrapper">
+    <!-- 顶部栏 -->
+    <view class="chat-header">
+      <text class="chat-title">AI 理财助手</text>
+      <text class="chat-subtitle">您的智能理财小伙伴</text>
+    </view>
+
+    <!-- 聊天气泡区域 -->
+    <scroll-view class="chat-body" scroll-y :scroll-into-view="scrollIntoView" scroll-with-animation>
+      <view v-for="(msg, index) in messages" :key="index" :id="'msg-' + index"
+        class="chat-message" :class="msg.role">
+        <image class="avatar" :src="msg.role === 'ai' ? aiAvatar : userAvatar" />
+        <view class="bubble">
+          <text>{{ msg.text }}</text>
+        </view>
+      </view>
+      <view :id="bottomAnchor" class="scroll-anchor"></view>
+    </scroll-view>
+
+    <!-- 输入栏 -->
+    <view class="input-area">
+      <input class="input-box" v-model="inputText" placeholder="请输入内容..." @confirm="sendMessage" />
+      <button class="send-button" @tap="sendMessage">发送</button>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref, nextTick } from 'vue'
+
+interface ChatMessage {
+  role: 'ai' | 'user';
+  text: string;
+}
+
+const aiAvatar = '/static/icons/pet.png'
+const userAvatar = '/static/icons/user.png' // TODO: 可扩展为用户自定义头像
+
+const inputText = ref('')
+const messages = ref<ChatMessage[]>([
+  { role: 'ai', text: '你好，我是你的AI理财助手，有什么可以帮您？' }
+])
+const bottomAnchor = 'bottom-anchor'
+const scrollIntoView = ref(bottomAnchor)
+
+function sendMessage() {
+  const content = inputText.value.trim()
+  if (!content) return
+  messages.value.push({ role: 'user', text: content })
+  inputText.value = ''
+  scrollToBottom()
+
+  setTimeout(() => {
+    messages.value.push({ role: 'ai', text: `收到：${content}\n我会为您分析一下～` })
+    scrollToBottom()
+  }, 500)
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    scrollIntoView.value = bottomAnchor
+  })
+}
+</script>
+
+<style scoped>
+.chat-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.chat-header {
+  background: linear-gradient(to right,#4e54c8, #8f94fb);
+  color: white;
+  padding: 40rpx 32rpx 24rpx;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  text-align: center;
+}
+.chat-title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+.chat-subtitle {
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-top: 10rpx;
+}
+
+.chat-body {
+  flex: 1;
+  padding: 30rpx 24rpx;
+}
+
+.chat-message {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30rpx;
+}
+.chat-message.ai {
+  flex-direction: row;
+}
+.chat-message.user {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  margin: 0 16rpx;
+}
+
+.bubble {
+  max-width: 70%;
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+  color: #333;
+  word-wrap: break-word;
+}
+.chat-message.user .bubble {
+  background-color: #dcefff;
+}
+
+.input-area {
+  padding: 20rpx;
+  display: flex;
+  border-top: 1rpx solid #eee;
+  background-color: #fff;
+}
+.input-box {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 30rpx;
+  padding: 16rpx 24rpx;
+  font-size: 28rpx;
+  background-color: #f9f9f9;
+}
+.send-button {
+  margin-left: 20rpx;
+  height: 70rpx;
+  padding: 0 32rpx;
+  line-height: 70rpx;
+  background-color: #4e54c8;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 32rpx;
+}
+.scroll-anchor {
+  height: 1rpx;
+}
+</style>

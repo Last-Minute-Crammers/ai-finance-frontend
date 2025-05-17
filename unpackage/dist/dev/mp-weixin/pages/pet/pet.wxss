@@ -1,0 +1,187 @@
+@import "../../uvue.wxss";
+:host{display:flex;flex-direction:column}
+
+.container.data-v-44a33225 {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部标题栏 */
+.header.data-v-44a33225 {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 40rpx;
+  /* text-align: center; */
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  position: relative;
+  /* display: flex; */
+  /* flex-direction: column; */
+  align-items: center;
+  /* justify-content: center; */
+}
+.back-btn.data-v-44a33225 {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+}
+.title.data-v-44a33225 {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+}
+.subtitle.data-v-44a33225 {
+  font-size: 24rpx;
+  color: #f0f0f0;
+  margin-top: 10rpx;
+}
+
+/* 宠物卡片 */
+.card.data-v-44a33225 {
+  background: #fff;
+  margin: 30rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+.avatar-wrapper.data-v-44a33225 {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  align-items: center;
+    width: 100%;
+}
+.avatar.data-v-44a33225 {
+  width: 140rpx;
+  height: 140rpx;
+}
+.level.data-v-44a33225 {
+  position: absolute;
+  right: 100rpx;
+  bottom: 0;
+  width: 36rpx;
+  height: 36rpx;
+  background: orange;
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: bold;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 36rpx;
+}
+.pet-name.data-v-44a33225 {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-top: 12rpx;
+   align-items: center;
+}
+.pet-status.data-v-44a33225 {
+  font-size: 24rpx;
+  margin-top: 6rpx;
+}
+.status-green.data-v-44a33225 {
+  color: #35b765;
+}
+.comment.data-v-44a33225 {
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  margin: 20rpx 0;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #333;
+}
+.progress-label-row.data-v-44a33225 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #333;
+   align-items: center;
+}
+.progress-bar.data-v-44a33225 {
+  height: 16rpx;
+  width: 90%;
+  background: #eee;
+  border-radius: 10rpx;
+  margin: 10rpx auto;
+  overflow: hidden;
+}
+.progress-inner.data-v-44a33225 {
+  height: 100%;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+}
+
+/* 聊天按钮 */
+.action-column.data-v-44a33225 {
+  display: flex;
+  justify-content: right;
+ align-items: center;
+  margin: 40rpx 0;
+}
+.action-item.data-v-44a33225 {
+  width: 90%;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.icon.data-v-44a33225 {
+  font-size: 40rpx;
+}
+.label.data-v-44a33225 {
+  font-size: 24rpx;
+  margin-top: 8rpx;
+  display: block;
+}
+
+/* 勋章展示 */
+.badge-section.data-v-44a33225 {
+  margin: 40rpx 30rpx;
+}
+.badge-header.data-v-44a33225 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.badge-title.data-v-44a33225 {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+.badge-link.data-v-44a33225 {
+  font-size: 24rpx;
+  color: #4e54c8;
+}
+.badge-row.data-v-44a33225 {
+  display: flex;
+  flex-direction:row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20rpx 10rpx;
+}
+.badge-item.data-v-44a33225 {
+  width: 30%;
+  background: white;
+  border-radius: 16rpx;
+  padding: 20rpx 0;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.badge-icon.data-v-44a33225 {
+  font-size: 36rpx;
+}
+.badge-name.data-v-44a33225 {
+  font-size: 22rpx;
+  margin-top: 6rpx;
+}

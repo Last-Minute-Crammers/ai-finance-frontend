@@ -1,0 +1,1 @@
+{"version":3,"file":"chat.js","sources":["../../HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvY2hhdC9jaGF0LnV2dWU"],"sourcesContent":["import MiniProgramPage from 'E:/app/uniapp/project/AI Financial Management/pages/chat/chat.uvue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;;;;;;AACA,GAAG,WAAW,eAAe;"}

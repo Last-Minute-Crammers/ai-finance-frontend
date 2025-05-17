@@ -1,0 +1,268 @@
+<template>
+  <view class="container">
+    <!-- 顶部标题栏 -->
+    <view class="header">
+      <text class="back-btn">←</text>
+      <text class="title">AI理财宠物</text>
+      <text class="subtitle">您的智能理财小伙伴</text>
+    </view>
+
+    <!-- 宠物卡片 -->
+    <view class="card">
+      <view class="avatar-wrapper">
+        <image src="/static/icons/pet.png" class="avatar" mode="aspectFit" />
+        <view class="level">5</view>
+      </view>
+      <text class="pet-name">理财小汪</text>
+      <text class="pet-status">状态：<text class="status-green">很开心</text></text>
+      <view class="comment">
+        主人，您这个月的储蓄进度很棒哦！已经完成了 65% 的目标，继续保持！
+      </view>
+      <view class="progress-label-row">
+        <text>本月储蓄目标</text>
+        <text>65%</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-inner" :style="{ width: '65%' }"></view>
+      </view>
+    </view>
+
+    <!-- 聊天按钮 -->
+    <view class="action-column">
+      <view class="action-item" @click="goToChat">
+        <text class="icon">💬</text>
+        <text class="label">聊天</text>
+      </view>
+    </view>
+
+    <!-- 勋章区 -->
+    <view class="badge-section">
+      <view class="badge-header">
+        <text class="badge-title">我的勋章</text>
+        <text class="badge-link" @click="toggleShowAll">{{ showAllBadges ? '收起' : '查看全部' }}</text>
+      </view>
+      <view class="badge-row">
+        <view class="badge-item" v-for="badge in displayedBadges" :key="badge.name">
+          <text class="badge-icon">{{ badge.icon }}</text>
+          <text class="badge-name">{{ badge.name }}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+
+const showAllBadges = ref(false)
+
+const allBadges = [
+  { name: '目标达人', icon: '🎯' },
+  { name: '省钱小能手', icon: '💰' },
+  { name: '储蓄先锋', icon: '📈' },
+  { name: '社交达人', icon: '🗣️' },
+  { name: '理财王者', icon: '👑' },
+  { name: '早起打卡', icon: '⏰' },
+  { name: '账单清零', icon: '🧾' }
+]
+
+const displayedBadges = computed(() => {
+  return showAllBadges.value ? allBadges : allBadges.slice(0, 3)
+})
+
+const toggleShowAll = () => {
+  showAllBadges.value = !showAllBadges.value
+}
+
+const goToChat = () => {
+  uni.navigateTo({ url: '/pages/AIchat/AIchat' })
+}
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部标题栏 */
+.header {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 40rpx;
+  /* text-align: center; */
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  position: relative;
+  /* display: flex; */
+  /* flex-direction: column; */
+  align-items: center;
+  /* justify-content: center; */
+}
+.back-btn {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+}
+.subtitle {
+  font-size: 24rpx;
+  color: #f0f0f0;
+  margin-top: 10rpx;
+}
+
+/* 宠物卡片 */
+.card {
+  background: #fff;
+  margin: 30rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+.avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  align-items: center;
+    width: 100%;
+}
+.avatar {
+  width: 140rpx;
+  height: 140rpx;
+}
+.level {
+  position: absolute;
+  right: 100rpx;
+  bottom: 0;
+  width: 36rpx;
+  height: 36rpx;
+  background: orange;
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: bold;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 36rpx;
+
+}
+.pet-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-top: 12rpx;
+}
+.pet-status {
+  font-size: 24rpx;
+  margin-top: 6rpx;
+}
+.status-green {
+  color: #35b765;
+}
+.comment {
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  margin: 20rpx 0;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #333;
+}
+.progress-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #333;
+   align-items: center;
+}
+.progress-bar {
+  height: 16rpx;
+  width: 90%;
+  background: #eee;
+  border-radius: 10rpx;
+  margin: 10rpx auto;
+  overflow: hidden;
+}
+.progress-inner {
+  height: 100%;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+}
+
+/* 聊天按钮 */
+.action-column {
+  display: flex;
+  justify-content: right;
+ align-items: center;
+  margin: 40rpx 0;
+}
+.action-item {
+  width: 90%;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.icon {
+  font-size: 40rpx;
+}
+.label {
+  font-size: 24rpx;
+  margin-top: 8rpx;
+  display: block;
+}
+
+/* 勋章展示 */
+.badge-section {
+  margin: 40rpx 30rpx;
+}
+.badge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.badge-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+.badge-link {
+  font-size: 24rpx;
+  color: #4e54c8;
+}
+.badge-row {
+  display: flex;
+  flex-direction:row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20rpx 10rpx;
+}
+.badge-item {
+  width: 30%;
+  background: white;
+  border-radius: 16rpx;
+  padding: 20rpx 0;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-icon {
+  font-size: 36rpx;
+}
+.badge-name {
+  font-size: 22rpx;
+  margin-top: 6rpx;
+}
+</style>

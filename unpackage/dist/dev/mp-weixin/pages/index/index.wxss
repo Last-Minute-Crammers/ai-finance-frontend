@@ -1,0 +1,113 @@
+@import "../../uvue.wxss";
+:host{display:flex;flex-direction:column}
+
+.container.data-v-00a60067 {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f2f3f5;
+}
+
+/* 顶部标题 */
+.header.data-v-00a60067 {
+  height: 140rpx;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.title.data-v-00a60067 {
+  color: white;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+/* 余额 + 花销卡片 */
+.balance-card.data-v-00a60067 {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx 0;
+  width: 80%;
+  margin: -30rpx auto 20rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.summary-block.data-v-00a60067 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 6rpx;
+}
+.balance-label.data-v-00a60067 {
+  font-size: 24rpx;
+  color: #666;
+}
+.balance-value.data-v-00a60067 {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+  margin-top: 4rpx;
+}
+.balance-value.expense.data-v-00a60067 {
+  color: #ff3b30;
+}
+.expense-row.data-v-00a60067 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4rpx;
+}
+.expense-icon.data-v-00a60067 {
+  font-size: 30rpx;
+  color: #ff3b30;
+  margin-right: 6rpx;
+}
+.divider.data-v-00a60067 {
+  width: 60%;
+  height: 1rpx;
+  background-color: #eee;
+  margin: 14rpx 0;
+}
+
+/* 功能区：3行2列 */
+.feature-grid.data-v-00a60067 {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: space-around;
+  padding: 0 24rpx;
+}
+.feature-item.data-v-00a60067 {
+  width: 48%;
+  height: 30%;
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx 10rpx;
+  display: flex;
+  flex-direction: column;    /* 垂直布局 */
+  align-items: center;       /* 横向居中 */
+  justify-content: center;   /* 垂直居中整个内容块 */
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.04);
+  margin-bottom: 20rpx;
+}
+.feature-icon.data-v-00a60067 {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 10rpx;
+}
+.feature-title.data-v-00a60067 {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+}
+.feature-sub.data-v-00a60067 {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 4rpx;
+  text-align: center;
+}

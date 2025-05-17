@@ -1,0 +1,27 @@
+<template>
+  <view class="app-container">
+    <router-view></router-view>
+  </view>
+</template>
+
+<script>
+export default {
+  onLaunch() {
+    console.log('App 启动');
+  },
+  onShow() {
+    console.log('App 显示');
+  },
+  onHide() {
+    console.log('App 隐藏');
+  }
+}
+</script>
+
+<style>
+.app-container {
+  background-color: #f4f4f4;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+</style>

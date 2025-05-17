@@ -1,0 +1,176 @@
+<template>
+  <view class="container">
+    <!-- 顶部 -->
+    <view class="header">
+      <text class="title">登录</text>
+      <text class="subtitle">欢迎回来！</text>
+    </view>
+
+    <!-- 登录表单 -->
+    <view class="form">
+      <view class="input-group">
+        <input
+          v-model="username"
+          class="input-field"
+          placeholder="请输入用户名"
+          
+        />
+      </view>
+      <view class="input-group">
+        <input
+          v-model="password"
+          class="input-field"
+          placeholder="请输入密码"
+          :type="inputType"
+        />
+        <text class="toggle-password" @click="togglePassword">
+          {{ passwordVisible ? '隐藏' : '显示' }}
+        </text>
+      </view>
+
+      <!-- 登录按钮 -->
+      <view class="button-group">
+        <button class="login-btn" @click="login">登录</button>
+      </view>
+
+      <!-- 忘记密码与注册 -->
+      <view class="footer-links">
+        <text class="forgot-password" @click="goToForgotPassword">忘记密码?</text>
+        <text class="register" @click="goToRegister">没有账号? 注册</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const username = ref('')
+const password = ref('')
+const passwordVisible = ref(false)
+const inputType = ref('password')
+
+// 切换密码显示/隐藏
+function togglePassword() {
+  passwordVisible.value = !passwordVisible.value
+  inputType.value = passwordVisible.value ? 'text' : 'password'
+}
+
+// 登录操作
+function login() {
+  if (!username.value || !password.value) {
+    uni.showToast({
+      title: '请输入用户名和密码',
+      icon: 'none',
+    })
+    return
+  }
+
+  // 模拟登录成功操作
+  uni.showToast({
+    title: '登录成功',
+    icon: 'success',
+    duration: 2000,
+  })
+
+  // 登录成功后跳转到主页面（index）
+
+  uni.navigateTo({
+    url: '/pages/index/index',
+  })
+}
+
+// 跳转到忘记密码页面
+function goToForgotPassword() {
+  uni.navigateTo({
+    url: '/pages/forgot-password/forgot-password',
+  })
+}
+
+// 跳转到注册页面
+function goToRegister() {
+  uni.navigateTo({
+    url: '/pages/register/register',
+  })
+}
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+.header {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 90rpx;
+  text-align: center;
+  align-items: center;
+  color: white;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+.subtitle {
+  font-size: 24rpx;
+  margin-top: 10rpx;
+}
+
+.form {
+  padding: 30rpx;
+  background-color: white;
+  border-radius: 20rpx;
+  margin-top: -40rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.input-field {
+  width: 100%;
+  padding: 16rpx 20rpx;
+  font-size: 24rpx;
+  border-radius: 12rpx;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.toggle-password {
+  font-size: 20rpx;
+  color: #4e54c8;
+  cursor: pointer;
+}
+
+.button-group {
+  margin-top: 20rpx;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 16rpx;
+  font-size: 28rpx;
+  background-color: #4e54c8;
+  color: white;
+  border-radius: 30rpx;
+  border: none;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+
+.forgot-password,
+.register {
+  font-size: 24rpx;
+  color: #4e54c8;
+  cursor: pointer;
+}
+</style>

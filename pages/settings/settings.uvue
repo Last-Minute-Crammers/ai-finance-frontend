@@ -1,0 +1,221 @@
+<template>
+  <view class="container">
+    <!-- 顶部 -->
+    <view class="header">
+      <text class="back">←</text>
+      <text class="title">设置</text>
+      <text class="subtitle">个性化您的体验</text>
+    </view>
+
+    <!-- 设置项列表 -->
+    <view class="settings-list">
+      <!-- 昵称设置 -->
+      <view class="settings-item">
+        <text class="item-label">昵称</text>
+        <input v-model="nickname" class="item-input" placeholder="请输入昵称" />
+      </view>
+
+      <!-- 头像设置 -->
+      <view class="settings-item">
+        <text class="item-label">头像</text>
+        <view class="item-avatar" @click="chooseAvatar">
+          <image :src="avatarUrl" class="avatar" mode="aspectFill" />
+        </view>
+      </view>
+
+      <!-- 显示用户ID -->
+      <view class="settings-item">
+        <text class="item-label">用户ID</text>
+        <view class="item-value">{{ userId }}</view>
+      </view>
+
+      <!-- 修改密码 -->
+      <view class="settings-item">
+        <text class="item-label">修改密码</text>
+        <input v-model="oldPassword" class="item-input" type="password" placeholder="请输入旧密码" />
+        <input v-model="newPassword" class="item-input" type="password" placeholder="请输入新密码" />
+        <text class="item-action" @click="changePassword">修改</text>
+      </view>
+
+      <!-- 更多设置 -->
+      <view class="settings-item">
+        <text class="item-label">更多设置</text>
+        <text class="item-action" @click="goToMoreSettings">查看全部</text>
+      </view>
+    </view>
+
+    <!-- 退出按钮 -->
+    <view class="logout-button">
+      <button class="logout-btn" @click="logout">退出登录</button>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+const nickname = ref('张三')  // 默认昵称
+const avatarUrl = ref('/static/icons/default-avatar.png')  // 默认头像
+const userId = ref('U123456789')  // 默认用户ID
+const oldPassword = ref('')
+const newPassword = ref('')
+
+// 选择头像
+function chooseAvatar() {
+  uni.chooseImage({
+    count: 1,
+    success: (res) => {
+      avatarUrl.value = res.tempFilePaths[0]
+    }
+  })
+}
+
+// 修改密码
+function changePassword() {
+  if (!oldPassword.value || !newPassword.value) {
+    uni.showToast({
+      title: '请输入旧密码和新密码',
+      icon: 'none'
+    })
+    return
+  }
+  // 调用 API 修改密码（此处模拟）
+  uni.showToast({
+    title: '密码修改成功',
+    icon: 'success',
+    duration: 2000
+  })
+}
+
+// 退出登录功能
+function logout() {
+  uni.showToast({
+    title: '已退出登录',
+    icon: 'success',
+    duration: 2000
+  })
+  
+  // 清除用户登录状态数据（如 token、用户信息等）
+  // uni.removeStorageSync('token');  // 示例，假设你有存储 token 的逻辑
+
+  // 退出登录后跳转到登录页面
+  uni.navigateTo({
+    url: '/pages/login/login'
+  })
+}
+
+// 跳转到更多设置页面
+function goToMoreSettings() {
+  uni.navigateTo({ url: '/pages/more-settings/more-settings' })
+}
+</script>
+
+<style scoped>
+.container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部区域 */
+.header {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 40rpx;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  position: relative;
+  text-align: center;
+}
+.back {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+}
+.title, .subtitle {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+}
+.subtitle {
+  font-size: 24rpx;
+  color: #f0f0f0;
+  margin-top: 10rpx;
+}
+
+/* 设置项 */
+.settings-list {
+  margin-top: 40rpx;
+}
+
+.settings-item {
+  background-color: #fff;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-label {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.item-input {
+  font-size: 24rpx;
+  padding: 10rpx;
+  border-radius: 12rpx;
+  width: 60%;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.item-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.item-value {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.item-action {
+  font-size: 24rpx;
+  color: #4e54c8;
+  cursor: pointer;
+}
+
+.logout-button {
+  margin-top: 50rpx;
+  padding: 30rpx;
+  text-align: center;
+  align-items: center;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
+  font-size: 28rpx;
+  padding: 16rpx 40rpx;
+  border-radius: 30rpx;
+  width: 80%;
+}
+</style>

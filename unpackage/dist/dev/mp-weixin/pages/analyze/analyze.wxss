@@ -1,0 +1,127 @@
+:host{display:flex;flex-direction:column}
+
+.container.data-v-c1d51998 {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部区域 */
+.header.data-v-c1d51998 {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 40rpx;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  position: relative;
+  text-align: center;
+}
+.back.data-v-c1d51998 {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+}
+.title.data-v-c1d51998, .subtitle.data-v-c1d51998 {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+.title.data-v-c1d51998 {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+}
+.subtitle.data-v-c1d51998 {
+  font-size: 24rpx;
+  color: #f0f0f0;
+  margin-top: 10rpx;
+}
+
+/* Tabs */
+.tabs.data-v-c1d51998 {
+  margin-top: 40rpx;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 40rpx;
+  padding: 6rpx;
+}
+.tab.data-v-c1d51998 {
+  font-size: 26rpx;
+  color: white;
+  padding: 12rpx 24rpx;
+  border-radius: 30rpx;
+}
+.tab.active.data-v-c1d51998 {
+  background: #fff;
+  color: #4e54c8;
+  font-weight: bold;
+}
+
+/* 卡片通用 */
+.card.data-v-c1d51998 {
+  background: #fff;
+  margin: 30rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+.card-header.data-v-c1d51998 {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.card-title.data-v-c1d51998 {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+.card-link.data-v-c1d51998 {
+  font-size: 24rpx;
+  color: #4e54c8;
+}
+.chart-placeholder.data-v-c1d51998 {
+  height: 200rpx;
+  background-color: #f0f0f0;
+  border-radius: 16rpx;
+  color: #888;
+  font-size: 22rpx;
+  text-align: center;
+  line-height: 200rpx;
+}
+
+/* 总收入支出 */
+.summary-row.data-v-c1d51998 {
+  display: flex;
+  justify-content: space-between;
+   flex-direction:row;
+  padding: 0 30rpx;
+  margin-bottom: 30rpx;
+}
+.summary-card.data-v-c1d51998 {
+  width: 48%;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+.label.data-v-c1d51998 {
+  font-size: 24rpx;
+  color: #999;
+}
+.value.data-v-c1d51998 {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin: 10rpx 0;
+}
+.trend.data-v-c1d51998 {
+  font-size: 22rpx;
+}
+.green.data-v-c1d51998 {
+  color: #35b765;
+}
+.red.data-v-c1d51998 {
+  color: #e74c3c;
+}
