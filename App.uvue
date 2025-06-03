@@ -5,9 +5,29 @@
 </template>
 
 <script>
+import { testConnection, healthCheck } from './utils/request.ts';
+
 export default {
-  onLaunch() {
+  async onLaunch() {
     console.log('App 启动');
+    
+    // 测试后端连接
+    try {
+      await testConnection();
+      console.log('Backend connection successful');
+      
+      // 检查后端健康状态
+      const healthStatus = await healthCheck();
+      console.log('Backend health status:', healthStatus);
+      
+    } catch (error) {
+      console.error('Failed to connect to backend:', error);
+      uni.showModal({
+        title: '连接失败',
+        content: '无法连接到后端服务，请检查网络连接',
+        showCancel: false
+      });
+    }
   },
   onShow() {
     console.log('App 显示');

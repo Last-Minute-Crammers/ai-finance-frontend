@@ -1,0 +1,295 @@
+<template>
+  <view class="health-test-page">
+    <view class="header">
+      <text class="title">后端连接健康检查</text>
+    </view>
+    
+    <view class="test-section">
+      <view class="test-item">
+        <button @click="testBasicConnection" :disabled="loading">
+          测试基础连接
+        </button>
+        <text class="status" :class="connectionStatus.basic">
+          {{ connectionStatus.basic }}
+        </text>
+      </view>
+      
+      <view class="test-item">
+        <button @click="testHealthEndpoint" :disabled="loading">
+          测试健康检查端点
+        </button>
+        <text class="status" :class="connectionStatus.health">
+          {{ connectionStatus.health }}
+        </text>
+      </view>
+      
+      <view class="test-item">
+        <button @click="testPublicAPI" :disabled="loading">
+          测试公开API
+        </button>
+        <text class="status" :class="connectionStatus.public">
+          {{ connectionStatus.public }}
+        </text>
+      </view>
+      
+      <view class="test-item">
+        <button @click="testPrivateAPI" :disabled="loading">
+          测试私有API (需要登录)
+        </button>
+        <text class="status" :class="connectionStatus.private">
+          {{ connectionStatus.private }}
+        </text>
+      </view>
+      
+      <view class="test-item">
+        <button @click="runAllTests" :disabled="loading">
+          运行所有测试
+        </button>
+      </view>
+    </view>
+    
+    <view class="results">
+      <text class="results-title">测试结果:</text>
+      <view class="result-item" v-for="(result, index) in testResults" :key="index">
+        <text class="result-text">{{ result }}</text>
+      </view>
+    </view>
+    
+    <view v-if="healthData" class="health-details">
+      <text class="details-title">服务状态详情:</text>
+      <view class="detail-item" v-for="(status, service) in healthData.services" :key="service">
+        <text class="service-name">{{ service }}:</text>
+        <text class="service-status" :class="status.includes('healthy') ? 'healthy' : 'unhealthy'">
+          {{ status }}
+        </text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import { testConnection, healthCheck, request } from '../../utils/request'
+import { getTransactionList, getCategoryList } from '../../common/api/finance'
+
+export default {
+  data() {
+    return {
+      loading: false,
+      connectionStatus: {
+        basic: '未测试',
+        health: '未测试',
+        public: '未测试',
+        private: '未测试'
+      },
+      testResults: [],
+      healthData: null
+    }
+  },
+  methods: {
+    async testBasicConnection() {
+      this.loading = true
+      try {
+        await testConnection()
+        this.connectionStatus.basic = '成功'
+        this.addResult('✅ 基础连接测试成功')
+      } catch (error) {
+        this.connectionStatus.basic = '失败'
+        this.addResult('❌ 基础连接测试失败: ' + error.message)
+      }
+      this.loading = false
+    },
+    
+    async testHealthEndpoint() {
+      this.loading = true
+      try {
+        const response = await healthCheck()
+        this.connectionStatus.health = '成功'
+        this.healthData = response
+        this.addResult('✅ 健康检查端点测试成功')
+      } catch (error) {
+        this.connectionStatus.health = '失败'
+        this.addResult('❌ 健康检查端点测试失败: ' + error.message)
+      }
+      this.loading = false
+    },
+    
+    async testPublicAPI() {
+      this.loading = true
+      try {
+        const response = await request({
+          url: '/public/ping',
+          method: 'GET'
+        })
+        this.connectionStatus.public = '成功'
+        this.addResult('✅ 公开API测试成功')
+      } catch (error) {
+        this.connectionStatus.public = '失败'
+        this.addResult('❌ 公开API测试失败: ' + error.message)
+      }
+      this.loading = false
+    },
+    
+    async testPrivateAPI() {
+      this.loading = true
+      try {
+        // 测试需要认证的API
+        const response = await getTransactionList()
+        this.connectionStatus.private = '成功'
+        this.addResult('✅ 私有API测试成功')
+      } catch (error) {
+        if (error.message === 'Unauthorized') {
+          this.connectionStatus.private = '需要登录'
+          this.addResult('⚠️ 私有API测试 - 需要登录令牌')
+        } else {
+          this.connectionStatus.private = '失败'
+          this.addResult('❌ 私有API测试失败: ' + error.message)
+        }
+      }
+      this.loading = false
+    },
+    
+    async runAllTests() {
+      this.testResults = []
+      this.addResult('开始运行所有测试...')
+      
+      await this.testBasicConnection()
+      await this.testHealthEndpoint()
+      await this.testPublicAPI()
+      await this.testPrivateAPI()
+      
+      this.addResult('所有测试完成')
+    },
+    
+    addResult(message) {
+      const timestamp = new Date().toLocaleTimeString()
+      this.testResults.push(`[${timestamp}] ${message}`)
+    }
+  },
+  
+  onLoad() {
+    this.addResult('页面加载完成，准备进行健康检查')
+  }
+}
+</script>
+
+<style>
+.health-test-page {
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.test-section {
+  margin-bottom: 30px;
+}
+
+.test-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+button:disabled {
+  background-color: #ccc;
+}
+
+.status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.成功 {
+  color: #4CAF50;
+  background-color: #E8F5E8;
+}
+
+.失败 {
+  color: #F44336;
+  background-color: #FFEBEE;
+}
+
+.需要登录 {
+  color: #FF9800;
+  background-color: #FFF3E0;
+}
+
+.results {
+  margin-bottom: 30px;
+}
+
+.results-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.result-item {
+  padding: 8px;
+  background-color: white;
+  margin-bottom: 5px;
+  border-radius: 4px;
+}
+
+.result-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.health-details {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.details-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.service-name {
+  font-weight: bold;
+  color: #555;
+}
+
+.healthy {
+  color: #4CAF50;
+}
+
+.unhealthy {
+  color: #F44336;
+}
+</style>
