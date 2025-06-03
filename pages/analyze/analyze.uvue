@@ -2,7 +2,7 @@
   <view class="container">
     <!-- 顶部 -->
     <view class="header">
-      <text class="back">←</text>
+      <text class="back" @click="goBack">←</text>
       <text class="title">财务分析</text>
       <text class="subtitle">可视化您的消费情况</text>
 
@@ -11,56 +11,229 @@
           v-for="tab in tabs"
           :key="tab"
           :class="['tab', activeTab === tab ? 'active' : '']"
-          @click="activeTab = tab"
+          @click="changeTimeRange(tab)"
         >
           {{ tab }}
         </view>
       </view>
     </view>
 
+    <!-- Debug: 显示当前数据 -->
+    <view class="debug-info" v-if="showDebug">
+      <text>数据总数: {{ transactionCount }}</text>
+    </view>
+
     <!-- 收支趋势图 -->
     <view class="card">
       <view class="card-header">
         <text class="card-title">收支趋势</text>
-        <text class="card-link">详情</text>
       </view>
-      <view class="chart-placeholder">[此处为收支趋势折线图]</view>
+      <view class="chart-container" style="display: flex; align-items: center; justify-content: center;">
+        <image src="/static/trend.png" style="max-width: 100%; max-height: 300px;" mode="aspectFit" />
+      </view>
     </view>
 
     <!-- 总收入 / 总支出 -->
     <view class="summary-row">
       <view class="summary-card">
         <text class="label">总支出</text>
-        <text class="value">¥2,458</text>
-        <text class="trend green">↓12% 较上周</text>
+        <text class="value">¥{{ formatAmount(totalExpense) }}</text>
+        <text class="trend" :class="expenseTrend >= 0 ? 'red' : 'green'">
+          {{ expenseTrend >= 0 ? '↑' : '↓' }}{{ Math.abs(expenseTrend) }}% 较上{{ activeTab }}
+        </text>
       </view>
       <view class="summary-card">
         <text class="label">总收入</text>
-        <text class="value">¥8,500</text>
-        <text class="trend red">↑5% 较上月</text>
+        <text class="value">¥{{ formatAmount(totalIncome) }}</text>
+        <text class="trend" :class="incomeTrend >= 0 ? 'green' : 'red'">
+          {{ incomeTrend >= 0 ? '↑' : '↓' }}{{ Math.abs(incomeTrend) }}% 较上{{ activeTab }}
+        </text>
       </view>
     </view>
 
-    <!-- 消费分类 -->
+    <!-- 消费分类饼图 -->
     <view class="card">
       <view class="card-header">
         <text class="card-title">消费分类</text>
-        <text class="card-link">详情</text>
       </view>
-      <view class="chart-placeholder">[此处为消费分类饼图]</view>
+      <view class="chart-container" style="display: flex; align-items: center; justify-content: center;">
+        <image src="/static/pie.png" style="max-width: 100%; max-height: 300px;" mode="aspectFit" />
+      </view>
+    </view>
+
+    <!-- Debug Info -->
+    <view v-if="showDebug" class="debug-card">
+      <text class="debug-title">Debug Information</text>
+      <text>总交易数: {{ transactionCount }}</text>
+      <text>当前范围: {{ activeTab }}</text>
+      <text>总支出: ¥{{ formatAmount(totalExpense) }}</text>
+      <text>总收入: ¥{{ formatAmount(totalIncome) }}</text>
+      <view class="debug-section">
+        <text>趋势数据:</text>
+        <text>{{ JSON.stringify(trendData.series, null, 2) }}</text>
+      </view>
+      <view class="debug-section">
+        <text>分类数据:</text>
+        <text>{{ JSON.stringify(categoryData.series, null, 2) }}</text>
+      </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+const echarts = require('@/echarts.min.js')
 
-// 修改后的 tabs 数组，只保留 "周", "月", "年"
+const trendChart = ref<any>(null)
+const categoryChart = ref<any>(null)
+const showDebug = ref(false)
+const transactionCount = ref(0)
 const tabs = ['周', '月', '年']
-const activeTab = ref('周')  // 默认选中"周"
+const activeTab = ref('周')
+
+// 状态变量
+const totalExpense = ref(0)
+const totalIncome = ref(0)
+const expenseTrend = ref(0)
+const incomeTrend = ref(0)
+
+// 初始化图表数据
+const trendData = ref({
+  categories: [],
+  series: [
+    { name: '支出', data: [] },
+    { name: '收入', data: [] }
+  ]
+})
+const categoryData = ref({ series: [] })
+
+// 获取本地存储的交易记录
+function getLocalTransactions() {
+  try {
+    const transactions = uni.getStorageSync('transactions')
+    return transactions ? JSON.parse(transactions) : []
+  } catch (error) {
+    console.error('读取本地数据失败:', error)
+    return []
+  }
+}
+
+function formatAmount(cents: number) {
+  return (cents / 100).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+function getDateRange(rangeType: string) {
+  const now = new Date()
+  const start = new Date()
+  switch (rangeType) {
+    case '周': start.setDate(now.getDate() - 7); break
+    case '月': start.setMonth(now.getMonth() - 1); break
+    case '年': start.setFullYear(now.getFullYear() - 1); break
+  }
+  return { start, end: now }
+}
+
+function updateCharts(rangeType: string) {
+  const transactions = getLocalTransactions()
+  transactionCount.value = transactions.length
+  if (transactions.length === 0) return
+  const { start, end } = getDateRange(rangeType)
+  const filteredTransactions = transactions.filter((t: any) => {
+    const date = new Date(t.tradeTime)
+    return date >= start && date <= end
+  })
+  totalExpense.value = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)
+  totalIncome.value = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)
+  // 生成日期标签和数据
+  const dateMap = new Map()
+  filteredTransactions.forEach(t => {
+    const date = formatDate(new Date(t.tradeTime))
+    if (!dateMap.has(date)) dateMap.set(date, { expense: 0, income: 0 })
+    const data = dateMap.get(date)
+    if (t.type === 'expense') data.expense += t.amount
+    else data.income += t.amount
+  })
+  const dates = Array.from(dateMap.keys()).sort()
+  const expenseData = dates.map(date => dateMap.get(date).expense / 100)
+  const incomeData = dates.map(date => dateMap.get(date).income / 100)
+  // 趋势图配置
+  const trendOption = {
+    tooltip: { trigger: 'axis', formatter: function(params: any) {
+      return params.map((item: any) => `${item.seriesName}: ¥${item.value.toFixed(2)}`).join('<br/>')
+    } },
+    legend: { data: ['支出', '收入'], bottom: 0 },
+    grid: { left: '3%', right: '4%', bottom: '60px', top: '3%', containLabel: true },
+    xAxis: { type: 'category', boundaryGap: false, data: dates },
+    yAxis: { type: 'value', axisLabel: { formatter: (value: number) => `¥${value.toFixed(0)}` } },
+    series: [
+      { name: '支出', type: 'line', areaStyle: { opacity: 0.2 }, color: '#ff6b6b', smooth: true, data: expenseData },
+      { name: '收入', type: 'line', areaStyle: { opacity: 0.2 }, color: '#4e54c8', smooth: true, data: incomeData }
+    ]
+  }
+  // 饼图数据
+  const categoryMap = new Map()
+  filteredTransactions.forEach(t => {
+    if (t.type === 'expense') {
+      const current = categoryMap.get(t.categoryName) || 0
+      categoryMap.set(t.categoryName, current + t.amount)
+    }
+  })
+  const pieData = Array.from(categoryMap.entries()).map(([name, value]) => ({ name, value: value / 100 }))
+  const pieOption = {
+    tooltip: { trigger: 'item', formatter: '{b}: ¥{c} ({d}%)' },
+    legend: { orient: 'horizontal', bottom: 0, type: 'scroll' },
+    series: [{
+      type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: '{b}\n¥{c}' },
+      emphasis: { label: { show: true, fontSize: '14', fontWeight: 'bold' } },
+      data: pieData
+    }]
+  }
+  // 渲染图表
+  if (trendChart.value) trendChart.value.setOption(trendOption)
+  if (categoryChart.value) categoryChart.value.setOption(pieOption)
+}
+
+function formatDate(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function initCharts() {
+  nextTick(() => {
+    const trendDom = document.getElementById('trendChart')
+    const categoryDom = document.getElementById('categoryChart')
+    if (trendDom && !trendChart.value) trendChart.value = echarts.init(trendDom)
+    if (categoryDom && !categoryChart.value) categoryChart.value = echarts.init(categoryDom)
+    updateCharts(activeTab.value)
+    window.addEventListener('resize', resizeCharts)
+  })
+}
+function resizeCharts() {
+  trendChart.value && trendChart.value.resize()
+  categoryChart.value && categoryChart.value.resize()
+}
+onUnmounted(() => {
+  trendChart.value?.dispose()
+  categoryChart.value?.dispose()
+  window.removeEventListener('resize', resizeCharts)
+})
+
+onMounted(() => {
+  initCharts()
+})
+
+function goBack() { uni.navigateBack() }
+function changeTimeRange(tab: string) {
+  activeTab.value = tab
+  updateCharts(tab)
+}
 </script>
 
-<style scoped>
+<style>
 .container {
   background-color: #f5f7fa;
   min-height: 100vh;
@@ -185,5 +358,28 @@ const activeTab = ref('周')  // 默认选中"周"
 }
 .red {
   color: #e74c3c;
+}
+.chart-container {
+  height: 300px;
+  width: 100%;
+}
+
+/* Debug 信息 */
+.debug-card {
+  background: #fff;
+  margin: 30rpx;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+}
+.debug-title {
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+.debug-section {
+  margin-top: 10rpx;
+  padding: 10rpx;
+  background: #f5f5f5;
+  border-radius: 6rpx;
 }
 </style>

@@ -18,7 +18,6 @@
       <view class="amount-line">
         <text class="currency">¥</text>
         <input class="amount-input" type="digit" v-model="amount" placeholder="0.00" />
-        <text class="arrow">⌄</text>
       </view>
 
       <!-- 分类 -->
@@ -43,18 +42,6 @@
       </view>
     </view>
 
-    <!-- 工具区域 -->
-    <view class="tools">
-      <view class="tool-item">
-        <text class="tool-icon">🎤</text>
-        <text class="tool-label">语音输入</text>
-      </view>
-      <view class="tool-item">
-        <text class="tool-icon">📷</text>
-        <text class="tool-label">拍照记账</text>
-      </view>
-    </view>
-
     <!-- 保存按钮 -->
     <view class="save-btn-wrapper">
       <button class="save-btn" @click="submitTransaction">保存记录</button>
@@ -62,67 +49,155 @@
   </view>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      type: '支出',
-      amount: '',
-      selectedCategory: '餐饮',
-      date: '',
-      categories: [
-        { name: '餐饮', icon: '🍔' },
-        { name: '购物', icon: '🛒' },
-        { name: '交通', icon: '🚗' },
-        { name: '住房', icon: '🏠' },
-        { name: '娱乐', icon: '🎬' },
-        { name: '数码', icon: '📱' },
-        { name: '服饰', icon: '👗' },
-        { name: '其他', icon: '➕' }
-      ]
-    };
-  },
-  onLoad() {
-    this.date = this.formatDate(new Date())
-  },
-  methods: {
-    goBack() {
-      uni.navigateBack();
-    },
-    changeType(newType) {
-      this.type = newType;
-    },
-    formatDate(date) {
-      const y = date.getFullYear();
-      const m = (date.getMonth() + 1).toString().padStart(2, '0');
-      const d = date.getDate().toString().padStart(2, '0');
-      return `${y}年${m}月${d}日`;
-    },
-    submitTransaction() {
-      if (!this.amount) {
-        uni.showToast({ title: '请输入金额', icon: 'none' });
-        return;
-      }
-      const data = {
-        type: this.type,
-        amount: this.amount,
-        category: this.selectedCategory,
-        date: this.date
-      };
-      console.log('记录已保存：', data);
-      uni.showToast({ title: '记录已保存', icon: 'success' });
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const type = ref('支出')
+const amount = ref('')
+const selectedCategory = ref('餐饮')
+const date = ref('')
+const categories = ref([
+  { name: '餐饮', icon: '🍔', id: 1 },
+  { name: '购物', icon: '🛒', id: 2 },
+  { name: '交通', icon: '🚗', id: 3 },
+  { name: '住房', icon: '🏠', id: 4 },
+  { name: '娱乐', icon: '🎬', id: 5 },
+  { name: '数码', icon: '📱', id: 6 },
+  { name: '服饰', icon: '👗', id: 7 },
+  { name: '其他', icon: '➕', id: 8 }
+])
+
+// 页面加载时获取当前日期
+onMounted(async () => {
+  date.value = formatDate(new Date())
+})
+
+// 获取本地存储的交易记录
+function getLocalTransactions() {
+  const transactions = uni.getStorageSync('transactions') || '[]'
+  return JSON.parse(transactions)
+}
+
+// 保存交易记录到本地存储
+function saveTransaction(transaction: any) {
+  const transactions = getLocalTransactions()
+  transactions.push(transaction)
+  uni.setStorageSync('transactions', JSON.stringify(transactions))
+}
+
+// 根据分类名称返回对应的图标
+function getIconForCategory(name: string) {
+  const iconMap: { [key: string]: string } = {
+    '餐饮': '🍔',
+    '购物': '🛒',
+    '交通': '🚗',
+    '住房': '🏠',
+    '娱乐': '🎬',
+    '数码': '📱',
+    '服饰': '👗',
+  }
+  return iconMap[name] || '➕'
+}
+
+function goBack() {
+  uni.navigateBack()
+}
+
+function changeType(newType: string) {
+  type.value = newType
+}
+
+function formatDate(date: Date) {
+  const y = date.getFullYear()
+  const m = (date.getMonth() + 1).toString().padStart(2, '0')
+  const d = date.getDate().toString().padStart(2, '0')
+  return `${y}年${m}月${d}日`
+}
+
+async function submitTransaction() {
+  try {
+    console.log('开始保存交易...')
+    
+    // 输入验证
+    if (!amount.value) {
+      uni.showToast({ title: '请输入金额', icon: 'none' })
+      return
     }
+
+    const amountNum = parseFloat(amount.value)
+    if (isNaN(amountNum) || amountNum <= 0) {
+      uni.showToast({ title: '请输入有效的正数金额', icon: 'none' })
+      return
+    }
+
+    const selectedCategoryData = categories.value.find(c => c.name === selectedCategory.value)
+    if (!selectedCategoryData) {
+      uni.showToast({ title: '请选择分类', icon: 'none' })
+      return
+    }
+
+    const amountInCents = Math.round(amountNum * 100) // 转换为分
+
+    // 准备交易数据
+    const transaction = {
+      id: Date.now(), // 使用时间戳作为唯一ID
+      amount: amountInCents,
+      categoryId: selectedCategoryData.id,
+      categoryName: selectedCategoryData.name,
+      type: type.value === '支出' ? 'expense' : 'income',
+      remark: '',
+      tradeTime: new Date().toISOString(),
+      createTime: new Date().toISOString()
+    }
+
+    // 保存到本地存储
+    saveTransaction(transaction)
+
+    // 清空表单
+    amount.value = ''
+      // 保存前先获取现有数据
+    const existingTransactions = getLocalTransactions()
+    console.log('现有交易记录:', existingTransactions)
+    
+    // 添加新交易
+    saveTransaction(transaction)
+    console.log('新交易已保存:', transaction)
+    
+    // 再次检查保存是否成功
+    const savedTransactions = getLocalTransactions()
+    console.log('保存后的所有交易:', savedTransactions)
+
+    // 显示成功提示
+    uni.showToast({ 
+      title: '记录已保存',
+      icon: 'success',
+      mask: true,
+      duration: 1500
+    })
+
+    // 等待提示显示完毕后返回
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 1500)
+
+  } catch (error) {
+    console.error('保存失败:', error)
+    uni.showToast({
+      title: '保存失败，请重试',
+      icon: 'none',
+      duration: 2000
+    })
   }
 }
 </script>
 
-<style scoped>
-/* 样式保持不变，与之前样式兼容 */
+<style>
 .transaction-container {
   background-color: #f5f7fa;
   min-height: 100vh;
   padding-bottom: 10%;
 }
+
 .header {
   background: linear-gradient(to right, #4e54c8, #8f94fb);
   padding: 80rpx 30rpx 40rpx;
@@ -131,6 +206,7 @@ export default {
   text-align: center;
   position: relative;
 }
+
 .back-btn {
   position: absolute;
   left: 30rpx;
@@ -138,16 +214,19 @@ export default {
   font-size: 36rpx;
   color: white;
 }
+
 .header-title {
   font-size: 36rpx;
   font-weight: bold;
   color: white;
 }
+
 .header-sub {
   font-size: 24rpx;
   color: white;
   margin-top: 10rpx;
 }
+
 .type-toggle {
   display: flex;
   justify-content: center;
@@ -156,6 +235,7 @@ export default {
   margin: 30rpx auto 20rpx;
   width: 60%;
 }
+
 .type-btn {
   flex: 1;
   text-align: center;
@@ -165,11 +245,13 @@ export default {
   font-weight: bold;
   border-radius: 40rpx;
 }
+
 .type-btn.active {
   background: white;
   color: #4e54c8;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
 }
+
 .amount-card {
   background: #fff;
   margin: 0 20rpx;
@@ -177,97 +259,97 @@ export default {
   border-radius: 20rpx;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
 }
+
 .amount-line {
   display: flex;
   align-items: center;
   font-size: 44rpx;
   margin-bottom: 20rpx;
 }
+
 .currency {
   color: #333;
   margin-right: 10rpx;
 }
+
 .amount-input {
   flex: 1;
   border: none;
   background: transparent;
   font-size: 44rpx;
 }
-.arrow {
-  font-size: 28rpx;
-  color: #888;
-}
+
 .section-label {
   font-size: 24rpx;
   color: #333;
   margin-bottom: 20rpx;
 }
+
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20rpx;
   margin-bottom: 30rpx;
 }
+
 .category-item {
   background: #f4f4f4;
   border-radius: 16rpx;
   padding: 20rpx 0;
   text-align: center;
 }
+
 .category-item.selected {
   background: #e0e3ff;
   border: 2rpx solid #4e54c8;
 }
+
 .emoji {
   font-size: 36rpx;
   margin-bottom: 10rpx;
+  display: block;
 }
+
 .name {
   font-size: 22rpx;
+  display: block;
 }
+
 .date-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.date-label {
   font-size: 24rpx;
   color: #666;
 }
+
 .date-value {
+  font-size: 24rpx;
   color: #333;
 }
-.tools {
-  display: flex;
-  justify-content: space-around;
-  background: #fff;
-  margin: 40rpx 30rpx;
-  padding: 30rpx 0;
-  border-radius: 20rpx;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
-}
-.tool-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.tool-icon {
-  font-size: 36rpx;
-  margin-bottom: 10rpx;
-}
-.tool-label {
-  font-size: 22rpx;
-}
+
 .save-btn-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 40rpx;
-  padding: 0 30rpx 10%;
+  padding: 40rpx 30rpx;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, #f5f7fa 80%, transparent);
 }
+
 .save-btn {
   width: 100%;
   background: linear-gradient(to right, #4e54c8, #8f94fb);
   color: white;
-  padding: 20rpx;
-  font-size: 28rpx;
+  padding: 24rpx;
+  font-size: 32rpx;
   border-radius: 40rpx;
-  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.1);
+  border: none;
 }
 </style>

@@ -57,7 +57,7 @@ function togglePassword() {
 }
 
 // 登录操作
-function login() {
+async function login() {
   if (!username.value || !password.value) {
     uni.showToast({
       title: '请输入用户名和密码',
@@ -66,31 +66,49 @@ function login() {
     return
   }
 
-  // 模拟登录成功操作
-  uni.showToast({
-    title: '登录成功',
-    icon: 'success',
-    duration: 2000,
-  })
+  // 从本地存储获取注册用户列表
+  const registeredUsers = uni.getStorageSync('registered_users') || []
+  const user = registeredUsers.find(
+    (u: any) => u.username === username.value && u.password === password.value
+  )
 
-  // 登录成功后跳转到主页面（index）
+  if (user) {
+    // 保存当前用户信息
+    uni.setStorageSync('current_user', user)
 
-  uni.navigateTo({
-    url: '/pages/index/index',
-  })
+    // 显示登录成功提示
+    uni.showToast({
+      title: '登录成功',
+      icon: 'success',
+      mask: true,
+      duration: 1500
+    })
+
+    // 等待提示显示完毕后跳转
+    setTimeout(() => {
+      uni.navigateTo({
+        url: '/pages/index/index'
+      })
+    }, 1500)
+  } else {
+    uni.showToast({
+      title: '用户名或密码错误',
+      icon: 'none'
+    })
+  }
 }
 
 // 跳转到忘记密码页面
 function goToForgotPassword() {
   uni.navigateTo({
-    url: '/pages/forgot-password/forgot-password',
+    url: '/pages/forgot-password/forgot-password'
   })
 }
 
 // 跳转到注册页面
 function goToRegister() {
   uni.navigateTo({
-    url: '/pages/register/register',
+    url: '/pages/register/register'
   })
 }
 </script>
