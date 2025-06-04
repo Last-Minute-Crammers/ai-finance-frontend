@@ -200,7 +200,10 @@ export default {
         }
       } catch (error) {
         this.connectionStatus.backend = '错误'
-        this.addResult('❌ 后端状态检查失败: ' + error.message)
+        const errorMsg = typeof error === 'object' && error !== null && 'message' in error 
+          ? error.message 
+          : '未知错误'
+        this.addResult('❌ 后端状态检查失败: ' + errorMsg)
       }
       this.lastTestTime = new Date().toLocaleString()
       this.loading = false
@@ -214,13 +217,16 @@ export default {
         this.addResult('✅ 基础连接测试成功')
       } catch (error) {
         this.connectionStatus.basic = '失败'
-        this.addResult('❌ 基础连接测试失败: ' + error.message)
+        const errorMsg = typeof error === 'object' && error !== null && 'message' in error 
+          ? error.message 
+          : '未知错误'
+        this.addResult('❌ 基础连接测试失败: ' + errorMsg)
         
-        if (error.message.includes('404')) {
+        if (errorMsg.includes('404')) {
           this.addResult('💡 建议: 检查后端路由 /api/test 是否已配置')
-        } else if (error.message.includes('timeout')) {
+        } else if (errorMsg.includes('timeout')) {
           this.addResult('💡 建议: 检查后端服务是否正在运行在端口8080')
-        } else if (error.message.includes('连接失败')) {
+        } else if (errorMsg.includes('连接失败')) {
           this.addResult('💡 建议: 确认后端服务已启动且端口8080可访问')
           this.addResult('💡 可能原因: 防火墙阻止访问、后端服务未启动、端口被占用')
         }
@@ -237,7 +243,10 @@ export default {
         this.addResult('✅ 健康检查端点测试成功')
       } catch (error) {
         this.connectionStatus.health = '失败'
-        this.addResult('❌ 健康检查端点测试失败: ' + error.message)
+        const errorMsg = typeof error === 'object' && error !== null && 'message' in error 
+          ? error.message 
+          : '未知错误'
+        this.addResult('❌ 健康检查端点测试失败: ' + errorMsg)
       }
       this.loading = false
     },
@@ -253,7 +262,10 @@ export default {
         this.addResult('✅ 公开API测试成功')
       } catch (error) {
         this.connectionStatus.public = '失败'
-        this.addResult('❌ 公开API测试失败: ' + error.message)
+        const errorMsg = typeof error === 'object' && error !== null && 'message' in error 
+          ? error.message 
+          : '未知错误'
+        this.addResult('❌ 公开API测试失败: ' + errorMsg)
       }
       this.loading = false
     },
@@ -265,12 +277,15 @@ export default {
         this.connectionStatus.private = '成功'
         this.addResult('✅ 私有API测试成功')
       } catch (error) {
-        if (error.message === 'Unauthorized') {
+        const errorMsg = typeof error === 'object' && error !== null && 'message' in error 
+          ? error.message 
+          : '未知错误'
+        if (errorMsg === 'Unauthorized') {
           this.connectionStatus.private = '需要登录'
           this.addResult('⚠️ 私有API测试 - 需要登录令牌')
         } else {
           this.connectionStatus.private = '失败'
-          this.addResult('❌ 私有API测试失败: ' + error.message)
+          this.addResult('❌ 私有API测试失败: ' + errorMsg)
         }
       }
       this.loading = false
@@ -291,7 +306,10 @@ export default {
         }
       } catch (error) {
         this.connectionStatus.aiChat = '失败'
-        this.addResult('❌ AI对话功能测试失败: ' + error.message)
+        const errorMsg = typeof error === 'object' && error !== null && 'message' in error 
+          ? error.message 
+          : '未知错误'
+        this.addResult('❌ AI对话功能测试失败: ' + errorMsg)
       }
       this.loading = false
     },
@@ -342,7 +360,10 @@ export default {
           this.addResult('❌ 服务器无响应')
         }
       } catch (error) {
-        this.addResult('❌ 连接测试失败: ' + error.message)
+        const errorMsg = typeof error === 'object' && error !== null && 'message' in error 
+          ? error.message 
+          : '未知错误'
+        this.addResult('❌ 连接测试失败: ' + errorMsg)
       }
       
       this.loading = false
@@ -360,7 +381,10 @@ export default {
         return {success: true, time: endTime - startTime}
       } catch (error) {
         console.error('Ping error:', error)
-        return {success: false, error: error.errMsg || '未知错误'}
+        const errMsg = typeof error === 'object' && error !== null && 'errMsg' in error 
+          ? error.errMsg 
+          : '未知错误'
+        return {success: false, error: errMsg}
       }
     }
   },

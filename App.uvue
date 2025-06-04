@@ -47,7 +47,8 @@ export default {
       // 显示连接失败提示，但不阻止应用启动
       uni.showModal({
         title: '连接失败',
-        content: '无法连接到后端服务，请检查网络连接和服务器状态。\n\n错误详情: ' + (error.message || '未知错误'),
+        content: '无法连接到后端服务，请检查网络连接和服务器状态。\n\n错误详情: ' + 
+          (typeof error === 'object' && error !== null && 'message' in error ? error.message : '未知错误'),
         showCancel: false
       });
     }

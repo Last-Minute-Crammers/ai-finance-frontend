@@ -1,7 +1,7 @@
 // Removed unused import as '@dcloudio/types' is not a module
 
-// Make BASE_URL configurable with a fallback
-const DEFAULT_URL = 'http://localhost:8080';
+// 更新默认URL，可能后端在不同端口上运行
+const DEFAULT_URL = 'http://localhost:8080'; // 或其他可能的端口
 const getBackendUrl = () => {
   // Try to get from storage first (allows runtime configuration)
   const configuredUrl = uni.getStorageSync('backend_url');
@@ -20,6 +20,13 @@ interface RequestOptions {
   // Add timeout and retries
   timeout?: number;
   retries?: number;
+}
+
+// 自定义错误接口
+interface UniRequestError {
+  errMsg?: string;
+  message?: string;
+  [key: string]: any;
 }
 
 // 获取存储的 token
@@ -47,7 +54,7 @@ export const healthCheck = async () => {
     console.log('Backend health check:', response);
     return response;
   } catch (error) {
-    const errMsg = (typeof error === 'object' && error && 'message' in error)
+    const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
       ? (error as any).message
       : String(error);
     console.error('Backend connection failed:', errMsg);
@@ -76,18 +83,25 @@ export const checkBackendConnection = async () => {
       responseTime: endTime - startTime,
       serverInfo: response.data || {}
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('后端连接检查失败:', error);
+    
+    // 处理错误对象，确保类型安全
+    const errMsg = typeof error === 'object' && error !== null && 'errMsg' in error 
+      ? String(error.errMsg) 
+      : '未知错误';
+
+    const isConnectionRefused = typeof errMsg === 'string' && errMsg.includes('CONNECTION_REFUSED');
     
     // 增强的诊断信息
     const diagnostics = {
       serverUrl: BASE_URL,
-      errorType: error.errMsg || 'Unknown error',
-      isConnectionRefused: (error.errMsg && error.errMsg.includes('CONNECTION_REFUSED')),
+      errorType: errMsg,
+      isConnectionRefused: isConnectionRefused,
       possibleCauses: [] as string[]
     };
     
-    if (diagnostics.isConnectionRefused) {
+    if (isConnectionRefused) {
       diagnostics.possibleCauses = [
         "后端服务器未启动",
         '端口8080可能被其他应用占用',
@@ -96,7 +110,7 @@ export const checkBackendConnection = async () => {
     }
     
     console.log('连接诊断:', diagnostics);
-    return { connected: false, error: error.errMsg || '连接失败', diagnostics };
+    return { connected: false, error: errMsg, diagnostics };
   }
 };
 
@@ -116,7 +130,7 @@ export const testConnection = async (maxRetries = 1) => {
       console.log('Connection test successful:', response);
       return response;
     } catch (error) {
-      const errMsg = (typeof error === 'object' && error && 'message' in error)
+      const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
         ? (error as any).message
         : String(error);
       console.error(`Connection test failed (attempt ${retries + 1}):`, errMsg);
@@ -284,8 +298,8 @@ export const request = async (options: RequestOptions) => {
       } else {
         throw new Error(`请求失败: ${response.statusCode} - ${response.data?.error || JSON.stringify(response.data) || '未知错误'}`);
       }
-    } catch (error) {
-      const errMsg = (typeof error === 'object' && error && 'message' in error)
+    } catch (error: any) {
+      const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
         ? (error as any).message
         : String(error);
       console.error('请求错误详情:', errMsg, error);
@@ -300,23 +314,28 @@ export const request = async (options: RequestOptions) => {
       }
       
       // 网络连接错误 - 提供更详细的诊断
-      if (error.errMsg && error.errMsg.includes('request:fail')) {
-        if (error.errMsg.includes('timeout')) {
-          uni.showToast({
-            title: '网络超时，请检查网络连接',
-            icon: 'none'
-          });
-          throw new Error('网络超时');
-        } else if (error.errMsg.includes('CONNECTION_REFUSED')) {
-          uni.showToast({
-            title: '无法连接到后端服务器',
-            icon: 'none'
-          });
-          console.error('连接诊断: 后端服务器可能未启动或不在端口8080上运行');
-          throw new Error('后端服务器连接失败');
-        } else {
-          console.error('网络错误详情:', error.errMsg);
-          throw new Error('网络连接错误: ' + error.errMsg);
+      // 安全检查error对象结构
+      if (typeof error === 'object' && error !== null && 'errMsg' in error) {
+        const errMsgStr = String(error.errMsg);
+        
+        if (errMsgStr.includes('request:fail')) {
+          if (errMsgStr.includes('timeout')) {
+            uni.showToast({
+              title: '网络超时，请检查网络连接',
+              icon: 'none'
+            });
+            throw new Error('网络超时');
+          } else if (errMsgStr.includes('CONNECTION_REFUSED')) {
+            uni.showToast({
+              title: '无法连接到后端服务器',
+              icon: 'none'
+            });
+            console.error('连接诊断: 后端服务器可能未启动或不在端口8080上运行');
+            throw new Error('后端服务器连接失败');
+          } else {
+            console.error('网络错误详情:', errMsgStr);
+            throw new Error('网络连接错误: ' + errMsgStr);
+          }
         }
       }
       
