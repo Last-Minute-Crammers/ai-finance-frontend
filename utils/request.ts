@@ -93,43 +93,53 @@ export const checkBackendConnection = async (customUrl?: string) => {
     console.log('检查后端连接状态...', targetUrl);
     const startTime = Date.now();
     
-    // 增加超时控制，防止请求过久无响应
+    // 修复Promise.race逻辑，确保适当处理undefined
+    const requestPromise = new Promise((resolve, reject) => {
+      uni.request({
+        url: targetUrl + '/api/test',
+        method: 'GET',
+        timeout: 10000,
+        success: (response) => {
+          if (!response) {
+            reject(new Error('未收到后端响应'));
+            return;
+          }
+          resolve(response);
+        },
+        fail: (error) => {
+          reject(error || new Error('请求失败'));
+        }
+      });
+    });
+    
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('请求超时(10秒)')), 10000);
     });
     
-    // 使用Promise.race来实现超时控制
-    const [err, res] = await Promise.race([
-      uni.request({
-        url: targetUrl + '/api/test',
-        method: 'GET',
-        timeout: 10000, // 增加超时时间
-        complete: (response) => response
-      }),
-      timeoutPromise
-    ]).catch(error => [error, null]);
-    
+    // 使用Promise.race正确处理响应
+    const response = await Promise.race([requestPromise, timeoutPromise]) as any;
     const endTime = Date.now();
     
-    if (err) {
-      throw err;
+    // 安全检查response和statusCode
+    if (!response || response.statusCode === undefined) {
+      throw new Error('无效的响应格式');
     }
     
-    console.log('后端连接检查结果:', res, `响应时间: ${endTime - startTime}ms`);
+    console.log('后端连接检查结果:', response, `响应时间: ${endTime - startTime}ms`);
     
     return {
-      connected: res.statusCode === 200,
-      statusCode: res.statusCode,
+      connected: response.statusCode === 200,
+      statusCode: response.statusCode,
       responseTime: endTime - startTime,
-      serverInfo: res.data || {}
+      serverInfo: response.data || {}
     };
   } catch (error: any) {
     console.error('后端连接检查失败:', error);
     
     // 处理错误对象，确保类型安全
-    const errMsg = typeof error === 'object' && error !== null && 'errMsg' in error 
-      ? String(error.errMsg) 
-      : (error?.message || '未知错误');
+    const errMsg = typeof error === 'object' && error !== null && 'message' in error 
+      ? String(error.message || error.errMsg) 
+      : '未知错误';
 
     const isConnectionRefused = typeof errMsg === 'string' && errMsg.includes('CONNECTION_REFUSED');
     const isTimeout = typeof errMsg === 'string' && (errMsg.includes('timeout') || errMsg.includes('超时'));
@@ -157,6 +167,14 @@ export const checkBackendConnection = async (customUrl?: string) => {
         "防火墙阻止了连接 - 检查防火墙设置",
         "后端服务响应过慢 - 检查服务器负载",
         "后端服务未正确监听端口 - 检查后端日志"
+      ];
+    } else {
+      // 添加通用错误原因
+      diagnostics.possibleCauses = [
+        "后端服务未正确启动",
+        "API端点路径可能不正确",
+        "请求处理过程中出现错误",
+        "网络连接问题"
       ];
     }
     
@@ -323,31 +341,38 @@ export const request = async (options: RequestOptions) => {
       console.log('Request headers:', headers);
       console.log('Request data:', data);
       
-      // 使用Promise方式处理请求
-      const [err, res] = await uni.request({
-        url: fullUrl,
-        method,
-        data,
-        header: headers,
-        timeout,
-        complete: (response) => response
-      }).catch(error => [error, null]);
+      // 使用Promise包装uni.request以更好地处理错误
+      const response = await new Promise((resolve, reject) => {
+        uni.request({
+          url: fullUrl,
+          method,
+          data,
+          header: headers,
+          timeout,
+          success: (res) => {
+            if (!res) {
+              reject(new Error('未收到响应数据'));
+              return;
+            }
+            resolve(res);
+          },
+          fail: (err) => {
+            reject(err || new Error('请求失败'));
+          }
+        });
+      }) as any;
 
-      // 处理请求错误
-      if (err) {
-        throw err;
+      // 确保响应存在并有状态码
+      if (!response || typeof response.statusCode !== 'number') {
+        throw new Error('无效的响应格式');
       }
 
-      if (!res) {
-        throw new Error('请求失败，没有收到响应');
-      }
+      console.log('Response status:', response.statusCode);
+      console.log('Response data:', response.data);
 
-      console.log('Response status:', res.statusCode);
-      console.log('Response data:', res.data);
-
-      if (res.statusCode === 200) {
-        return res.data;
-      } else if (res.statusCode === 401) {
+      if (response.statusCode === 200) {
+        return response.data;
+      } else if (response.statusCode === 401) {
         // Token 过期或无效
         uni.removeStorageSync('token');
         uni.showToast({
@@ -355,10 +380,10 @@ export const request = async (options: RequestOptions) => {
           icon: 'none'
         });
         throw new Error('Unauthorized');
-      } else if (res.statusCode === 404) {
+      } else if (response.statusCode === 404) {
         throw new Error(`API路径不存在: ${url} (检查后端路由配置)`);
       } else {
-        throw new Error(`请求失败: ${res.statusCode} - ${res.data?.error || JSON.stringify(res.data) || '未知错误'}`);
+        throw new Error(`请求失败: ${response.statusCode} - ${response.data?.error || JSON.stringify(response.data) || '未知错误'}`);
       }
     } catch (error: any) {
       const errMsg = (typeof error === 'object' && error !== null && 'message' in error)

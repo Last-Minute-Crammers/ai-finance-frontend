@@ -132,46 +132,65 @@ export default {
       
       try {
         const startTime = Date.now();
-        const [err, res] = await uni.request({
-          url: newBackendUrl.value + '/test',
-          method: 'GET',
-          timeout: 5000,
-          complete: (response) => response
-        }).catch(error => [error, null]);
+        
+        // 使用Promise包装更可靠的请求处理
+        const response = await new Promise((resolve, reject) => {
+          uni.request({
+            url: newBackendUrl.value + '/test',
+            method: 'GET',
+            timeout: 5000,
+            success: (res) => {
+              if (!res) {
+                reject(new Error('未收到响应数据'));
+                return;
+              }
+              resolve(res);
+            },
+            fail: (err) => {
+              reject(err || new Error('请求失败'));
+            }
+          });
+        }).catch(error => {
+          throw error;
+        });
         
         const endTime = Date.now();
         const responseTime = endTime - startTime;
         
-        if (!err && res && res.statusCode === 200) {
+        // 类型安全检查
+        if (!response || typeof response.statusCode !== 'number') {
+          throw new Error('无效的响应格式');
+        }
+        
+        if (response.statusCode === 200) {
           connectionStatus.value = 'success';
           statusMessage.value = `连接成功! (${responseTime}ms)`;
           connectionSuccess.value = true;
           addLog(`连接成功，响应时间: ${responseTime}ms`);
-          addLog(`服务器响应: ${JSON.stringify(res.data)}`);
-        } else if (res) {
-          connectionStatus.value = 'warning';
-          statusMessage.value = `服务器返回: ${res.statusCode}`;
-          addLog(`服务器返回非200状态码: ${res.statusCode}`);
+          addLog(`服务器响应: ${JSON.stringify(response.data)}`);
         } else {
-          throw err || new Error('请求失败，未收到响应');
+          connectionStatus.value = 'warning';
+          statusMessage.value = `服务器返回: ${response.statusCode}`;
+          addLog(`服务器返回非200状态码: ${response.statusCode}`);
         }
       } catch (error) {
         connectionStatus.value = 'error';
-        const errMsg = typeof error === 'object' && error !== null && 'errMsg' in error 
-          ? String(error.errMsg) 
-          : (error?.message || '未知错误');
+        const errMsg = typeof error === 'object' && error !== null && 
+          ('message' in error ? error.message : ('errMsg' in error ? error.errMsg : '未知错误'));
         
         statusMessage.value = `连接失败: ${errMsg}`;
         addLog(`连接错误: ${errMsg}`);
         
-        if (errMsg.includes('CONNECTION_REFUSED')) {
-          addLog('诊断: 服务器未启动或端口不正确');
-        } else if (errMsg.includes('timeout')) {
-          addLog('诊断: 连接超时，可能的原因:');
-          addLog('1. Docker容器端口映射不正确');
-          addLog('2. 后端服务未正确监听端口');
-          addLog('3. 防火墙阻止了连接');
-          addLog('💡 建议: 运行高级诊断并尝试不同的连接地址');
+        if (typeof errMsg === 'string') {
+          if (errMsg.includes('CONNECTION_REFUSED')) {
+            addLog('诊断: 服务器未启动或端口不正确');
+          } else if (errMsg.includes('timeout')) {
+            addLog('诊断: 连接超时，可能的原因:');
+            addLog('1. Docker容器端口映射不正确');
+            addLog('2. 后端服务未正确监听端口');
+            addLog('3. 防火墙阻止了连接');
+            addLog('💡 建议: 运行高级诊断并尝试不同的连接地址');
+          }
         }
       } finally {
         loading.value = false;

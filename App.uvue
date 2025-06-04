@@ -23,7 +23,8 @@ export default {
       const connectionCheck = await checkBackendConnection();
       console.log('Connection check result:', connectionCheck);
       
-      if (connectionCheck.connected) {
+      // 判断检查结果是否有效
+      if (connectionCheck && connectionCheck.connected) {
         console.log('Backend connection successful');
         
         // 连接成功后，再检查健康状态
@@ -35,13 +36,13 @@ export default {
         }
       } else {
         // 提供诊断信息
-        console.error('Backend connection failed:', connectionCheck.error);
-        console.info('Connection diagnostics:', connectionCheck.diagnostics);
+        console.error('Backend connection failed:', connectionCheck?.error || '未知错误');
+        console.info('Connection diagnostics:', connectionCheck?.diagnostics || {});
         
         // 显示连接失败提示，但不阻止应用启动
         uni.showModal({
           title: '后端连接失败',
-          content: '无法连接到后端服务器，请确保服务已启动。\n\n您可以继续使用应用，但部分功能可能不可用。',
+          content: '无法连接到后端服务器，请确保服务已启动。\n\n您可以继续使用应用，但部分功能可能不可用。\n\n可前往【测试】页面调整后端地址。',
           showCancel: false
         });
       }
