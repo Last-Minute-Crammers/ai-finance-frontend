@@ -63,10 +63,10 @@ export const userRegister = (userData: any) => {
 // AI聊天对话
 export const sendAIMessage = (message: string) => {
   return request({
-    url: '/api/ai/chat',
+    url: '/api/public/ai/chat',
     method: 'POST',
     data: { message },
-    requireAuth: false // 根据需要决定是否需要认证
+    requireAuth: false
   });
 }
 
@@ -76,7 +76,7 @@ export const voiceRecognition = (audioFile: File) => {
   formData.append('audio', audioFile);
   
   return request({
-    url: '/api/ai/voice',
+    url: '/api/public/ai/voice',
     method: 'POST',
     data: formData,
     requireAuth: false

@@ -5,26 +5,49 @@
 </template>
 
 <script>
-import { testConnection, healthCheck } from './utils/request.ts';
+import { testConnection, healthCheck, checkBackendConnection, setBackendUrl } from './utils/request.ts';
 
 export default {
   async onLaunch() {
     console.log('App 启动');
     
+    // 如果需要自定义后端地址，这里可以设置
+    // setBackendUrl('http://192.168.1.100:8080'); // 例如连接到局域网中的服务器
+    
     // 测试后端连接
     try {
-      await testConnection();
-      console.log('Backend connection successful');
+      // 先进行基础连接检查
+      const connectionCheck = await checkBackendConnection();
+      console.log('Connection check result:', connectionCheck);
       
-      // 检查后端健康状态
-      const healthStatus = await healthCheck();
-      console.log('Backend health status:', healthStatus);
-      
+      if (connectionCheck.connected) {
+        console.log('Backend connection successful');
+        
+        // 连接成功后，再检查健康状态
+        try {
+          const healthStatus = await healthCheck();
+          console.log('Backend health status:', healthStatus);
+        } catch (healthError) {
+          console.warn('Health check failed, but basic connection works:', healthError);
+        }
+      } else {
+        // 提供诊断信息
+        console.error('Backend connection failed:', connectionCheck.error);
+        console.info('Connection diagnostics:', connectionCheck.diagnostics);
+        
+        // 显示连接失败提示，但不阻止应用启动
+        uni.showModal({
+          title: '后端连接失败',
+          content: '无法连接到后端服务器，请确保服务已启动。\n\n您可以继续使用应用，但部分功能可能不可用。',
+          showCancel: false
+        });
+      }
     } catch (error) {
       console.error('Failed to connect to backend:', error);
+      // 显示连接失败提示，但不阻止应用启动
       uni.showModal({
         title: '连接失败',
-        content: '无法连接到后端服务，请检查网络连接',
+        content: '无法连接到后端服务，请检查网络连接和服务器状态。\n\n错误详情: ' + (error.message || '未知错误'),
         showCancel: false
       });
     }

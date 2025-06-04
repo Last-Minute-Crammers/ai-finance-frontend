@@ -99,11 +99,47 @@
         </text>
       </view>
     </view>
+
+    <view v-if="showAdvancedOptions" class="advanced-section">
+      <text class="section-title">高级选项</text>
+      <view class="input-group">
+        <input v-model="customServerUrl" class="input-field" placeholder="服务器地址 (例如: http://192.168.1.100:8080)" />
+        <button @click="setCustomServerUrl" class="small-button">设置</button>
+      </view>
+      <button @click="diagnoseConnection" :disabled="loading" class="advanced-button">
+        运行网络诊断
+      </button>
+    </view>
+    
+    <view class="advanced-toggle">
+      <button @click="showAdvancedOptions = !showAdvancedOptions" class="toggle-button">
+        {{ showAdvancedOptions ? '隐藏高级选项' : '显示高级选项' }}
+      </button>
+    </view>
+    
+    <view v-if="diagnostics" class="diagnostic-detail">
+      <text class="detail-title">连接诊断详情</text>
+      <view class="detail-item">
+        <text class="detail-label">服务器:</text>
+        <text class="detail-value">{{ diagnostics.serverUrl }}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">错误类型:</text>
+        <text class="detail-value">{{ diagnostics.errorType }}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">可能原因:</text>
+      </view>
+      <view class="cause-item" v-for="(cause, idx) in diagnostics.possibleCauses" :key="idx">
+        <text class="cause-number">{{ idx + 1 }}.</text>
+        <text class="cause-text">{{ cause }}</text>
+      </view>
+    </view>
   </view>
 </template>
 
 <script>
-import { testConnection, healthCheck, request, checkBackendConnection } from '../../utils/request'
+import { testConnection, healthCheck, request, checkBackendConnection, setBackendUrl } from '../../utils/request'
 import { getTransactionList, getCategoryList, sendAIMessage } from '../../common/api/finance'
 
 export default {
@@ -122,20 +158,45 @@ export default {
       healthData: null,
       backendUrl: 'http://localhost:8080',
       networkStatus: '检测中...',
-      lastTestTime: '未测试'
+      lastTestTime: '未测试',
+      diagnostics: null,
+      customServerUrl: '',
+      showAdvancedOptions: false
     }
   },
   methods: {
+    setCustomServerUrl() {
+      if (!this.customServerUrl) {
+        uni.showToast({
+          title: '请输入有效的服务器地址',
+          icon: 'none'
+        })
+        return
+      }
+      
+      setBackendUrl(this.customServerUrl)
+      this.backendUrl = this.customServerUrl
+      this.addResult(`✅ 已设置后端地址为: ${this.customServerUrl}`)
+      
+      this.checkBackendStatus()
+    },
+    
     async checkBackendStatus() {
       this.loading = true
+      this.diagnostics = null
       try {
-        const isConnected = await checkBackendConnection()
-        if (isConnected) {
+        const result = await checkBackendConnection()
+        if (result.connected) {
           this.connectionStatus.backend = '在线'
-          this.addResult('✅ 后端服务在线')
+          this.addResult(`✅ 后端服务在线 (响应时间: ${result.responseTime}ms)`)
         } else {
           this.connectionStatus.backend = '离线'
           this.addResult('❌ 后端服务离线或无响应')
+          
+          if (result.diagnostics) {
+            this.diagnostics = result.diagnostics
+            this.addResult(`📊 可能的原因: ${result.diagnostics.possibleCauses.join(', ')}`)
+          }
         }
       } catch (error) {
         this.connectionStatus.backend = '错误'
@@ -148,20 +209,20 @@ export default {
     async testBasicConnection() {
       this.loading = true
       try {
-        await testConnection()
+        await testConnection(2)
         this.connectionStatus.basic = '成功'
         this.addResult('✅ 基础连接测试成功')
       } catch (error) {
         this.connectionStatus.basic = '失败'
         this.addResult('❌ 基础连接测试失败: ' + error.message)
         
-        // 提供详细的错误诊断
         if (error.message.includes('404')) {
           this.addResult('💡 建议: 检查后端路由 /api/test 是否已配置')
         } else if (error.message.includes('timeout')) {
           this.addResult('💡 建议: 检查后端服务是否正在运行在端口8080')
         } else if (error.message.includes('连接失败')) {
           this.addResult('💡 建议: 确认后端服务已启动且端口8080可访问')
+          this.addResult('💡 可能原因: 防火墙阻止访问、后端服务未启动、端口被占用')
         }
       }
       this.loading = false
@@ -200,7 +261,6 @@ export default {
     async testPrivateAPI() {
       this.loading = true
       try {
-        // 测试需要认证的API
         const response = await getTransactionList()
         this.connectionStatus.private = '成功'
         this.addResult('✅ 私有API测试成功')
@@ -256,7 +316,6 @@ export default {
     },
 
     checkNetworkStatus() {
-      // 检查网络状态
       uni.getNetworkType({
         success: (res) => {
           this.networkStatus = res.networkType || '未知'
@@ -265,13 +324,50 @@ export default {
           this.networkStatus = '检测失败'
         }
       })
+    },
+
+    async diagnoseConnection() {
+      this.loading = true
+      this.addResult('🔍 开始网络诊断...')
+      
+      this.checkNetworkStatus()
+      this.addResult(`📱 设备网络状态: ${this.networkStatus}`)
+      
+      this.addResult('🔍 测试后端服务器连通性...')
+      try {
+        const pingResult = await this.pingServer()
+        if (pingResult.success) {
+          this.addResult(`✅ 服务器可达 (响应时间: ${pingResult.time}ms)`)
+        } else {
+          this.addResult('❌ 服务器无响应')
+        }
+      } catch (error) {
+        this.addResult('❌ 连接测试失败: ' + error.message)
+      }
+      
+      this.loading = false
+    },
+    
+    async pingServer() {
+      try {
+        const startTime = Date.now()
+        await uni.request({
+          url: this.backendUrl + '/test',
+          method: 'GET',
+          timeout: 2000
+        })
+        const endTime = Date.now()
+        return {success: true, time: endTime - startTime}
+      } catch (error) {
+        console.error('Ping error:', error)
+        return {success: false, error: error.errMsg || '未知错误'}
+      }
     }
   },
   
   onLoad() {
     this.addResult('页面加载完成，准备进行健康检查')
     this.checkNetworkStatus()
-    // 自动运行基础连接检查
     setTimeout(() => {
       this.checkBackendStatus()
     }, 1000)
@@ -450,5 +546,92 @@ button:disabled {
 
 .unhealthy {
   color: #F44336;
+}
+
+.advanced-section {
+  background-color: #f0f0f0;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+}
+
+.input-group {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.input-field {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.small-button {
+  padding: 0 15px;
+  background-color: #007AFF;
+  color: white;
+  height: auto;
+  line-height: 32px;
+  font-size: 14px;
+}
+
+.advanced-button {
+  width: 100%;
+  background-color: #7047EB;
+}
+
+.diagnostic-detail {
+  background-color: #FFF9E6;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  border-left: 4px solid #FFC107;
+}
+
+.detail-title {
+  font-weight: bold;
+  font-size: 16px;
+  color: #B78105;
+  margin-bottom: 10px;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.detail-label {
+  font-weight: bold;
+  width: 80px;
+  color: #666;
+}
+
+.cause-item {
+  display: flex;
+  padding: 5px 0 5px 15px;
+}
+
+.cause-number {
+  margin-right: 5px;
+  color: #B78105;
+  font-weight: bold;
+}
+
+.cause-text {
+  color: #333;
+  flex: 1;
+}
+
+.advanced-toggle {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.toggle-button {
+  background-color: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
 }
 </style>
