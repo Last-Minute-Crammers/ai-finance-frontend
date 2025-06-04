@@ -1,7 +1,7 @@
 // Removed unused import as '@dcloudio/types' is not a module
 
 // 更新默认URL，可能后端在不同端口上运行
-const DEFAULT_URL = 'http://localhost:8080'; // 或其他可能的端口
+const DEFAULT_URL = 'http://host.docker.internal:8080'; // 或其他可能的端口
 const getBackendUrl = () => {
   // Try to get from storage first (allows runtime configuration)
   const configuredUrl = uni.getStorageSync('backend_url');
