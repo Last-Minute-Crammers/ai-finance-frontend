@@ -83,6 +83,23 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 
+// 类型定义
+interface TrendSeries {
+  name: string;
+  data: number[];
+}
+interface TrendData {
+  categories: string[];
+  series: TrendSeries[];
+}
+interface PieItem {
+  name: string;
+  value: number;
+}
+interface CategoryData {
+  series: PieItem[];
+}
+
 const trendChart = ref<any>(null)
 const categoryChart = ref<any>(null)
 const showDebug = ref(false)
@@ -97,14 +114,11 @@ const expenseTrend = ref(0)
 const incomeTrend = ref(0)
 
 // 初始化图表数据
-const trendData = ref({
+const trendData = ref<TrendData>({
   categories: [],
-  series: [
-    { name: '支出', data: [] },
-    { name: '收入', data: [] }
-  ]
+  series: []
 })
-const categoryData = ref({ series: [] })
+const categoryData = ref<CategoryData>({ series: [] })
 
 // 获取本地存储的交易记录
 function getLocalTransactions(): any[] {
