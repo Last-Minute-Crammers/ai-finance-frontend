@@ -28,33 +28,73 @@
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
+import { sendAIMessage } from '../../common/api/finance'
 
 interface ChatMessage {
   role: 'ai' | 'user';
   text: string;
+  loading?: boolean;
 }
 
 const aiAvatar = '/static/icons/pet.png'
-const userAvatar = '/static/icons/user.png' // TODO: 可扩展为用户自定义头像
+const userAvatar = '/static/icons/user.png'
 
 const inputText = ref('')
+const isLoading = ref(false)
 const messages = ref<ChatMessage[]>([
-  { role: 'ai', text: '你好，我是你的AI理财助手，有什么可以帮您？' }
+  { role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' }
 ])
 const bottomAnchor = 'bottom-anchor'
 const scrollIntoView = ref(bottomAnchor)
 
-function sendMessage() {
+async function sendMessage() {
   const content = inputText.value.trim()
-  if (!content) return
+  if (!content || isLoading.value) return
+  
+  // 添加用户消息
   messages.value.push({ role: 'user', text: content })
   inputText.value = ''
   scrollToBottom()
-
-  setTimeout(() => {
-    messages.value.push({ role: 'ai', text: `收到：${content}\n我会为您分析一下～` })
+  
+  // 添加AI加载消息
+  const loadingMsgIndex = messages.value.length
+  messages.value.push({ role: 'ai', text: '正在思考中...', loading: true })
+  scrollToBottom()
+  
+  isLoading.value = true
+  
+  try {
+    const response = await sendAIMessage(content)
+    console.log('AI response received:', response) // 添加调试日志
+    
+    // 移除加载消息，添加AI回复
+    messages.value.splice(loadingMsgIndex, 1)
+    
+    // 修复：使用正确的属性名访问响应数据
+    if (response.success && response.data) {
+      messages.value.push({ role: 'ai', text: response.data })
+    } else {
+      // 处理后端返回错误的情况
+      const errorMsg = response.error || '抱歉，我暂时无法回答这个问题。'
+      messages.value.push({ role: 'ai', text: errorMsg })
+    }
+  } catch (error) {
+    // 移除加载消息，添加错误提示
+    messages.value.splice(loadingMsgIndex, 1)
+    messages.value.push({ 
+      role: 'ai', 
+      text: '抱歉，我暂时无法连接到AI服务。请稍后再试或联系技术支持。' 
+    })
+    console.error('AI chat error:', error)
+    
+    uni.showToast({
+      title: 'AI服务暂时不可用',
+      icon: 'none'
+    })
+  } finally {
+    isLoading.value = false
     scrollToBottom()
-  }, 500)
+  }
 }
 
 function scrollToBottom() {
