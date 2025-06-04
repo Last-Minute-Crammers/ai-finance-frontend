@@ -94,10 +94,8 @@ function logout() {
     icon: 'success',
     duration: 2000
   })
-  
-  // 清除用户登录状态数据（如 token、用户信息等）
-  // uni.removeStorageSync('token');  // 示例，假设你有存储 token 的逻辑
-
+  // 清除用户登录状态数据
+  uni.removeStorageSync('current_user');
   // 退出登录后跳转到登录页面
   uni.navigateTo({
     url: '/pages/login/login'

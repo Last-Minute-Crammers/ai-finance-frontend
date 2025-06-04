@@ -75,7 +75,6 @@ async function login() {
   if (user) {
     // 保存当前用户信息
     uni.setStorageSync('current_user', user)
-
     // 显示登录成功提示
     uni.showToast({
       title: '登录成功',
@@ -83,7 +82,6 @@ async function login() {
       mask: true,
       duration: 1500
     })
-
     // 等待提示显示完毕后跳转
     setTimeout(() => {
       uni.navigateTo({

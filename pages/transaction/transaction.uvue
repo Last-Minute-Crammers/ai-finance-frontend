@@ -156,29 +156,28 @@ async function submitTransaction() {
     // 清空表单
     amount.value = ''
       // 保存前先获取现有数据
-    const existingTransactions = getLocalTransactions()
-    console.log('现有交易记录:', existingTransactions)
-    
-    // 添加新交易
-    saveTransaction(transaction)
-    console.log('新交易已保存:', transaction)
-    
-    // 再次检查保存是否成功
-    const savedTransactions = getLocalTransactions()
-    console.log('保存后的所有交易:', savedTransactions)
-
-    // 显示成功提示
-    uni.showToast({ 
-      title: '记录已保存',
-      icon: 'success',
-      mask: true,
-      duration: 1500
-    })
-
-    // 等待提示显示完毕后返回
-    setTimeout(() => {
-      uni.navigateBack()
-    }, 1500)
+      const existingTransactions = getLocalTransactions()
+      console.log('现有交易记录:', existingTransactions)
+      
+      // 添加新交易到现有数据
+      existingTransactions.push(transaction)
+  
+      // 保存更新后的数据到本地存储
+      uni.setStorageSync('transactions', JSON.stringify(existingTransactions))
+      console.log('保存后的所有交易:', existingTransactions)
+  
+      // 显示成功提示
+      uni.showToast({ 
+        title: '记录已保存',
+        icon: 'success',
+        mask: true,
+        duration: 1500
+      })
+  
+      // 等待提示显示完毕后返回
+      setTimeout(() => {
+        uni.navigateBack()
+      }, 1500)
 
   } catch (error) {
     console.error('保存失败:', error)

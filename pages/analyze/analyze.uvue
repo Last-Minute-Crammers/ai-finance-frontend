@@ -1,385 +1,222 @@
 <template>
-  <view class="container">
-    <!-- 顶部 -->
-    <view class="header">
-      <text class="back" @click="goBack">←</text>
-      <text class="title">财务分析</text>
-      <text class="subtitle">可视化您的消费情况</text>
-
-      <view class="tabs">
-        <view
-          v-for="tab in tabs"
-          :key="tab"
-          :class="['tab', activeTab === tab ? 'active' : '']"
-          @click="changeTimeRange(tab)"
-        >
-          {{ tab }}
-        </view>
-      </view>
-    </view>
-
-    <!-- Debug: 显示当前数据 -->
-    <view class="debug-info" v-if="showDebug">
-      <text>数据总数: {{ transactionCount }}</text>
-    </view>
-
-    <!-- 收支趋势图 -->
-    <view class="card">
-      <view class="card-header">
-        <text class="card-title">收支趋势</text>
-      </view>
-      <view class="chart-container" style="display: flex; align-items: center; justify-content: center;">
-        <image src="/static/trend.png" style="max-width: 100%; max-height: 300px;" mode="aspectFit" />
-      </view>
-    </view>
-
-    <!-- 总收入 / 总支出 -->
-    <view class="summary-row">
-      <view class="summary-card">
-        <text class="label">总支出</text>
-        <text class="value">¥{{ formatAmount(totalExpense) }}</text>
-        <text class="trend" :class="expenseTrend >= 0 ? 'red' : 'green'">
-          {{ expenseTrend >= 0 ? '↑' : '↓' }}{{ Math.abs(expenseTrend) }}% 较上{{ activeTab }}
-        </text>
-      </view>
-      <view class="summary-card">
-        <text class="label">总收入</text>
-        <text class="value">¥{{ formatAmount(totalIncome) }}</text>
-        <text class="trend" :class="incomeTrend >= 0 ? 'green' : 'red'">
-          {{ incomeTrend >= 0 ? '↑' : '↓' }}{{ Math.abs(incomeTrend) }}% 较上{{ activeTab }}
-        </text>
-      </view>
-    </view>
-
-    <!-- 消费分类饼图 -->
-    <view class="card">
-      <view class="card-header">
-        <text class="card-title">消费分类</text>
-      </view>
-      <view class="chart-container" style="display: flex; align-items: center; justify-content: center;">
-        <image src="/static/pie.png" style="max-width: 100%; max-height: 300px;" mode="aspectFit" />
-      </view>
-    </view>
-
-    <!-- Debug Info -->
-    <view v-if="showDebug" class="debug-card">
-      <text class="debug-title">Debug Information</text>
-      <text>总交易数: {{ transactionCount }}</text>
-      <text>当前范围: {{ activeTab }}</text>
-      <text>总支出: ¥{{ formatAmount(totalExpense) }}</text>
-      <text>总收入: ¥{{ formatAmount(totalIncome) }}</text>
-      <view class="debug-section">
-        <text>趋势数据:</text>
-        <text>{{ JSON.stringify(trendData.series, null, 2) }}</text>
-      </view>
-      <view class="debug-section">
-        <text>分类数据:</text>
-        <text>{{ JSON.stringify(categoryData.series, null, 2) }}</text>
-      </view>
-    </view>
+  <view class="charts-box">
+    <qiun-data-charts 
+      type="column"
+      :opts="opts"
+      :chartData="chartData"
+    />
+  </view>
+  <view class="charts-box">
+    <qiun-data-charts 
+      type="pie"
+      :opts="pieOpts"
+      :chartData="pieChartData"
+    />
   </view>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-const echarts = require('@/echarts.min.js')
-
-const trendChart = ref<any>(null)
-const categoryChart = ref<any>(null)
-const showDebug = ref(false)
-const transactionCount = ref(0)
-const tabs = ['周', '月', '年']
-const activeTab = ref('周')
-
-// 状态变量
-const totalExpense = ref(0)
-const totalIncome = ref(0)
-const expenseTrend = ref(0)
-const incomeTrend = ref(0)
-
-// 初始化图表数据
-const trendData = ref({
-  categories: [],
-  series: [
-    { name: '支出', data: [] },
-    { name: '收入', data: [] }
-  ]
-})
-const categoryData = ref({ series: [] })
-
-// 获取本地存储的交易记录
-function getLocalTransactions() {
-  try {
-    const transactions = uni.getStorageSync('transactions')
-    return transactions ? JSON.parse(transactions) : []
-  } catch (error) {
-    console.error('读取本地数据失败:', error)
-    return []
-  }
-}
-
-function formatAmount(cents: number) {
-  return (cents / 100).toLocaleString('zh-CN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })
-}
-
-function getDateRange(rangeType: string) {
-  const now = new Date()
-  const start = new Date()
-  switch (rangeType) {
-    case '周': start.setDate(now.getDate() - 7); break
-    case '月': start.setMonth(now.getMonth() - 1); break
-    case '年': start.setFullYear(now.getFullYear() - 1); break
-  }
-  return { start, end: now }
-}
-
-function updateCharts(rangeType: string) {
-  const transactions = getLocalTransactions()
-  transactionCount.value = transactions.length
-  if (transactions.length === 0) return
-  const { start, end } = getDateRange(rangeType)
-  const filteredTransactions = transactions.filter((t: any) => {
-    const date = new Date(t.tradeTime)
-    return date >= start && date <= end
-  })
-  totalExpense.value = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)
-  totalIncome.value = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)
-  // 生成日期标签和数据
-  const dateMap = new Map()
-  filteredTransactions.forEach(t => {
-    const date = formatDate(new Date(t.tradeTime))
-    if (!dateMap.has(date)) dateMap.set(date, { expense: 0, income: 0 })
-    const data = dateMap.get(date)
-    if (t.type === 'expense') data.expense += t.amount
-    else data.income += t.amount
-  })
-  const dates = Array.from(dateMap.keys()).sort()
-  const expenseData = dates.map(date => dateMap.get(date).expense / 100)
-  const incomeData = dates.map(date => dateMap.get(date).income / 100)
-  // 趋势图配置
-  const trendOption = {
-    tooltip: { trigger: 'axis', formatter: function(params: any) {
-      return params.map((item: any) => `${item.seriesName}: ¥${item.value.toFixed(2)}`).join('<br/>')
-    } },
-    legend: { data: ['支出', '收入'], bottom: 0 },
-    grid: { left: '3%', right: '4%', bottom: '60px', top: '3%', containLabel: true },
-    xAxis: { type: 'category', boundaryGap: false, data: dates },
-    yAxis: { type: 'value', axisLabel: { formatter: (value: number) => `¥${value.toFixed(0)}` } },
-    series: [
-      { name: '支出', type: 'line', areaStyle: { opacity: 0.2 }, color: '#ff6b6b', smooth: true, data: expenseData },
-      { name: '收入', type: 'line', areaStyle: { opacity: 0.2 }, color: '#4e54c8', smooth: true, data: incomeData }
-    ]
-  }
-  // 饼图数据
-  const categoryMap = new Map()
-  filteredTransactions.forEach(t => {
-    if (t.type === 'expense') {
-      const current = categoryMap.get(t.categoryName) || 0
-      categoryMap.set(t.categoryName, current + t.amount)
+<script>
+export default {
+  data() {
+    return {
+      chartData: {},
+      //这里的 opts 是图表类型 type="column" 的全部配置参数，您可以将此配置复制到 config-ucharts.js 文件中下标为 ['column'] 的节点中来覆盖全局默认参数。实际应用过程中 opts 只需传入与全局默认参数中不一致的【某一个属性】即可实现同类型的图表显示不同的样式，达到页面简洁的需求。
+      opts: {
+        timing: "easeOut",
+        duration: 1000,
+        rotate: false,
+        rotateLock: false,
+        color: ["#1890FF","#91CB74","#FAC858","#EE6666","#73C0DE","#3CA272","#FC8452","#9A60B4","#ea7ccc"],
+        padding: [13,10,20,5],
+        fontSize: 13,
+        fontColor: "#666666",
+        dataLabel: true,
+        dataPointShape: true,
+        dataPointShapeType: "solid",
+        touchMoveLimit: 60,
+        enableScroll: false,
+        enableMarkLine: false,
+        legend: {
+          show: true,
+          position: "bottom",
+          float: "center",
+          padding: 5,
+          margin: 5,
+          backgroundColor: "rgba(0,0,0,0)",
+          borderColor: "rgba(0,0,0,0)",
+          borderWidth: 0,
+          fontSize: 13,
+          fontColor: "#666666",
+          lineHeight: 11,
+          hiddenColor: "#CECECE",
+          itemGap: 10
+        },
+        xAxis: {
+          disableGrid: true,
+          disabled: false,
+          axisLine: true,
+          axisLineColor: "#CCCCCC",
+          calibration: false,
+          fontColor: "#666666",
+          fontSize: 13,
+          lineHeight: 20,
+          marginTop: 0,
+          rotateLabel: false,
+          rotateAngle: 45,
+          itemCount: 5,
+          boundaryGap: "center",
+          splitNumber: 5,
+          gridColor: "#CCCCCC",
+          gridType: "solid",
+          dashLength: 4,
+          gridEval: 1,
+          scrollShow: false,
+          scrollAlign: "left",
+          scrollColor: "#A6A6A6",
+          scrollBackgroundColor: "#EFEBEF",
+          title: "",
+          titleFontSize: 13,
+          titleOffsetY: 0,
+          titleOffsetX: 0,
+          titleFontColor: "#666666",
+          format: ""
+        },
+        yAxis: {
+          data: [
+            {
+              min: 0
+            }
+          ],
+          disabled: false,
+          disableGrid: false,
+          splitNumber: 5,
+          gridType: "solid",
+          dashLength: 8,
+          gridColor: "#CCCCCC",
+          padding: 10,
+          showTitle: false
+        },
+        extra: {
+          column: {
+            type: "group",
+            width: 30,
+            activeBgColor: "#000000",
+            activeBgOpacity: 0.08,
+            seriesGap: 2,
+            categoryGap: 3,
+            barBorderCircle: false,
+            linearType: "none",
+            linearOpacity: 1,
+            colorStop: 0,
+            meterBorder: 1,
+            meterFillColor: "#FFFFFF",
+            labelPosition: "outside"
+          },
+          tooltip: {
+            showBox: true,
+            showArrow: true,
+            showCategory: false,
+            borderWidth: 0,
+            borderRadius: 0,
+            borderColor: "#000000",
+            borderOpacity: 0.7,
+            bgColor: "#000000",
+            bgOpacity: 0.7,
+            gridType: "solid",
+            dashLength: 4,
+            gridColor: "#CCCCCC",
+            boxPadding: 3,
+            fontSize: 13,
+            lineHeight: 20,
+            fontColor: "#FFFFFF",
+            legendShow: true,
+            legendShape: "auto",
+            splitLine: true,
+            horizentalLine: false,
+            xAxisLabel: false,
+            yAxisLabel: false,
+            labelBgColor: "#FFFFFF",
+            labelBgOpacity: 0.7,
+            labelFontColor: "#666666"
+          },
+          markLine: {
+            type: "solid",
+            dashLength: 4,
+            data: []
+          }
+        }
+      },
+      pieChartData: {},
+      pieOpts: {
+        color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4", "#ea7ccc"],
+        padding: [15, 15, 15, 15],
+        legend: {
+          show: true,
+          position: "bottom",
+          fontSize: 13,
+          fontColor: "#666666"
+        },
+        extra: {
+          pie: {
+            activeOpacity: 0.5,
+            activeRadius: 10,
+            offsetAngle: 0,
+            labelWidth: 15,
+            border: true,
+            borderWidth: 3,
+            borderColor: "#FFFFFF"
+          }
+        }
+      }
+    };
+  },
+  onReady() {
+    this.getServerData();
+    this.getPieData();
+  },
+  methods: {
+    getServerData() {
+      //模拟从服务器获取数据时的延时
+      setTimeout(() => {
+        //模拟服务器返回数据，如果数据格式和标准格式不同，需自行按下面的格式拼接
+        let res = {
+            categories: ["2018","2019","2020","2021","2022","2023"],
+            series: [
+              {
+                name: "目标值",
+                data: [35,36,31,33,13,34]
+              },
+              {
+                name: "完成量",
+                data: [18,27,21,24,6,28]
+              }
+            ]
+          };
+        this.chartData = JSON.parse(JSON.stringify(res));
+      }, 500);
+    },
+    getPieData() {
+      // 示例饼图数据
+      let res = {
+        series: [
+          { name: "餐饮", data: 30 },
+          { name: "购物", data: 20 },
+          { name: "交通", data: 15 },
+          { name: "娱乐", data: 35 },
+    
+        ]
+      };
+      this.pieChartData = JSON.parse(JSON.stringify(res));
     }
-  })
-  const pieData = Array.from(categoryMap.entries()).map(([name, value]) => ({ name, value: value / 100 }))
-  const pieOption = {
-    tooltip: { trigger: 'item', formatter: '{b}: ¥{c} ({d}%)' },
-    legend: { orient: 'horizontal', bottom: 0, type: 'scroll' },
-    series: [{
-      type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: '{b}\n¥{c}' },
-      emphasis: { label: { show: true, fontSize: '14', fontWeight: 'bold' } },
-      data: pieData
-    }]
   }
-  // 渲染图表
-  if (trendChart.value) trendChart.value.setOption(trendOption)
-  if (categoryChart.value) categoryChart.value.setOption(pieOption)
-}
-
-function formatDate(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
-function initCharts() {
-  nextTick(() => {
-    const trendDom = document.getElementById('trendChart')
-    const categoryDom = document.getElementById('categoryChart')
-    if (trendDom && !trendChart.value) trendChart.value = echarts.init(trendDom)
-    if (categoryDom && !categoryChart.value) categoryChart.value = echarts.init(categoryDom)
-    updateCharts(activeTab.value)
-    window.addEventListener('resize', resizeCharts)
-  })
-}
-function resizeCharts() {
-  trendChart.value && trendChart.value.resize()
-  categoryChart.value && categoryChart.value.resize()
-}
-onUnmounted(() => {
-  trendChart.value?.dispose()
-  categoryChart.value?.dispose()
-  window.removeEventListener('resize', resizeCharts)
-})
-
-onMounted(() => {
-  initCharts()
-})
-
-function goBack() { uni.navigateBack() }
-function changeTimeRange(tab: string) {
-  activeTab.value = tab
-  updateCharts(tab)
-}
+};
 </script>
 
-<style>
-.container {
-  background-color: #f5f7fa;
-  min-height: 100vh;
-  padding-bottom: 10%;
-}
-
-/* 顶部区域 */
-.header {
-  background: linear-gradient(to right, #4e54c8, #8f94fb);
-  padding: 80rpx 30rpx 40rpx;
-  border-bottom-left-radius: 30rpx;
-  border-bottom-right-radius: 30rpx;
-  position: relative;
-  text-align: center;
-}
-.back {
-  position: absolute;
-  left: 30rpx;
-  top: 80rpx;
-  font-size: 36rpx;
-  color: white;
-}
-.title, .subtitle {
-  width: 100%;
-  display: block;
-  text-align: center;
-}
-.title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: white;
-}
-.subtitle {
-  font-size: 24rpx;
-  color: #f0f0f0;
-  margin-top: 10rpx;
-}
-
-/* Tabs */
-.tabs {
-  margin-top: 40rpx;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 40rpx;
-  padding: 6rpx;
-}
-.tab {
-  font-size: 26rpx;
-  color: white;
-  padding: 12rpx 24rpx;
-  border-radius: 30rpx;
-}
-.tab.active {
-  background: #fff;
-  color: #4e54c8;
-  font-weight: bold;
-}
-
-/* 卡片通用 */
-.card {
-  background: #fff;
-  margin: 30rpx;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.06);
-}
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20rpx;
-}
-.card-title {
-  font-size: 28rpx;
-  font-weight: bold;
-}
-.card-link {
-  font-size: 24rpx;
-  color: #4e54c8;
-}
-.chart-placeholder {
-  height: 200rpx;
-  background-color: #f0f0f0;
-  border-radius: 16rpx;
-  color: #888;
-  font-size: 22rpx;
-  text-align: center;
-  line-height: 200rpx;
-}
-
-/* 总收入支出 */
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-  padding: 0 30rpx;
-  margin-bottom: 30rpx;
-}
-.summary-card {
-  width: 48%;
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 24rpx;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
-  text-align: center;
-}
-.label {
-  font-size: 24rpx;
-  color: #999;
-}
-.value {
-  font-size: 30rpx;
-  font-weight: bold;
-  margin: 10rpx 0;
-}
-.trend {
-  font-size: 22rpx;
-}
-.green {
-  color: #35b765;
-}
-.red {
-  color: #e74c3c;
-}
-.chart-container {
-  height: 300px;
-  width: 100%;
-}
-
-/* Debug 信息 */
-.debug-card {
-  background: #fff;
-  margin: 30rpx;
-  padding: 20rpx;
-  border-radius: 10rpx;
-  font-size: 24rpx;
-}
-.debug-title {
-  font-weight: bold;
-  margin-bottom: 10rpx;
-}
-.debug-section {
-  margin-top: 10rpx;
-  padding: 10rpx;
-  background: #f5f5f5;
-  border-radius: 6rpx;
-}
+<style scoped>
+  /* 请根据实际需求修改父元素尺寸，组件自动识别宽高 */
+  .charts-box {
+    width: 100%;
+    height: 300px;
+    margin-bottom: 20px;
+  }
 </style>

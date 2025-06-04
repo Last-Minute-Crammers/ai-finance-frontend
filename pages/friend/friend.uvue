@@ -1,0 +1,328 @@
+<template>
+  <view class="container">
+    <view class="header">
+      <text class="back" @click="goBack">←</text>
+      <text class="title">添加好友</text>
+    </view>
+    
+    <view class="search-section">
+      <input 
+        v-model="searchEmail" 
+        placeholder="输入Email搜索用户" 
+        class="search-input" 
+      />
+      <button class="search-btn" @click="searchUser">搜索</button>
+    </view>
+    
+    <view v-if="searchResult" class="user-result">
+      <text class="user-email">{{ searchResult.email }}</text>
+      <button 
+        v-if="!searchResult.added && !searchResult.pending" 
+        class="add-btn" 
+        @click="addFriend(searchResult)"
+      >
+        添加
+      </button>
+      <button 
+        v-else-if="searchResult.pending" 
+        class="pending-btn" 
+        disabled
+      >
+        等待验证
+      </button>
+      <button 
+        v-else 
+        class="added-btn" 
+        disabled
+      >
+        已添加
+      </button>
+    </view>
+    
+    <view v-if="pendingRequests.length > 0" class="pending-section">
+      <text class="pending-title">好友请求</text>
+      <view 
+        v-for="(req, idx) in pendingRequests" 
+        :key="idx" 
+        class="pending-item"
+      >
+        <text class="pending-email">{{ req.from }}</text>
+        <view class="pending-buttons">
+          <button class="accept-btn" @click="acceptRequest(req)">同意</button>
+          <button class="reject-btn" @click="rejectRequest(req)">拒绝</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref, watchEffect } from 'vue'
+
+const searchEmail = ref('')
+const searchResult = ref<any>(null)
+const pendingRequests = ref<any[]>([])
+const myFriends = ref<string[]>([])
+const allUsers = [
+  { email: '3393479429@qq.com' },
+  { email: '3382636795@qq.com' }
+]
+
+// 读取当前登录用户
+const currentUser = ref('')
+function getCurrentUser() {
+  const user = uni.getStorageSync('current_user')
+  currentUser.value = user?.username || ''
+}
+
+// 本地请求和好友数据
+function getAllRequests() {
+  return uni.getStorageSync('friend_requests') || []
+}
+function setAllRequests(reqs: any[]) {
+  uni.setStorageSync('friend_requests', reqs)
+}
+function getAllFriends() {
+  return uni.getStorageSync('friend_relations') || {}
+}
+function setAllFriends(obj: any) {
+  uni.setStorageSync('friend_relations', obj)
+}
+
+function updatePendingRequests() {
+  const reqs = getAllRequests()
+  pendingRequests.value = reqs.filter((r: any) => r.to === currentUser.value)
+}
+
+function updateMyFriends() {
+  const all = getAllFriends()
+  myFriends.value = all[currentUser.value] || []
+}
+
+function searchUser() {
+  if (!searchEmail.value) return
+  if (searchEmail.value === currentUser.value) {
+    uni.showToast({ title: '不能添加自己', icon: 'none' })
+    searchResult.value = null
+    return
+  }
+  const user = allUsers.find(u => u.email === searchEmail.value)
+  if (user) {
+    updateMyFriends()
+    const added = myFriends.value.includes(user.email)
+    const reqs = getAllRequests()
+    const pending = reqs.some((r: any) => r.from === currentUser.value && r.to === user.email)
+    searchResult.value = {
+      email: user.email,
+      added,
+      pending
+    }
+  } else {
+    searchResult.value = null
+    uni.showToast({ title: '未找到该用户', icon: 'none' })
+  }
+}
+
+function addFriend(user: any) {
+  const reqs = getAllRequests()
+  if (!reqs.some((r: any) => r.from === currentUser.value && r.to === user.email)) {
+    reqs.push({ from: currentUser.value, to: user.email })
+    setAllRequests(reqs)
+    user.pending = true
+    updatePendingRequests()
+    uni.showToast({ title: '好友请求已发送', icon: 'none' })
+  }
+}
+
+function acceptRequest(req: any) {
+  // 双方互为好友
+  const all = getAllFriends()
+  all[currentUser.value] = all[currentUser.value] || []
+  all[req.from] = all[req.from] || []
+  if (!all[currentUser.value].includes(req.from)) all[currentUser.value].push(req.from)
+  if (!all[req.from].includes(currentUser.value)) all[req.from].push(currentUser.value)
+  setAllFriends(all)
+  // 移除请求
+  let reqs = getAllRequests()
+  reqs = reqs.filter((r: any) => !(r.from === req.from && r.to === currentUser.value))
+  setAllRequests(reqs)
+  updatePendingRequests()
+  updateMyFriends()
+  uni.showToast({ title: '已添加为好友', icon: 'success' })
+}
+function rejectRequest(req: any) {
+  let reqs = getAllRequests()
+  reqs = reqs.filter((r: any) => !(r.from === req.from && r.to === currentUser.value))
+  setAllRequests(reqs)
+  updatePendingRequests()
+  uni.showToast({ title: '已拒绝', icon: 'none' })
+}
+
+watchEffect(() => {
+  getCurrentUser()
+  updatePendingRequests()
+  updateMyFriends()
+  // 3382636795@qq.com 登录时自动补一条请求（仅首次）
+  if (currentUser.value === '3382636795@qq.com') {
+    const reqs = getAllRequests()
+    if (!reqs.some((r: any) => r.from === '3393479429@qq.com' && r.to === '3382636795@qq.com')) {
+      reqs.push({ from: '3393479429@qq.com', to: '3382636795@qq.com' })
+      setAllRequests(reqs)
+      updatePendingRequests()
+    }
+  }
+})
+function goBack() {
+  uni.navigateBack()
+}
+</script>
+
+<style scoped>
+.container {
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding: 20rpx;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  padding: 20rpx 0;
+}
+
+.back {
+  font-size: 40rpx;
+  color: #4e54c8;
+  margin-right: 20rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+/* 搜索区域 - 修改为同一行布局 */
+.search-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.search-input {
+  flex: 1;
+  padding: 20rpx;
+  font-size: 28rpx;
+  border: 1rpx solid #ccc;
+  border-radius: 10rpx;
+  margin-right: 20rpx;
+}
+
+.search-btn {
+  background: #4e54c8;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  white-space: nowrap;
+}
+
+.user-result {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  display: flex;
+  align-items: center;
+}
+
+.user-email {
+  flex: 1;
+  font-size: 28rpx;
+}
+
+.add-btn {
+  background: #4e54c8;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  padding: 15rpx 25rpx;
+  font-size: 26rpx;
+}
+
+.pending-btn {
+  background: #ffd93d;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  padding: 15rpx 25rpx;
+  font-size: 26rpx;
+}
+
+.added-btn {
+  background: #35b765;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  padding: 15rpx 25rpx;
+  font-size: 26rpx;
+}
+
+.pending-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+}
+
+.pending-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+/* 修改好友请求项布局 */
+.pending-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.pending-email {
+  font-size: 28rpx;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 20rpx;
+}
+
+/* 修改按钮组布局 */
+.pending-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 15rpx;
+}
+
+.accept-btn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  padding: 15rpx 25rpx;
+  font-size: 26rpx;
+}
+
+.reject-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  padding: 15rpx 25rpx;
+  font-size: 26rpx;
+}
+</style>

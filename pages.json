@@ -65,7 +65,6 @@
 		 		"navigationBarTitleText" : ""
 		 	}
 		 },
-		 
 		 {
 		 	"path" : "pages/register/register",
 		 	"style" : 
@@ -75,6 +74,13 @@
 		 },
 		 {
 		 	"path" : "pages/forgot-password/forgot-password",
+		 	"style" : 
+		 	{
+		 		"navigationBarTitleText" : ""
+		 	}
+		 },
+		 {
+		 	"path" : "pages/friend/friend",
 		 	"style" : 
 		 	{
 		 		"navigationBarTitleText" : ""
