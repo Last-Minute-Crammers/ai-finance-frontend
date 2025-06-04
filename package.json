@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@qiun/ucharts": "^2.5.0-20230101"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "^3.4.15",
+    "@types/uni-app": "^1.4.8"
+  }
+}
