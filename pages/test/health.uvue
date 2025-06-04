@@ -117,7 +117,7 @@ export default {
       this.loading = true
       try {
         const response = await request({
-          url: '/public/ping',
+          url: '/api/public/ping',
           method: 'GET'
         })
         this.connectionStatus.public = '成功'

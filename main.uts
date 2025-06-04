@@ -7,13 +7,3 @@ export function createApp() {
 		app
 	}
 }
-// common/api/finance.ts
-interface Transaction {
-  amount: number;
-  category: string;
-  date: string;
-}
-
-export const addTransaction = (data: Transaction) => {
-  return uni.request({ url: '/api/transaction', method: 'POST', data })
-}

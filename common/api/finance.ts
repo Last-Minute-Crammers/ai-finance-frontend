@@ -16,7 +16,7 @@ interface ApiResponse<T = any> {
 // 添加交易
 export const addTransaction = (data: Transaction) => {
   return request({
-    url: '/transaction/add',
+    url: '/api/transaction/add',
     method: 'POST',
     data,
     requireAuth: true
@@ -26,7 +26,7 @@ export const addTransaction = (data: Transaction) => {
 // 获取交易列表
 export const getTransactionList = (params?: any) => {
   return request({
-    url: '/transaction/list',
+    url: '/api/transaction/list',
     method: 'GET',
     params,
     requireAuth: true
@@ -36,7 +36,7 @@ export const getTransactionList = (params?: any) => {
 // 获取分类列表
 export const getCategoryList = () => {
   return request({
-    url: '/category/list',
+    url: '/api/category/list',
     method: 'GET',
     requireAuth: true
   });
@@ -45,7 +45,7 @@ export const getCategoryList = () => {
 // 用户登录
 export const userLogin = (username: string, password: string) => {
   return request({
-    url: '/public/user/login',
+    url: '/api/public/user/login',
     method: 'POST',
     data: { username, password }
   });
@@ -54,7 +54,7 @@ export const userLogin = (username: string, password: string) => {
 // 用户注册
 export const userRegister = (userData: any) => {
   return request({
-    url: '/public/user/register',
+    url: '/api/public/user/register',
     method: 'POST',
     data: userData
   });

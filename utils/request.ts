@@ -22,7 +22,7 @@ const getToken = () => {
 export const healthCheck = async () => {
   try {
     const response = await request({
-      url: '/public/health',
+      url: '/api/public/health',
       method: 'GET'
     });
     console.log('Backend health check:', response);
@@ -37,7 +37,7 @@ export const healthCheck = async () => {
 export const testConnection = async () => {
   try {
     const response = await request({
-      url: '/test',
+      url: '/api/test',
       method: 'GET'
     });
     console.log('Connection test successful:', response);
@@ -78,15 +78,15 @@ export const runComprehensiveTest = async () => {
 
   try {
     // 3. 公开API测试
-    await request({ url: '/public/ping', method: 'GET' });
+    await request({ url: '/api/public/ping', method: 'GET' });
     testResults.public = true;
-  } catch (error:any) {
+  } catch (error: any) {
     testResults.errors.push('公开API测试失败: ' + error.message);
   }
 
   try {
     // 4. 私有API测试 (可能因未登录而失败，这是正常的)
-    await request({ url: '/transaction/list', method: 'GET', requireAuth: true });
+    await request({ url: '/api/transaction/list', method: 'GET', requireAuth: true });
     testResults.private = true;
   } catch (error) {
     if (error.message !== 'Unauthorized') {
@@ -101,7 +101,7 @@ export const runComprehensiveTest = async () => {
 export const pingBackend = async () => {
   try {
     const startTime = Date.now();
-    await request({ url: '/test', method: 'GET' });
+    await request({ url: '/api/test', method: 'GET' });
     const endTime = Date.now();
     return {
       success: true,
