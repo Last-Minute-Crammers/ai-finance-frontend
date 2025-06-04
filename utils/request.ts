@@ -28,14 +28,39 @@ export const healthCheck = async () => {
     console.log('Backend health check:', response);
     return response;
   } catch (error) {
-    console.error('Backend connection failed:', error);
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    console.error('Backend connection failed:', errMsg);
     throw error;
+  }
+};
+
+// 检查后端连接状态
+export const checkBackendConnection = async () => {
+  try {
+    console.log('检查后端连接状态...');
+    const response = await uni.request({
+      url: BASE_URL + '/api/test',
+      method: 'GET',
+      timeout: 5000
+    });
+    
+    console.log('后端连接检查结果:', response);
+    return response.statusCode === 200;
+  } catch (error) {
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    console.error('后端连接检查失败:', errMsg);
+    return false;
   }
 };
 
 // 测试连接函数
 export const testConnection = async () => {
   try {
+    console.log('测试连接到:', BASE_URL + '/api/test');
     const response = await request({
       url: '/api/test',
       method: 'GET'
@@ -43,7 +68,10 @@ export const testConnection = async () => {
     console.log('Connection test successful:', response);
     return response;
   } catch (error) {
-    console.error('Connection test failed:', error);
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    console.error('Connection test failed:', errMsg);
     throw error;
   }
 };
@@ -64,7 +92,10 @@ export const runComprehensiveTest = async () => {
     await testConnection();
     testResults.basic = true;
   } catch (error) {
-    testResults.errors.push('基础连接失败: ' + error.message);
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    testResults.errors.push('基础连接失败: ' + errMsg);
   }
 
   try {
@@ -73,15 +104,21 @@ export const runComprehensiveTest = async () => {
     testResults.health = true;
     testResults.services = healthResponse.services || {};
   } catch (error) {
-    testResults.errors.push('健康检查失败: ' + error.message);
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    testResults.errors.push('健康检查失败: ' + errMsg);
   }
 
   try {
     // 3. 公开API测试
     await request({ url: '/api/public/ping', method: 'GET' });
     testResults.public = true;
-  } catch (error: any) {
-    testResults.errors.push('公开API测试失败: ' + error.message);
+  } catch (error) {
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    testResults.errors.push('公开API测试失败: ' + errMsg);
   }
 
   try {
@@ -89,8 +126,11 @@ export const runComprehensiveTest = async () => {
     await request({ url: '/api/transaction/list', method: 'GET', requireAuth: true });
     testResults.private = true;
   } catch (error) {
-    if (error.message !== 'Unauthorized') {
-      testResults.errors.push('私有API测试失败: ' + error.message);
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    if (errMsg !== 'Unauthorized') {
+      testResults.errors.push('私有API测试失败: ' + errMsg);
     }
   }
 
@@ -108,9 +148,12 @@ export const pingBackend = async () => {
       responseTime: endTime - startTime
     };
   } catch (error) {
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
     return {
       success: false,
-      error: error.message
+      error: errMsg
     };
   }
 };
@@ -127,9 +170,12 @@ export const request = async (options: RequestOptions) => {
   }
 
   // 构建请求头
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
-  };
+  const headers: Record<string, string> = {};
+
+  // 如果数据不是FormData，设置Content-Type为JSON
+  if (!(data instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   // 如果需要认证，添加 Authorization header
   if (requireAuth) {
@@ -141,16 +187,19 @@ export const request = async (options: RequestOptions) => {
 
   try {
     console.log(`Making ${method} request to: ${fullUrl}`);
+    console.log('Request headers:', headers);
+    console.log('Request data:', data);
     
     const response = await uni.request({
       url: fullUrl,
       method,
       data,
       header: headers,
-      timeout: 10000 // 10秒超时
+      timeout: 30000
     });
 
-    console.log('Response:', response);
+    console.log('Response status:', response.statusCode);
+    console.log('Response data:', response.data);
 
     if (response.statusCode === 200) {
       return response.data;
@@ -162,15 +211,38 @@ export const request = async (options: RequestOptions) => {
         icon: 'none'
       });
       throw new Error('Unauthorized');
+    } else if (response.statusCode === 404) {
+      throw new Error(`API路径不存在: ${url} (检查后端路由配置)`);
     } else {
-      throw new Error(`请求失败: ${response.statusCode}`);
+      throw new Error(`请求失败: ${response.statusCode} - ${response.data?.error || JSON.stringify(response.data) || '未知错误'}`);
     }
   } catch (error) {
-    console.error('请求错误:', error);
-    uni.showToast({
-      title: '网络连接失败',
-      icon: 'none'
-    });
+    const errMsg = (typeof error === 'object' && error && 'message' in error)
+      ? (error as any).message
+      : String(error);
+    console.error('请求错误详情:', errMsg);
+    
+    // 网络连接错误
+    if (errMsg.includes('timeout')) {
+      uni.showToast({
+        title: '网络超时，请检查网络连接',
+        icon: 'none'
+      });
+      throw new Error('网络超时');
+    } else if (errMsg.includes('fail')) {
+      uni.showToast({
+        title: '无法连接到后端服务器',
+        icon: 'none'
+      });
+      throw new Error('后端服务器连接失败');
+    }
+    
+    if (errMsg !== 'Unauthorized') {
+      uni.showToast({
+        title: errMsg || '网络连接失败',
+        icon: 'none'
+      });
+    }
     throw error;
   }
 };

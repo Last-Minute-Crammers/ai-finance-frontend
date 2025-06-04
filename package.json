@@ -1,5 +1,9 @@
 {
   "devDependencies": {
-    "@dcloudio/types": "^3.4.15"
+    "@dcloudio/types": "^3.4.15",
+    "@types/node": "^18.0.0"
+  },
+  "dependencies": {
+    "vue": "^3.3.0"
   }
 }

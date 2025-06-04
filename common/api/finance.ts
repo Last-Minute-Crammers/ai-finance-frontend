@@ -59,3 +59,26 @@ export const userRegister = (userData: any) => {
     data: userData
   });
 }
+
+// AI聊天对话
+export const sendAIMessage = (message: string) => {
+  return request({
+    url: '/api/ai/chat',
+    method: 'POST',
+    data: { message },
+    requireAuth: false // 根据需要决定是否需要认证
+  });
+}
+
+// 语音识别
+export const voiceRecognition = (audioFile: File) => {
+  const formData = new FormData();
+  formData.append('audio', audioFile);
+  
+  return request({
+    url: '/api/ai/voice',
+    method: 'POST',
+    data: formData,
+    requireAuth: false
+  });
+}

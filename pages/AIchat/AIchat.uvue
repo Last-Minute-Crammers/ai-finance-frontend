@@ -13,6 +13,11 @@
         <image class="avatar" :src="msg.role === 'ai' ? aiAvatar : userAvatar" />
         <view class="bubble">
           <text>{{ msg.text }}</text>
+          <view v-if="msg.loading" class="loading-dots">
+            <text class="dot">·</text>
+            <text class="dot">·</text>
+            <text class="dot">·</text>
+          </view>
         </view>
       </view>
       <view :id="bottomAnchor" class="scroll-anchor"></view>
@@ -20,41 +25,73 @@
 
     <!-- 输入栏 -->
     <view class="input-area">
-      <input class="input-box" v-model="inputText" placeholder="请输入内容..." @confirm="sendMessage" />
-      <button class="send-button" @tap="sendMessage">发送</button>
+      <input class="input-box" v-model="inputText" placeholder="请输入内容..." @confirm="sendMessage" :disabled="isLoading" />
+      <button class="send-button" @tap="sendMessage" :disabled="isLoading || !inputText.trim()">
+        {{ isLoading ? '发送中...' : '发送' }}
+      </button>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
+import { sendAIMessage } from '../../common/api/finance'
 
 interface ChatMessage {
   role: 'ai' | 'user';
   text: string;
+  loading?: boolean;
 }
 
 const aiAvatar = '/static/icons/pet.png'
-const userAvatar = '/static/icons/user.png' // TODO: 可扩展为用户自定义头像
+const userAvatar = '/static/icons/user.png'
 
 const inputText = ref('')
+const isLoading = ref(false)
 const messages = ref<ChatMessage[]>([
-  { role: 'ai', text: '你好，我是你的AI理财助手，有什么可以帮您？' }
+  { role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' }
 ])
 const bottomAnchor = 'bottom-anchor'
 const scrollIntoView = ref(bottomAnchor)
 
-function sendMessage() {
+async function sendMessage() {
   const content = inputText.value.trim()
-  if (!content) return
+  if (!content || isLoading.value) return
+  
+  // 添加用户消息
   messages.value.push({ role: 'user', text: content })
   inputText.value = ''
   scrollToBottom()
-
-  setTimeout(() => {
-    messages.value.push({ role: 'ai', text: `收到：${content}\n我会为您分析一下～` })
+  
+  // 添加AI加载消息
+  const loadingMsgIndex = messages.value.length
+  messages.value.push({ role: 'ai', text: '正在思考中...', loading: true })
+  scrollToBottom()
+  
+  isLoading.value = true
+  
+  try {
+    const response = await sendAIMessage(content)
+    // 移除加载消息，添加AI回复
+    messages.value.splice(loadingMsgIndex, 1)
+    messages.value.push({ role: 'ai', text: response.response || '抱歉，我暂时无法回答这个问题。' })
+  } catch (error) {
+    // 移除加载消息，添加错误提示
+    messages.value.splice(loadingMsgIndex, 1)
+    messages.value.push({ 
+      role: 'ai', 
+      text: '抱歉，我暂时无法连接到AI服务。请稍后再试或联系技术支持。' 
+    })
+    console.error('AI chat error:', error)
+    
+    uni.showToast({
+      title: 'AI服务暂时不可用',
+      icon: 'none'
+    })
+  } finally {
+    isLoading.value = false
     scrollToBottom()
-  }, 500)
+  }
 }
 
 function scrollToBottom() {
@@ -155,5 +192,44 @@ function scrollToBottom() {
 }
 .scroll-anchor {
   height: 1rpx;
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 10rpx;
+}
+
+.dot {
+  font-size: 40rpx;
+  color: #999;
+  animation: blink 1.4s infinite both;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.send-button:disabled {
+  background-color: #ccc;
+  color: #999;
+}
+
+.input-box:disabled {
+  background-color: #f0f0f0;
+  color: #999;
 }
 </style>

@@ -2,9 +2,19 @@
   <view class="health-test-page">
     <view class="header">
       <text class="title">后端连接健康检查</text>
+      <text class="backend-url">后端地址: {{ backendUrl }}</text>
     </view>
     
     <view class="test-section">
+      <view class="test-item">
+        <button @click="checkBackendStatus" :disabled="loading">
+          检查后端服务状态
+        </button>
+        <text class="status" :class="connectionStatus.backend">
+          {{ connectionStatus.backend }}
+        </text>
+      </view>
+      
       <view class="test-item">
         <button @click="testBasicConnection" :disabled="loading">
           测试基础连接
@@ -42,9 +52,34 @@
       </view>
       
       <view class="test-item">
+        <button @click="testAIChat" :disabled="loading">
+          测试AI对话功能
+        </button>
+        <text class="status" :class="connectionStatus.aiChat">
+          {{ connectionStatus.aiChat }}
+        </text>
+      </view>
+      
+      <view class="test-item">
         <button @click="runAllTests" :disabled="loading">
           运行所有测试
         </button>
+      </view>
+    </view>
+    
+    <view class="diagnostic-section">
+      <text class="section-title">连接诊断信息</text>
+      <view class="diagnostic-item">
+        <text class="diagnostic-label">后端地址:</text>
+        <text class="diagnostic-value">{{ backendUrl }}</text>
+      </view>
+      <view class="diagnostic-item">
+        <text class="diagnostic-label">网络状态:</text>
+        <text class="diagnostic-value">{{ networkStatus }}</text>
+      </view>
+      <view class="diagnostic-item">
+        <text class="diagnostic-label">最后测试时间:</text>
+        <text class="diagnostic-value">{{ lastTestTime }}</text>
       </view>
     </view>
     
@@ -68,24 +103,48 @@
 </template>
 
 <script>
-import { testConnection, healthCheck, request } from '../../utils/request'
-import { getTransactionList, getCategoryList } from '../../common/api/finance'
+import { testConnection, healthCheck, request, checkBackendConnection } from '../../utils/request'
+import { getTransactionList, getCategoryList, sendAIMessage } from '../../common/api/finance'
 
 export default {
   data() {
     return {
       loading: false,
       connectionStatus: {
+        backend: '未测试',
         basic: '未测试',
         health: '未测试',
         public: '未测试',
-        private: '未测试'
+        private: '未测试',
+        aiChat: '未测试'
       },
       testResults: [],
-      healthData: null
+      healthData: null,
+      backendUrl: 'http://localhost:8080',
+      networkStatus: '检测中...',
+      lastTestTime: '未测试'
     }
   },
   methods: {
+    async checkBackendStatus() {
+      this.loading = true
+      try {
+        const isConnected = await checkBackendConnection()
+        if (isConnected) {
+          this.connectionStatus.backend = '在线'
+          this.addResult('✅ 后端服务在线')
+        } else {
+          this.connectionStatus.backend = '离线'
+          this.addResult('❌ 后端服务离线或无响应')
+        }
+      } catch (error) {
+        this.connectionStatus.backend = '错误'
+        this.addResult('❌ 后端状态检查失败: ' + error.message)
+      }
+      this.lastTestTime = new Date().toLocaleString()
+      this.loading = false
+    },
+
     async testBasicConnection() {
       this.loading = true
       try {
@@ -95,6 +154,15 @@ export default {
       } catch (error) {
         this.connectionStatus.basic = '失败'
         this.addResult('❌ 基础连接测试失败: ' + error.message)
+        
+        // 提供详细的错误诊断
+        if (error.message.includes('404')) {
+          this.addResult('💡 建议: 检查后端路由 /api/test 是否已配置')
+        } else if (error.message.includes('timeout')) {
+          this.addResult('💡 建议: 检查后端服务是否正在运行在端口8080')
+        } else if (error.message.includes('连接失败')) {
+          this.addResult('💡 建议: 确认后端服务已启动且端口8080可访问')
+        }
       }
       this.loading = false
     },
@@ -148,14 +216,36 @@ export default {
       this.loading = false
     },
     
+    async testAIChat() {
+      this.loading = true
+      try {
+        const testMessage = '你好，请介绍一下你自己'
+        const response = await sendAIMessage(testMessage)
+        
+        if (response.response && response.response.includes('理财小汪')) {
+          this.connectionStatus.aiChat = '成功'
+          this.addResult('✅ AI对话功能测试成功 - 理财小汪正常响应')
+        } else {
+          this.connectionStatus.aiChat = '部分成功'
+          this.addResult('⚠️ AI对话功能测试 - 有响应但格式可能异常')
+        }
+      } catch (error) {
+        this.connectionStatus.aiChat = '失败'
+        this.addResult('❌ AI对话功能测试失败: ' + error.message)
+      }
+      this.loading = false
+    },
+    
     async runAllTests() {
       this.testResults = []
       this.addResult('开始运行所有测试...')
       
+      await this.checkBackendStatus()
       await this.testBasicConnection()
       await this.testHealthEndpoint()
       await this.testPublicAPI()
       await this.testPrivateAPI()
+      await this.testAIChat()
       
       this.addResult('所有测试完成')
     },
@@ -163,11 +253,28 @@ export default {
     addResult(message) {
       const timestamp = new Date().toLocaleTimeString()
       this.testResults.push(`[${timestamp}] ${message}`)
+    },
+
+    checkNetworkStatus() {
+      // 检查网络状态
+      uni.getNetworkType({
+        success: (res) => {
+          this.networkStatus = res.networkType || '未知'
+        },
+        fail: () => {
+          this.networkStatus = '检测失败'
+        }
+      })
     }
   },
   
   onLoad() {
     this.addResult('页面加载完成，准备进行健康检查')
+    this.checkNetworkStatus()
+    // 自动运行基础连接检查
+    setTimeout(() => {
+      this.checkBackendStatus()
+    }, 1000)
   }
 }
 </script>
@@ -187,6 +294,12 @@ export default {
   font-size: 24px;
   font-weight: bold;
   color: #333;
+}
+
+.backend-url {
+  font-size: 14px;
+  color: #666;
+  margin-top: 5px;
 }
 
 .test-section {
@@ -238,6 +351,21 @@ button:disabled {
   background-color: #FFF3E0;
 }
 
+.在线 {
+  color: #4CAF50;
+  background-color: #E8F5E8;
+}
+
+.离线 {
+  color: #F44336;
+  background-color: #FFEBEE;
+}
+
+.错误 {
+  color: #FF9800;
+  background-color: #FFF3E0;
+}
+
 .results {
   margin-bottom: 30px;
 }
@@ -259,6 +387,37 @@ button:disabled {
 .result-text {
   font-size: 14px;
   color: #666;
+}
+
+.diagnostic-section {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.diagnostic-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.diagnostic-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.diagnostic-value {
+  color: #333;
 }
 
 .health-details {

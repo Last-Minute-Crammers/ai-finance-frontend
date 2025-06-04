@@ -73,16 +73,27 @@ onMounted(async () => {
 })
 
 // 获取本地存储的交易记录
-function getLocalTransactions() {
-  const transactions = uni.getStorageSync('transactions') || '[]'
-  return JSON.parse(transactions)
+function getLocalTransactions(): any[] {
+  try {
+    const transactions = uni.getStorageSync('transactions') || '[]'
+    const arr = JSON.parse(transactions)
+    return Array.isArray(arr) ? arr : []
+  } catch (error) {
+    return []
+  }
 }
 
 // 保存交易记录到本地存储
 function saveTransaction(transaction: any) {
   const transactions = getLocalTransactions()
-  transactions.push(transaction)
-  uni.setStorageSync('transactions', JSON.stringify(transactions))
+  if (Array.isArray(transactions)) {
+    transactions.push(transaction)
+    uni.setStorageSync('transactions', JSON.stringify(transactions))
+  } else {
+    // 如果数据损坏，重新创建数组
+    const newTransactions = [transaction]
+    uni.setStorageSync('transactions', JSON.stringify(newTransactions))
+  }
 }
 
 // 根据分类名称返回对应的图标
