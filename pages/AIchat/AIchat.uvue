@@ -55,42 +55,51 @@ const bottomAnchor = 'bottom-anchor'
 const scrollIntoView = ref(bottomAnchor)
 
 async function sendMessage() {
-  const content = inputText.value.trim()
-  if (!content || isLoading.value) return
-  
+  const content = inputText.value.trim();
+  if (!content || isLoading.value) return;
+
   // 添加用户消息
-  messages.value.push({ role: 'user', text: content })
-  inputText.value = ''
-  scrollToBottom()
-  
+  messages.value.push({ role: 'user', text: content });
+  inputText.value = '';
+  scrollToBottom();
+
   // 添加AI加载消息
-  const loadingMsgIndex = messages.value.length
-  messages.value.push({ role: 'ai', text: '正在思考中...', loading: true })
-  scrollToBottom()
-  
-  isLoading.value = true
-  
+  const loadingMsgIndex = messages.value.length;
+  messages.value.push({ role: 'ai', text: '正在思考中...', loading: true });
+  scrollToBottom();
+
+  isLoading.value = true;
+
   try {
-    const response = await sendAIMessage(content)
+    // 确保发送的参数符合后端预期，并解构返回值
+    const response = await sendAIMessage({ message: content });
     // 移除加载消息，添加AI回复
-    messages.value.splice(loadingMsgIndex, 1)
-    messages.value.push({ role: 'ai', text: response.response || '抱歉，我暂时无法回答这个问题。' })
+    messages.value.splice(loadingMsgIndex, 1);
+    
+    // 检查响应结构并处理成功/失败情况
+    if (response.success && response.data) {
+      messages.value.push({ role: 'ai', text: response.data });
+    } else {
+      // 处理后端返回的错误信息
+      const errorMsg = response.error || '抱歉，我暂时无法回答这个问题。';
+      messages.value.push({ role: 'ai', text: errorMsg });
+    }
   } catch (error) {
     // 移除加载消息，添加错误提示
-    messages.value.splice(loadingMsgIndex, 1)
-    messages.value.push({ 
-      role: 'ai', 
-      text: '抱歉，我暂时无法连接到AI服务。请稍后再试或联系技术支持。' 
-    })
-    console.error('AI chat error:', error)
-    
+    messages.value.splice(loadingMsgIndex, 1);
+    messages.value.push({
+      role: 'ai',
+      text: '抱歉，我暂时无法连接到AI服务。请稍后再试或联系技术支持。',
+    });
+    console.error('AI chat error:', error);
+
     uni.showToast({
       title: 'AI服务暂时不可用',
-      icon: 'none'
-    })
+      icon: 'none',
+    });
   } finally {
-    isLoading.value = false
-    scrollToBottom()
+    isLoading.value = false;
+    scrollToBottom();
   }
 }
 

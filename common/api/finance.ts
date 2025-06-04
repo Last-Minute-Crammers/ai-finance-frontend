@@ -61,14 +61,14 @@ export const userRegister = (userData: any) => {
 }
 
 // AI聊天对话
-export const sendAIMessage = (message: string) => {
-  return request({
+export const sendAIMessage = (data: { message: string }): Promise<{ success: boolean; data: string; error?: string }> => {
+  return request<{ success: boolean; data: string; error?: string }>({
     url: '/api/public/ai/chat',
     method: 'POST',
-    data: { message },
-    requireAuth: false
+    data,
+    requireAuth: false,
   });
-}
+};
 
 // 语音识别
 export const voiceRecognition = (audioFile: File) => {
