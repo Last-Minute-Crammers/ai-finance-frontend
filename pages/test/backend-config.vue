@@ -34,10 +34,25 @@
     <view class="quick-options">
       <text class="section-title">快速选择</text>
       <view class="options-grid">
-        <button @click="selectOption('http://localhost:8080')" class="option-button">本地 :8080</button>
-        <button @click="selectOption('http://localhost:3000')" class="option-button">本地 :3000</button>
-        <button @click="selectOption('http://localhost:5000')" class="option-button">本地 :5000</button>
-        <button @click="selectOption('http://192.168.1.100:8080')" class="option-button">局域网</button>
+        <button @click="selectOption('http://localhost:8080')" class="option-button primary-option">localhost:8080 (推荐)</button>
+        <button @click="selectOption('http://127.0.0.1:8080')" class="option-button">127.0.0.1:8080</button>
+        <button @click="selectOption('http://0.0.0.0:8080')" class="option-button">0.0.0.0:8080</button>
+        <button @click="selectOption(getDockerHost())" class="option-button">Docker主机</button>
+      </view>
+    </view>
+    
+    <view class="advanced-section" v-if="showAdvanced">
+      <text class="section-title">高级诊断</text>
+      <button @click="runDockerDiagnostics" class="advanced-button" :disabled="loading">
+        检查Docker配置
+      </button>
+      <view class="diagnostic-item" v-if="dockerConfig">
+        <text class="diagnostic-label">Docker容器:</text>
+        <text class="diagnostic-value">{{ dockerConfig.containerName || '未检测到' }}</text>
+      </view>
+      <view class="diagnostic-item" v-if="dockerConfig">
+        <text class="diagnostic-label">端口映射:</text>
+        <text class="diagnostic-value">{{ dockerConfig.portMapping || '未检测到' }}</text>
       </view>
     </view>
     
@@ -60,13 +75,20 @@
         <text class="tip-content">- 使用 host.docker.internal 而不是 localhost</text>
         <text class="tip-content">- 确保正确映射了容器端口</text>
       </view>
+      <view class="tip-item">
+        <text class="tip-title">连接超时</text>
+        <text class="tip-content">- Docker容器可能未正确映射端口</text>
+        <text class="tip-content">- 使用 docker ps 检查端口映射状态</text>
+        <text class="tip-content">- 尝试在前端使用 127.0.0.1 代替 localhost</text>
+        <text class="tip-content">- 检查Docker网络设置和防火墙规则</text>
+      </view>
     </view>
   </view>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue';
-import { setBackendUrl } from '../../utils/request';
+import { setBackendUrl, getAvailableBackendUrls } from '../../utils/request';
 
 export default {
   setup() {
@@ -78,15 +100,20 @@ export default {
     const connectionSuccess = ref(false);
     const logs = ref([]);
     const showAdvanced = ref(false);
+    const dockerConfig = ref(null);
+    const availableUrls = getAvailableBackendUrls();
     
     onMounted(() => {
-      // 获取当前后端URL
       currentBackendUrl.value = uni.getStorageSync('backend_url') || 'http://localhost:8080';
     });
     
     const addLog = (message) => {
       const timestamp = new Date().toLocaleTimeString();
-      logs.value.push(`[${timestamp}] ${message}`);
+      logs.value = [...logs.value, `[${timestamp}] ${message}`];
+    };
+    
+    const getDockerHost = () => {
+      return availableUrls.dockerHost || 'http://host.docker.internal:8080';
     };
     
     const testConnection = async () => {
@@ -105,32 +132,34 @@ export default {
       
       try {
         const startTime = Date.now();
-        const response = await uni.request({
+        const [err, res] = await uni.request({
           url: newBackendUrl.value + '/test',
           method: 'GET',
-          timeout: 5000
-        });
+          timeout: 5000,
+          complete: (response) => response
+        }).catch(error => [error, null]);
         
         const endTime = Date.now();
         const responseTime = endTime - startTime;
         
-        if (response.statusCode === 200) {
+        if (!err && res && res.statusCode === 200) {
           connectionStatus.value = 'success';
           statusMessage.value = `连接成功! (${responseTime}ms)`;
           connectionSuccess.value = true;
           addLog(`连接成功，响应时间: ${responseTime}ms`);
-          addLog(`服务器响应: ${JSON.stringify(response.data)}`);
-        } else {
+          addLog(`服务器响应: ${JSON.stringify(res.data)}`);
+        } else if (res) {
           connectionStatus.value = 'warning';
-          statusMessage.value = `服务器返回: ${response.statusCode}`;
-          addLog(`服务器返回非200状态码: ${response.statusCode}`);
+          statusMessage.value = `服务器返回: ${res.statusCode}`;
+          addLog(`服务器返回非200状态码: ${res.statusCode}`);
+        } else {
+          throw err || new Error('请求失败，未收到响应');
         }
       } catch (error) {
         connectionStatus.value = 'error';
-        // 安全获取错误信息
         const errMsg = typeof error === 'object' && error !== null && 'errMsg' in error 
           ? String(error.errMsg) 
-          : '未知错误';
+          : (error?.message || '未知错误');
         
         statusMessage.value = `连接失败: ${errMsg}`;
         addLog(`连接错误: ${errMsg}`);
@@ -138,7 +167,11 @@ export default {
         if (errMsg.includes('CONNECTION_REFUSED')) {
           addLog('诊断: 服务器未启动或端口不正确');
         } else if (errMsg.includes('timeout')) {
-          addLog('诊断: 连接超时，服务器可能响应缓慢或不可达');
+          addLog('诊断: 连接超时，可能的原因:');
+          addLog('1. Docker容器端口映射不正确');
+          addLog('2. 后端服务未正确监听端口');
+          addLog('3. 防火墙阻止了连接');
+          addLog('💡 建议: 运行高级诊断并尝试不同的连接地址');
         }
       } finally {
         loading.value = false;
@@ -157,7 +190,6 @@ export default {
       uni.showToast({ title: '设置已保存', icon: 'success' });
       addLog('后端地址已保存: ' + newBackendUrl.value);
       
-      // 更新状态可能需要重启应用，提示用户
       uni.showModal({
         title: '设置已保存',
         content: '后端地址已更改。建议重启应用以确保所有请求使用新地址。',
@@ -172,6 +204,59 @@ export default {
     const toggleAdvanced = () => {
       showAdvanced.value = !showAdvanced.value;
     };
+
+    const runDockerDiagnostics = async () => {
+      addLog('开始检查Docker配置...');
+      
+      try {
+        dockerConfig.value = {
+          containerName: '模拟检测 - 实际环境中无法从前端直接检测',
+          portMapping: '需要在服务器端运行 docker ps 命令检查端口映射'
+        };
+        
+        addLog('💡 请在服务器上运行以下命令检查Docker容器:');
+        addLog('docker ps | grep goAccounting');
+        addLog('docker port <container_id>');
+        
+        addLog('🔍 尝试连接到不同的地址...');
+        
+        await testConnectionTo('http://127.0.0.1:8080');
+        await testConnectionTo('http://localhost:8080');
+        await testConnectionTo(getDockerHost());
+        
+      } catch (error) {
+        addLog(`❌ 诊断过程出错: ${error.message || '未知错误'}`);
+      }
+    };
+    
+    const testConnectionTo = async (url) => {
+      addLog(`🔄 测试连接到 ${url}...`);
+      
+      try {
+        const startTime = Date.now();
+        const [err, res] = await uni.request({
+          url: `${url}/test`,
+          method: 'GET',
+          timeout: 5000,
+          complete: (response) => response
+        }).catch(error => [error, null]);
+        
+        const endTime = Date.now();
+        
+        if (!err && res && res.statusCode === 200) {
+          addLog(`✅ 连接到 ${url} 成功！响应时间: ${endTime - startTime}ms`);
+          return true;
+        } else if (res) {
+          addLog(`⚠️ 连接到 ${url} 返回非200状态码: ${res.statusCode}`);
+        } else {
+          addLog(`❌ 连接到 ${url} 失败: ${err?.errMsg || '未知错误'}`);
+        }
+      } catch (error) {
+        addLog(`❌ 连接到 ${url} 出错: ${error.message || '未知错误'}`);
+      }
+      
+      return false;
+    };
     
     return {
       currentBackendUrl,
@@ -185,7 +270,11 @@ export default {
       testConnection,
       saveConnection,
       selectOption,
-      toggleAdvanced
+      toggleAdvanced,
+      dockerConfig,
+      getDockerHost,
+      runDockerDiagnostics,
+      testConnectionTo
     };
   }
 };
@@ -358,6 +447,12 @@ export default {
   min-width: 0;
 }
 
+.primary-option {
+  border-color: #3498db;
+  background-color: #e9f5fe;
+  font-weight: bold;
+}
+
 .advanced-toggle {
   margin-bottom: 30rpx;
   text-align: center;
@@ -394,5 +489,38 @@ export default {
   display: block;
   padding-left: 20rpx;
   line-height: 1.5;
+}
+
+.advanced-section {
+  background-color: #f0f5ff;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  border-left: 4px solid #4a69ff;
+}
+
+.advanced-button {
+  width: 100%;
+  background-color: #4a69ff;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.diagnostic-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.diagnostic-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.diagnostic-value {
+  color: #333;
+  max-width: 60%;
+  word-break: break-all;
 }
 </style>

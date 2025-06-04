@@ -1,7 +1,16 @@
 // Removed unused import as '@dcloudio/types' is not a module
 
-// 更新默认URL，可能后端在不同端口上运行
-const DEFAULT_URL = 'http://host.docker.internal:8080'; // 或其他可能的端口
+// 为不同环境提供后端URL选项
+const BACKEND_URLS = {
+  local: 'http://localhost:8080',
+  dockerHost: 'http://host.docker.internal:8080',
+  ip: 'http://127.0.0.1:8080',
+  external: 'http://192.168.1.100:8080'
+};
+
+// 更新默认URL配置，正确连接本地运行的前端到Docker中的后端
+const DEFAULT_URL = BACKEND_URLS.local; // 使用localhost而不是host.docker.internal
+
 const getBackendUrl = () => {
   // Try to get from storage first (allows runtime configuration)
   const configuredUrl = uni.getStorageSync('backend_url');
@@ -43,6 +52,21 @@ export const setBackendUrl = (url: string) => {
   console.log('Backend URL set to:', url);
 };
 
+// 增强版设置后端URL函数，支持预设环境选择
+export const setBackendEnvironment = (envKey: keyof typeof BACKEND_URLS) => {
+  if (BACKEND_URLS[envKey]) {
+    const url = BACKEND_URLS[envKey];
+    setBackendUrl(url);
+    return url;
+  }
+  return null;
+};
+
+// 增加一个获取所有可能后端URL的函数
+export const getAvailableBackendUrls = () => {
+  return BACKEND_URLS;
+};
+
 // 健康检查函数
 export const healthCheck = async () => {
   try {
@@ -63,25 +87,41 @@ export const healthCheck = async () => {
 };
 
 // 检查后端连接状态 - 优化版，支持连接诊断
-export const checkBackendConnection = async () => {
+export const checkBackendConnection = async (customUrl?: string) => {
+  const targetUrl = customUrl || BASE_URL;
   try {
-    console.log('检查后端连接状态...', BASE_URL);
+    console.log('检查后端连接状态...', targetUrl);
     const startTime = Date.now();
     
-    const response = await uni.request({
-      url: BASE_URL + '/api/test',
-      method: 'GET',
-      timeout: 5000
+    // 增加超时控制，防止请求过久无响应
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('请求超时(10秒)')), 10000);
     });
     
+    // 使用Promise.race来实现超时控制
+    const [err, res] = await Promise.race([
+      uni.request({
+        url: targetUrl + '/api/test',
+        method: 'GET',
+        timeout: 10000, // 增加超时时间
+        complete: (response) => response
+      }),
+      timeoutPromise
+    ]).catch(error => [error, null]);
+    
     const endTime = Date.now();
-    console.log('后端连接检查结果:', response, `响应时间: ${endTime - startTime}ms`);
+    
+    if (err) {
+      throw err;
+    }
+    
+    console.log('后端连接检查结果:', res, `响应时间: ${endTime - startTime}ms`);
     
     return {
-      connected: response.statusCode === 200,
-      statusCode: response.statusCode,
+      connected: res.statusCode === 200,
+      statusCode: res.statusCode,
       responseTime: endTime - startTime,
-      serverInfo: response.data || {}
+      serverInfo: res.data || {}
     };
   } catch (error: any) {
     console.error('后端连接检查失败:', error);
@@ -89,15 +129,17 @@ export const checkBackendConnection = async () => {
     // 处理错误对象，确保类型安全
     const errMsg = typeof error === 'object' && error !== null && 'errMsg' in error 
       ? String(error.errMsg) 
-      : '未知错误';
+      : (error?.message || '未知错误');
 
     const isConnectionRefused = typeof errMsg === 'string' && errMsg.includes('CONNECTION_REFUSED');
+    const isTimeout = typeof errMsg === 'string' && (errMsg.includes('timeout') || errMsg.includes('超时'));
     
     // 增强的诊断信息
     const diagnostics = {
-      serverUrl: BASE_URL,
+      serverUrl: targetUrl,
       errorType: errMsg,
       isConnectionRefused: isConnectionRefused,
+      isTimeout: isTimeout,
       possibleCauses: [] as string[]
     };
     
@@ -106,6 +148,15 @@ export const checkBackendConnection = async () => {
         "后端服务器未启动",
         '端口8080可能被其他应用占用',
         '检查防火墙设置是否允许连接'
+      ];
+    }
+    else if (isTimeout) {
+      diagnostics.possibleCauses = [
+        "Docker容器端口映射不正确 - 检查docker-compose.yml",
+        "Docker网络配置问题 - 尝试使用127.0.0.1而不是localhost",
+        "防火墙阻止了连接 - 检查防火墙设置",
+        "后端服务响应过慢 - 检查服务器负载",
+        "后端服务未正确监听端口 - 检查后端日志"
       ];
     }
     
@@ -272,20 +323,31 @@ export const request = async (options: RequestOptions) => {
       console.log('Request headers:', headers);
       console.log('Request data:', data);
       
-      const response = await uni.request({
+      // 使用Promise方式处理请求
+      const [err, res] = await uni.request({
         url: fullUrl,
         method,
         data,
         header: headers,
-        timeout
-      });
+        timeout,
+        complete: (response) => response
+      }).catch(error => [error, null]);
 
-      console.log('Response status:', response.statusCode);
-      console.log('Response data:', response.data);
+      // 处理请求错误
+      if (err) {
+        throw err;
+      }
 
-      if (response.statusCode === 200) {
-        return response.data;
-      } else if (response.statusCode === 401) {
+      if (!res) {
+        throw new Error('请求失败，没有收到响应');
+      }
+
+      console.log('Response status:', res.statusCode);
+      console.log('Response data:', res.data);
+
+      if (res.statusCode === 200) {
+        return res.data;
+      } else if (res.statusCode === 401) {
         // Token 过期或无效
         uni.removeStorageSync('token');
         uni.showToast({
@@ -293,10 +355,10 @@ export const request = async (options: RequestOptions) => {
           icon: 'none'
         });
         throw new Error('Unauthorized');
-      } else if (response.statusCode === 404) {
+      } else if (res.statusCode === 404) {
         throw new Error(`API路径不存在: ${url} (检查后端路由配置)`);
       } else {
-        throw new Error(`请求失败: ${response.statusCode} - ${response.data?.error || JSON.stringify(response.data) || '未知错误'}`);
+        throw new Error(`请求失败: ${res.statusCode} - ${res.data?.error || JSON.stringify(res.data) || '未知错误'}`);
       }
     } catch (error: any) {
       const errMsg = (typeof error === 'object' && error !== null && 'message' in error)

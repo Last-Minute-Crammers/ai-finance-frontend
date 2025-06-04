@@ -86,6 +86,13 @@
 		 	{
 		 		"navigationBarTitleText" : "后端连接配置"
 		 	}
+		 },
+		 {
+		 	"path" : "pages/test/docker-help",
+		 	"style" : 
+		 	{
+		 		"navigationBarTitleText" : "Docker连接帮助"
+		 	}
 		 }
 	],
 	"globalStyle": {

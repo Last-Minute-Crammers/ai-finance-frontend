@@ -11,6 +11,9 @@ export default {
   async onLaunch() {
     console.log('App 启动');
     
+    // 设置默认后端地址为localhost:8080
+    setBackendUrl('http://localhost:8080');
+    
     // 如果需要自定义后端地址，这里可以设置
     // setBackendUrl('http://192.168.1.100:8080'); // 例如连接到局域网中的服务器
     

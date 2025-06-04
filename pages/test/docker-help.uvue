@@ -1,0 +1,246 @@
+<template>
+  <view class="container">
+    <view class="header">
+      <text class="title">Docker连接问题排查指南</text>
+    </view>
+    
+    <view class="section">
+      <text class="section-title">常见问题</text>
+      <view class="problem">
+        <text class="problem-title">1. 连接超时 (timeout)</text>
+        <text class="problem-desc">连接请求发送后没有收到响应，可能是Docker容器配置问题</text>
+        
+        <view class="solution">
+          <text class="solution-title">解决方案:</text>
+          <view class="step">
+            <text class="step-number">1</text>
+            <text class="step-desc">检查Docker容器是否正在运行</text>
+          </view>
+          <view class="code-block">
+            <text class="code">docker ps | grep goAccounting</text>
+          </view>
+          
+          <view class="step">
+            <text class="step-number">2</text>
+            <text class="step-desc">检查端口映射情况</text>
+          </view>
+          <view class="code-block">
+            <text class="code">docker port 容器ID</text>
+          </view>
+          
+          <view class="step">
+            <text class="step-number">3</text>
+            <text class="step-desc">确认后端正在监听正确的端口和地址</text>
+          </view>
+          <view class="code-block">
+            <text class="code">docker logs 容器ID | grep listen</text>
+          </view>
+          
+          <view class="step">
+            <text class="step-number">4</text>
+            <text class="step-desc">修改Docker容器的端口映射 (需要重启容器)</text>
+          </view>
+          <view class="code-block">
+            <text class="code">docker-compose down</text>
+            <text class="code">修改docker-compose.yml中的端口映射</text>
+            <text class="code">docker-compose up -d</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="problem">
+        <text class="problem-title">2. 前端与Docker网络问题</text>
+        <text class="problem-desc">本地前端访问Docker容器需要正确的网络配置</text>
+        
+        <view class="solution">
+          <text class="solution-title">尝试以下连接地址:</text>
+          <view class="connection-option primary-connection">
+            <text class="address">http://localhost:8080</text>
+            <text class="desc">【推荐】适用于大多数本地Docker容器标准端口映射</text>
+          </view>
+          <view class="connection-option">
+            <text class="address">http://127.0.0.1:8080</text>
+            <text class="desc">使用IP地址代替主机名，避免DNS解析问题</text>
+          </view>
+          <view class="connection-option">
+            <text class="address">http://host.docker.internal:8080</text>
+            <text class="desc">只适用于Docker容器内部访问宿主机，前端在本地时不适用</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <view class="section">
+      <text class="section-title">Docker网络架构</text>
+      <image src="/static/images/docker-network.png" mode="widthFix" class="diagram"></image>
+      <text class="diagram-caption">前端在本地，后端在Docker中的网络架构示意图</text>
+    </view>
+    
+    <view class="actions">
+      <button @click="goToConnectionTest" class="primary-button">返回连接测试</button>
+    </view>
+  </view>
+</template>
+
+<script>
+export default {
+  methods: {
+    goToConnectionTest() {
+      uni.navigateTo({
+        url: '/pages/test/backend-config'
+      });
+    }
+  }
+}
+</script>
+
+<style>
+.container {
+  padding: 30rpx;
+  background-color: #f5f7fa;
+}
+
+.header {
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.problem {
+  margin-bottom: 30rpx;
+}
+
+.problem-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #e74c3c;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.problem-desc {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+}
+
+.solution-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 15rpx;
+  display: block;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10rpx;
+}
+
+.step-number {
+  width: 40rpx;
+  height: 40rpx;
+  background-color: #3498db;
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40rpx;
+  margin-right: 15rpx;
+}
+
+.step-desc {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+  line-height: 40rpx;
+}
+
+.code-block {
+  background-color: #2c3e50;
+  padding: 15rpx;
+  border-radius: 8rpx;
+  margin: 10rpx 0 20rpx 55rpx;
+}
+
+.code {
+  font-family: monospace;
+  color: #ecf0f1;
+  font-size: 24rpx;
+  display: block;
+  line-height: 36rpx;
+}
+
+.connection-option {
+  margin-bottom: 15rpx;
+  background-color: #f8f9fa;
+  padding: 15rpx;
+  border-radius: 8rpx;
+}
+
+.address {
+  font-family: monospace;
+  font-weight: bold;
+  color: #16a085;
+  font-size: 26rpx;
+  margin-bottom: 5rpx;
+  display: block;
+}
+
+.desc {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.diagram {
+  width: 100%;
+  margin: 20rpx 0;
+}
+
+.diagram-caption {
+  font-size: 24rpx;
+  color: #666;
+  text-align: center;
+  display: block;
+}
+
+.actions {
+  margin-top: 30rpx;
+}
+
+.primary-button {
+  background-color: #3498db;
+  color: white;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+}
+
+.primary-connection {
+  border-left: 4px solid #3498db;
+  background-color: #e9f5fe;
+}
+</style>
