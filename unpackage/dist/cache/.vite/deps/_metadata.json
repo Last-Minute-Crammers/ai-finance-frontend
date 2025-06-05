@@ -1,15 +1,8 @@
 {
-  "hash": "b9f720e4",
+  "hash": "3a87b84a",
   "configHash": "3e1e07f8",
-  "lockfileHash": "02913359",
-  "browserHash": "6882eac4",
-  "optimized": {
-    "@qiun/ucharts": {
-      "src": "../../../../../node_modules/@qiun/ucharts/u-charts.js",
-      "file": "@qiun_ucharts.js",
-      "fileHash": "0a68b441",
-      "needsInterop": false
-    }
-  },
+  "lockfileHash": "1af6de20",
+  "browserHash": "3bc8318d",
+  "optimized": {},
   "chunks": {}
 }
