@@ -44,18 +44,22 @@
 
     <!-- 保存按钮 -->
     <view class="save-btn-wrapper">
-      <button class="save-btn" @click="submitTransaction">保存记录</button>
+      <button class="save-btn" @click="submitTransaction" :disabled="loading">
+        {{ loading ? '保存中...' : '保存记录' }}
+      </button>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { createTransaction } from '../../common/api/finance'
 
 const type = ref('支出')
 const amount = ref('')
 const selectedCategory = ref('餐饮')
 const date = ref('')
+const loading = ref(false)
 const categories = ref([
   { name: '餐饮', icon: '🍔', id: 1 },
   { name: '购物', icon: '🛒', id: 2 },
@@ -71,33 +75,6 @@ const categories = ref([
 onMounted(async () => {
   date.value = formatDate(new Date())
 })
-
-// 获取本地存储的交易记录
-function getLocalTransactions() {
-  const transactions = uni.getStorageSync('transactions') || '[]'
-  return JSON.parse(transactions)
-}
-
-// 保存交易记录到本地存储
-function saveTransaction(transaction: any) {
-  const transactions = getLocalTransactions()
-  transactions.push(transaction)
-  uni.setStorageSync('transactions', JSON.stringify(transactions))
-}
-
-// 根据分类名称返回对应的图标
-function getIconForCategory(name: string) {
-  const iconMap: { [key: string]: string } = {
-    '餐饮': '🍔',
-    '购物': '🛒',
-    '交通': '🚗',
-    '住房': '🏠',
-    '娱乐': '🎬',
-    '数码': '📱',
-    '服饰': '👗',
-  }
-  return iconMap[name] || '➕'
-}
 
 function goBack() {
   uni.navigateBack()
@@ -116,8 +93,8 @@ function formatDate(date: Date) {
 
 async function submitTransaction() {
   try {
-    console.log('开始保存交易...')
-    
+    loading.value = true
+
     // 输入验证
     if (!amount.value) {
       uni.showToast({ title: '请输入金额', icon: 'none' })
@@ -140,44 +117,30 @@ async function submitTransaction() {
 
     // 准备交易数据
     const transaction = {
-      id: Date.now(), // 使用时间戳作为唯一ID
-      amount: amountInCents,
       categoryId: selectedCategoryData.id,
-      categoryName: selectedCategoryData.name,
-      type: type.value === '支出' ? 'expense' : 'income',
+      incomeExpense: type.value === '支出' ? 'expense' : 'income',
+      amount: amountInCents,
       remark: '',
-      tradeTime: new Date().toISOString(),
-      createTime: new Date().toISOString()
+      tradeTime: new Date().toISOString()
     }
 
-    // 保存到本地存储
-    saveTransaction(transaction)
-
-    // 清空表单
-    amount.value = ''
-      // 保存前先获取现有数据
-      const existingTransactions = getLocalTransactions()
-      console.log('现有交易记录:', existingTransactions)
-      
-      // 添加新交易到现有数据
-      existingTransactions.push(transaction)
-  
-      // 保存更新后的数据到本地存储
-      uni.setStorageSync('transactions', JSON.stringify(existingTransactions))
-      console.log('保存后的所有交易:', existingTransactions)
-  
-      // 显示成功提示
+    // 只调用后端API，不再本地保存
+    const response = await createTransaction(transaction)
+    
+    if (response.code === 200) {
+      amount.value = ''
       uni.showToast({ 
         title: '记录已保存',
         icon: 'success',
         mask: true,
         duration: 1500
       })
-  
-      // 等待提示显示完毕后返回
       setTimeout(() => {
         uni.navigateBack()
       }, 1500)
+    } else {
+      throw new Error(response.message || '保存失败')
+    }
 
   } catch (error) {
     console.error('保存失败:', error)
@@ -186,6 +149,8 @@ async function submitTransaction() {
       icon: 'none',
       duration: 2000
     })
+  } finally {
+    loading.value = false
   }
 }
 </script>

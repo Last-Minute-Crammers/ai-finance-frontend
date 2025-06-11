@@ -38,11 +38,13 @@
 </template>
 
 <script>
+import { getTransactionList } from '../../common/api/finance'
+
 export default {
   data() {
     return {
-      balance: 8542.36,
-      expense: 2260.45, // 新增本月花销
+      balance: 0,
+      expense: 0,
       features: [
         { name: '记账', desc: '记录每一笔收支', icon: '/static/icons/book.png', path: '/pages/transaction/transaction' },
         { name: '财务分析', desc: '可视化您的消费', icon: '/static/icons/chart.png', path: '/pages/analyze/analyze' },
@@ -53,9 +55,121 @@ export default {
       ]
     }
   },
+  onShow() {
+    this.loadTransactionData()
+  },
+  mounted() {
+    this.loadTransactionData()
+  },
   methods: {
     goPage(path) {
       uni.navigateTo({ url: path });
+    },
+    
+    // 加载交易数据并计算余额和支出
+    async loadTransactionData() {
+      try {
+        console.log('开始加载交易数据...');
+        
+        // 检查token是否存在
+        const token = uni.getStorageSync('token');
+        if (!token) {
+          console.error('没有找到token，跳转到登录页');
+          uni.navigateTo({
+            url: '/pages/login/login'
+          });
+          return;
+        }
+        
+        // 获取交易数据
+        const res = await getTransactionList({ offset: 0, limit: 100 });
+        console.log('交易数据响应:', res);
+        
+        // 处理后端响应格式 - 匹配Go后端的返回结构
+        let transactions = [];
+        if (res && res.Data && res.Data.List) {
+          // 后端返回格式：{ Data: { List: [...], Total: number }, Msg: "success" }
+          transactions = res.Data.List;
+        } else if (res && res.data && res.data.List) {
+          // 可能的标准化格式
+          transactions = res.data.List;
+        }
+        
+        console.log('解析后的交易数据:', transactions);
+        
+        if (!transactions || transactions.length === 0) {
+          console.log('没有交易数据，显示默认值');
+          this.balance = 0;
+          this.expense = 0;
+          return;
+        }
+        
+        let totalIncome = 0;
+        let totalExpense = 0;
+        
+        // 获取当前月份的开始时间
+        const now = new Date();
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        let monthlyExpense = 0;
+        
+        transactions.forEach(transaction => {
+          // 匹配后端字段名（大写）
+          const amount = transaction.Amount || 0;
+          const amountInYuan = amount / 100; // 后端以分为单位
+          
+          const type = transaction.IncomeExpense;
+          
+          if (type === 'income') {
+            totalIncome += amountInYuan;
+          } else if (type === 'expense') {
+            totalExpense += amountInYuan;
+            
+            // 计算本月支出
+            const tradeTime = transaction.TradeTime;
+            if (tradeTime) {
+              const transactionDate = new Date(tradeTime);
+              if (transactionDate >= currentMonthStart) {
+                monthlyExpense += amountInYuan;
+              }
+            }
+          }
+        });
+        
+        this.balance = totalIncome - totalExpense;
+        this.expense = monthlyExpense;
+        
+        console.log('计算结果:', { 
+          totalIncome, 
+          totalExpense, 
+          balance: this.balance, 
+          monthlyExpense: this.expense 
+        });
+        
+      } catch (error) {
+        console.error('加载交易数据失败:', error);
+        
+        if (error.message && error.message.includes('Unauthorized')) {
+          console.log('Token过期，清除本地存储并跳转到登录页');
+          uni.removeStorageSync('token');
+          uni.removeStorageSync('current_user');
+          uni.showToast({
+            title: '登录已过期，请重新登录',
+            icon: 'none'
+          });
+          setTimeout(() => {
+            uni.navigateTo({
+              url: '/pages/login/login'
+            });
+          }, 1500);
+        } else {
+          this.balance = 0;
+          this.expense = 0;
+          uni.showToast({
+            title: '数据加载失败',
+            icon: 'none'
+          });
+        }
+      }
     }
   }
 }

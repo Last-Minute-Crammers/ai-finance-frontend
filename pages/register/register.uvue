@@ -1,32 +1,70 @@
 <template>
   <view class="register-container">
-    <view class="form-item">
-      <input type="text" v-model="username" placeholder="请输入用户名" />
+    <view class="header">
+      <text class="title">注册</text>
+      <text class="subtitle">创建新账户</text>
     </view>
-    <view class="form-item">
-      <input type="password" v-model="password" placeholder="请输入密码" />
+    
+    <view class="form">
+      <view class="form-item">
+        <input type="text" v-model="username" placeholder="请输入用户名" class="input-field" />
+      </view>
+      <view class="form-item">
+        <input type="email" v-model="email" placeholder="请输入邮箱" class="input-field" />
+      </view>
+      <view class="form-item">
+        <input type="password" v-model="password" placeholder="请输入密码" class="input-field" />
+      </view>
+      <view class="form-item">
+        <input type="password" v-model="confirmPassword" placeholder="请确认密码" class="input-field" />
+      </view>
+      <view class="form-item">
+        <input type="text" v-model="captcha" placeholder="请输入验证码(任意值)" class="input-field" />
+      </view>
+      <button class="register-btn" @click="register" :disabled="isLoading">
+        {{ isLoading ? '注册中...' : '注册' }}
+      </button>
+      <view class="login-link" @click="goToLogin">已有账号？去登录</view>
     </view>
-    <view class="form-item">
-      <input type="password" v-model="confirmPassword" placeholder="请确认密码" />
-    </view>
-    <button class="register-btn" @click="register">注册</button>
-    <view class="login-link" @click="goToLogin">已有账号？去登录</view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { userRegister } from '../../common/api/finance'
 
 const username = ref('')
+const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const captcha = ref('')
+const isLoading = ref(false)
 
 // 注册操作
 async function register() {
   // 输入验证
-  if (!username.value || !password.value || !confirmPassword.value) {
+  if (!username.value || !email.value || !password.value || !confirmPassword.value || !captcha.value) {
     uni.showToast({
       title: '请填写完整信息',
+      icon: 'none',
+    })
+    return
+  }
+
+  // 用户名验证
+  if (username.value.length < 2) {
+    uni.showToast({
+      title: '用户名至少2个字符',
+      icon: 'none',
+    })
+    return
+  }
+
+  // 邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email.value)) {
+    uni.showToast({
+      title: '请输入正确的邮箱格式',
       icon: 'none',
     })
     return
@@ -40,43 +78,58 @@ async function register() {
     return
   }
 
-  // 从本地存储获取已注册用户
-  const registeredUsers = uni.getStorageSync('registered_users') || []
-
-  // 检查用户名是否已存在
-  if (registeredUsers.some((u: any) => u.username === username.value)) {
+  if (password.value.length < 6) {
     uni.showToast({
-      title: '用户名已存在',
+      title: '密码长度至少6位',
       icon: 'none',
     })
     return
   }
 
-  // 创建新用户
-  const newUser = {
-    username: username.value,
-    password: password.value,
-    registeredAt: new Date().toISOString(),
-  }
+  isLoading.value = true
 
-  // 保存用户信息
-  registeredUsers.push(newUser)
-  uni.setStorageSync('registered_users', registeredUsers)
-
-  // 显示注册成功提示
-  uni.showToast({
-    title: '注册成功',
-    icon: 'success',
-    mask: true,
-    duration: 1500,
-  })
-
-  // 等待提示显示完毕后跳转
-  setTimeout(() => {
-    uni.navigateTo({
-      url: '/pages/login/login',
+  try {
+    console.log('开始注册:', { username: username.value, email: email.value })
+    const response = await userRegister({
+      username: username.value,
+      email: email.value,
+      password: password.value,
+      captcha: captcha.value
     })
-  }, 1500)
+    console.log('注册响应:', response)
+
+    // 检查响应格式 - 修正大小写
+    if (response && (response.Data || response.data)) {
+      const data = response.Data || response.data
+      // 保存token和用户信息
+      uni.setStorageSync('token', data.token)
+      uni.setStorageSync('current_user', data.user)
+      
+      uni.showToast({
+        title: '注册成功',
+        icon: 'success',
+        mask: true,
+        duration: 1500,
+      })
+
+      setTimeout(() => {
+        uni.navigateTo({
+          url: '/pages/index/index',
+        })
+      }, 1500)
+    } else {
+      throw new Error('注册响应格式错误')
+    }
+  } catch (error: any) {
+    console.error('注册失败:', error)
+    const errorMsg = error?.message || '注册失败，请重试'
+    uni.showToast({
+      title: errorMsg,
+      icon: 'none'
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 
 // 跳转到登录页
@@ -89,34 +142,65 @@ function goToLogin() {
 
 <style>
 .register-container {
-  padding: 20px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+.header {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 60rpx;
+  text-align: center;
+  color: white;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  margin-top: 10rpx;
+}
+
+.form {
+  padding: 30rpx;
+  background-color: white;
+  border-radius: 20rpx;
+  margin: -40rpx 20rpx 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 }
 
 .form-item {
-  margin-bottom: 20px;
+  margin-bottom: 30rpx;
 }
 
-.form-item input {
+.input-field {
   width: 100%;
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0 10px;
+  padding: 16rpx 20rpx;
+  font-size: 24rpx;
+  border-radius: 12rpx;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
 }
 
 .register-btn {
   width: 100%;
-  height: 40px;
-  background-color: #007aff;
-  color: #fff;
+  padding: 16rpx;
+  font-size: 28rpx;
+  background-color: #4e54c8;
+  color: white;
+  border-radius: 30rpx;
   border: none;
-  border-radius: 4px;
-  margin: 20px 0;
+  margin: 20rpx 0;
 }
 
 .login-link {
   text-align: center;
-  color: #007aff;
-  font-size: 14px;
+  color: #4e54c8;
+  font-size: 24rpx;
 }
 </style>

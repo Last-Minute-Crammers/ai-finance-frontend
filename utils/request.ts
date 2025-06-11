@@ -38,13 +38,15 @@ interface UniRequestError {
   [key: string]: any;
 }
 
-// 获取存储的 token
+// 获取存储的 token - 添加调试日志
+const getToken = () => {
+  const token = uni.getStorageSync('token') || '';
+  console.log('Retrieved token:', token ? `${token.substring(0, 20)}...` : 'No token found');
+  return token;
+};
+
 // Ensure uni is globally available or imported from the appropriate library
 declare const uni: any;
-
-const getToken = () => {
-  return uni.getStorageSync('token') || '';
-};
 
 // 设置后端URL
 export const setBackendUrl = (url: string) => {
@@ -320,16 +322,22 @@ export const request = async (options: RequestOptions) => {
   // 构建请求头
   const headers: Record<string, string> = {};
 
-  // 如果数据不是FormData，设置Content-Type为JSON
   if (!(data instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
 
-  // 如果需要认证，添加 Authorization header
   if (requireAuth) {
     const token = getToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      console.log('Added Authorization header:', `Bearer ${token.substring(0, 20)}...`);
+    } else {
+      console.warn('请求需要认证但未找到token');
+      uni.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      throw new Error('No authentication token found');
     }
   }
 
@@ -339,9 +347,8 @@ export const request = async (options: RequestOptions) => {
     try {
       console.log(`Making ${method} request to: ${fullUrl} (attempt ${currentRetry + 1})`);
       console.log('Request headers:', headers);
-      console.log('Request data:', data);
+      console.log('Request params:', params);
       
-      // 使用Promise包装uni.request以更好地处理错误
       const response = await new Promise((resolve, reject) => {
         uni.request({
           url: fullUrl,
@@ -362,7 +369,6 @@ export const request = async (options: RequestOptions) => {
         });
       }) as any;
 
-      // 确保响应存在并有状态码
       if (!response || typeof response.statusCode !== 'number') {
         throw new Error('无效的响应格式');
       }
@@ -373,17 +379,53 @@ export const request = async (options: RequestOptions) => {
       if (response.statusCode === 200) {
         return response.data;
       } else if (response.statusCode === 401) {
-        // Token 过期或无效
+        console.error('Authentication failed');
+        const currentToken = getToken();
+        console.log('Current token when 401 occurred:', currentToken ? `${currentToken.substring(0, 20)}...` : 'No token');
+        
         uni.removeStorageSync('token');
         uni.showToast({
-          title: '请重新登录',
+          title: '登录已过期，请重新登录',
           icon: 'none'
         });
         throw new Error('Unauthorized');
-      } else if (response.statusCode === 404) {
-        throw new Error(`API路径不存在: ${url} (检查后端路由配置)`);
+      } else if (response.statusCode === 400) {
+        console.error('客户端请求错误 (400):', response.data);
+        let errorMessage = '请求参数错误';
+        
+        if (response.data) {
+          if (typeof response.data === 'string') {
+            errorMessage = response.data;
+          } else if (response.data.Msg) {
+            errorMessage = response.data.Msg;
+          } else if (response.data.message) {
+            errorMessage = response.data.message;
+          }
+        }
+        
+        console.error('400错误详情:', {
+          url: fullUrl,
+          method,
+          headers,
+          params,
+          errorMessage
+        });
+        
+        throw new Error(`请求参数错误: ${errorMessage}`);
       } else {
-        throw new Error(`请求失败: ${response.statusCode} - ${response.data?.error || JSON.stringify(response.data) || '未知错误'}`);
+        let errorMessage = `请求失败 (${response.statusCode})`;
+        
+        if (response.data) {
+          if (typeof response.data === 'string') {
+            errorMessage += ': ' + response.data.substring(0, 100);
+          } else if (response.data.error) {
+            errorMessage += ': ' + response.data.error;
+          } else if (response.data.message) {
+            errorMessage += ': ' + response.data.message;
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
       const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
@@ -434,5 +476,19 @@ export const request = async (options: RequestOptions) => {
       }
       throw error;
     }
+  }
+};
+
+// 添加一个检查token有效性的函数
+export const validateToken = async () => {
+  try {
+    const response = await request({
+      url: '/api/user/profile',
+      method: 'GET',
+      requireAuth: true
+    });
+    return { valid: true, user: response.data };
+  } catch (error) {
+    return { valid: false, error };
   }
 };
