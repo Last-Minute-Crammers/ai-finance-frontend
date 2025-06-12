@@ -1,5 +1,11 @@
+// Standard API response format
 export interface ApiResponse<T = any> {
   code: number;
-  message: string;
-  data: T;
+  data?: T;
+  message?: string;
+  // Add possible backend variations
+  Code?: number;
+  Data?: T;
+  Msg?: string;
+  error?: string;
 }

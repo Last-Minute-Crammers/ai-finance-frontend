@@ -95,12 +95,14 @@ export const userLogin = async (email: string, password: string): Promise<ApiRes
     
     // 检查是否是网络或服务器错误
     if (error instanceof Error) {
-      if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
-        throw new Error('服务器内部错误，请稍后重试或联系管理员');
+      if (error.message.includes('500') || error.message.includes('Internal Server Error') || error.message.includes('服务器错误')) {
+        throw new Error('服务器内部错误，请检查用户账号是否存在或联系管理员');
       } else if (error.message.includes('Failed to fetch') || error.message.includes('network')) {
         throw new Error('网络连接失败，请检查网络连接');
       } else if (error.message.includes('timeout')) {
         throw new Error('请求超时，请稍后重试');
+      } else if (error.message.includes('用户不存在') || error.message.includes('record not found')) {
+        throw new Error('用户不存在，请检查邮箱地址或先注册账号');
       }
     }
     

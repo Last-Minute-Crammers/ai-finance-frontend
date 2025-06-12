@@ -396,6 +396,10 @@ export const request = async (options: RequestOptions) => {
         if (response.data) {
           if (typeof response.data === 'string') {
             errorMessage = response.data;
+            // 特殊处理EOF错误
+            if (response.data.includes('EOF')) {
+              errorMessage = '请求参数格式错误，请检查数据格式';
+            }
           } else if (response.data.Msg) {
             errorMessage = response.data.Msg;
           } else if (response.data.message) {
@@ -407,6 +411,7 @@ export const request = async (options: RequestOptions) => {
           url: fullUrl,
           method,
           headers,
+          data, // 记录实际发送的数据
           params,
           errorMessage
         });

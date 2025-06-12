@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { createTransaction } from '../../common/api/finance'
+import { createTransaction } from '../../common/api/transaction' // 修正import路径
 
 const type = ref('支出')
 const amount = ref('')
@@ -115,8 +115,14 @@ async function submitTransaction() {
 
     const amountInCents = Math.round(amountNum * 100) // 转换为分
 
-    // 准备交易数据
-    const transaction = {
+    // 准备交易数据 - 修复类型匹配问题
+    const transactionData: {
+      categoryId: number;
+      incomeExpense: 'expense' | 'income';
+      amount: number;
+      remark: string;
+      tradeTime: string;
+    } = {
       categoryId: selectedCategoryData.id,
       incomeExpense: type.value === '支出' ? 'expense' : 'income',
       amount: amountInCents,
@@ -124,10 +130,22 @@ async function submitTransaction() {
       tradeTime: new Date().toISOString()
     }
 
-    // 只调用后端API，不再本地保存
-    const response = await createTransaction(transaction)
+    console.log('发送交易数据:', transactionData);
+
+    // 调用后端API
+    const response = await createTransaction(transactionData)
     
-    if (response.code === 200) {
+    console.log('后端响应:', response);
+    
+    // 修复响应格式检查 - 使用类型安全的方式
+    const isSuccess = (
+      response.code === 200 || 
+      (response as any).Code === 200 || 
+      (response.data && !(response as any).error) || 
+      (response as any).Msg === 'success'
+    );
+    
+    if (isSuccess) {
       amount.value = ''
       uni.showToast({ 
         title: '记录已保存',
@@ -139,13 +157,25 @@ async function submitTransaction() {
         uni.navigateBack()
       }, 1500)
     } else {
-      throw new Error(response.message || '保存失败')
+      const errorMessage = (
+        response.message || 
+        (response as any).Msg || 
+        (response as any).error || 
+        '保存失败'
+      );
+      throw new Error(errorMessage);
     }
 
   } catch (error) {
     console.error('保存失败:', error)
+    
+    // 安全地处理错误信息
+    const errorMessage = (error && typeof error === 'object' && 'message' in error) 
+      ? String(error.message) 
+      : String(error);
+    
     uni.showToast({
-      title: '保存失败，请重试',
+      title: `保存失败: ${errorMessage}`,
       icon: 'none',
       duration: 2000
     })

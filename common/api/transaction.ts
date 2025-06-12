@@ -35,35 +35,19 @@ export interface TransactionListResponse {
   PageSize: number;
 }
 
-// 获取交易列表
+// 获取交易列表 - 使用POST方法支持复杂查询参数
 export const getTransactionList = (params: TransactionListParams = {}): Promise<ApiResponse<TransactionListResponse>> => {
   console.log('getTransactionList called with params:', params);
   
-  // 构建查询参数，匹配后端期望的结构
-  const queryParams: any = {};
-  
-  if (params.offset !== undefined) queryParams.offset = params.offset;
-  if (params.limit !== undefined) queryParams.limit = params.limit;
-  if (params.incomeExpense) queryParams.incomeExpense = params.incomeExpense;
-  if (params.startTime) queryParams.startTime = params.startTime;
-  if (params.endTime) queryParams.endTime = params.endTime;
-  if (params.minimumAmount) queryParams.minimumAmount = params.minimumAmount;
-  if (params.maximumAmount) queryParams.maximumAmount = params.maximumAmount;
-  if (params.categoryIds && params.categoryIds.length > 0) {
-    queryParams.categoryIds = params.categoryIds.join(',');
-  }
-  
-  console.log('Query params:', queryParams);
-  
   return request({
     url: '/api/user/transaction/list',
-    method: 'GET',
-    params: queryParams,
+    method: 'POST', // 改为POST方法
+    data: params,   // 使用data传递JSON body
     requireAuth: true
   });
 }
 
-// 创建交易记录
+// 创建交易记录 - 更新参数类型定义
 export const createTransaction = (data: {
   amount: number;
   categoryId: number;
@@ -71,6 +55,8 @@ export const createTransaction = (data: {
   remark: string;
   tradeTime?: string;
 }): Promise<ApiResponse<Transaction>> => {
+  console.log('createTransaction called with data:', data);
+  
   return request({
     url: '/api/user/transaction',
     method: 'POST',
@@ -88,15 +74,16 @@ export const getTransaction = (id: number): Promise<ApiResponse<Transaction>> =>
   });
 }
 
-// 获取月度统计
+// 获取月度统计 - 使用POST方法支持复杂查询参数
 export const getMonthStatistic = (params?: {
+  incomeExpense?: 'income' | 'expense';
   startTime?: string;
   endTime?: string;
 }): Promise<ApiResponse<any>> => {
   return request({
     url: '/api/user/transaction/statistic/month',
-    method: 'GET',
-    params,
+    method: 'POST', // 改为POST方法
+    data: params,   // 使用data传递JSON body
     requireAuth: true
   });
 }
@@ -141,6 +128,39 @@ export const getTransactionStats = (params?: {
     url: '/api/user/transaction/stats',
     method: 'GET',
     params,
+    requireAuth: true
+  });
+}
+// 获取总统计信息
+export const getTotalStatistic = (): Promise<ApiResponse<{
+  income: { amount: number; count: number };
+  expense: { amount: number; count: number };
+  total_assets: number;
+}>> => {
+  return request({
+    url: '/api/user/transaction/statistic/total',
+    method: 'GET',
+    requireAuth: true
+  });
+}
+
+// 获取月度统计信息 - 使用POST方法
+export const getMonthlyStatistic = (params?: {
+  startTime?: string;
+  endTime?: string;
+  incomeExpense?: 'income' | 'expense' | 'both';
+}): Promise<ApiResponse<{
+  List: Array<{
+    income: { amount: number; count: number };
+    expense: { amount: number; count: number };
+    StartTime: string;
+    EndTime: string;
+  }>;
+}>> => {
+  return request({
+    url: '/api/user/transaction/statistic/month',
+    method: 'POST', // 改为POST方法
+    data: params,   // 使用data传递JSON body
     requireAuth: true
   });
 }

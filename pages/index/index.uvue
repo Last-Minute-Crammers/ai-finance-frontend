@@ -13,10 +13,14 @@
       </view>
       <view class="divider" />
       <view class="summary-block">
-        <text class="balance-label">本月花销</text>
+        <text class="balance-label">本月收支</text>
         <view class="expense-row">
-          <text class="expense-icon">🔻</text>
-          <text class="balance-value expense">¥{{ expense.toFixed(2) }}</text>
+          <text class="expense-icon" :class="monthlyNet >= 0 ? 'positive' : 'negative'">
+            {{ monthlyNet >= 0 ? '🔺' : '🔻' }}
+          </text>
+          <text class="balance-value" :class="monthlyNet >= 0 ? 'income' : 'expense'">
+            ¥{{ Math.abs(monthlyNet).toFixed(2) }}
+          </text>
         </view>
       </view>
     </view>
@@ -38,13 +42,13 @@
 </template>
 
 <script>
-import { getTransactionList } from '../../common/api/finance'
+import { getTotalStatistic, getMonthStatistic } from '../../common/api/transaction'
 
 export default {
   data() {
     return {
       balance: 0,
-      expense: 0,
+      monthlyNet: 0, // 改为月度净收支
       features: [
         { name: '记账', desc: '记录每一笔收支', icon: '/static/icons/book.png', path: '/pages/transaction/transaction' },
         { name: '财务分析', desc: '可视化您的消费', icon: '/static/icons/chart.png', path: '/pages/analyze/analyze' },
@@ -56,20 +60,20 @@ export default {
     }
   },
   onShow() {
-    this.loadTransactionData()
+    this.loadStatisticData()
   },
   mounted() {
-    this.loadTransactionData()
+    this.loadStatisticData()
   },
   methods: {
     goPage(path) {
       uni.navigateTo({ url: path });
     },
     
-    // 加载交易数据并计算余额和支出
-    async loadTransactionData() {
+    // 使用后端统计接口加载数据
+    async loadStatisticData() {
       try {
-        console.log('开始加载交易数据...');
+        console.log('开始加载统计数据...');
         
         // 检查token是否存在
         const token = uni.getStorageSync('token');
@@ -81,74 +85,85 @@ export default {
           return;
         }
         
-        // 获取交易数据
-        const res = await getTransactionList({ offset: 0, limit: 100 });
-        console.log('交易数据响应:', res);
+        // 1. 获取总资产统计
+        console.log('=== 开始获取总资产统计 ===');
+        const totalRes = await getTotalStatistic();
+        console.log('总统计原始响应:', JSON.stringify(totalRes, null, 2));
         
-        // 处理后端响应格式 - 匹配Go后端的返回结构
-        let transactions = [];
-        if (res && res.Data && res.Data.List) {
-          // 后端返回格式：{ Data: { List: [...], Total: number }, Msg: "success" }
-          transactions = res.Data.List;
-        } else if (res && res.data && res.data.List) {
-          // 可能的标准化格式
-          transactions = res.data.List;
+        if (totalRes && totalRes.data) {
+          console.log('总统计数据解析:');
+          console.log('- total_assets:', totalRes.data.total_assets);
+          console.log('- income:', totalRes.data.income);
+          console.log('- expense:', totalRes.data.expense);
+          
+          // 总资产就是收入减去支出，后端已经计算好了
+          this.balance = totalRes.data.total_assets / 100; // 转换为元
+          console.log('设置余额为:', this.balance);
+        } else {
+          console.error('总统计响应数据为空或格式错误');
         }
         
-        console.log('解析后的交易数据:', transactions);
-        
-        if (!transactions || transactions.length === 0) {
-          console.log('没有交易数据，显示默认值');
-          this.balance = 0;
-          this.expense = 0;
-          return;
-        }
-        
-        let totalIncome = 0;
-        let totalExpense = 0;
-        
-        // 获取当前月份的开始时间
+        // 2. 获取本月统计
+        console.log('=== 开始获取本月统计 ===');
         const now = new Date();
-        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        let monthlyExpense = 0;
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
         
-        transactions.forEach(transaction => {
-          // 匹配后端字段名（大写）
-          const amount = transaction.Amount || 0;
-          const amountInYuan = amount / 100; // 后端以分为单位
-          
-          const type = transaction.IncomeExpense;
-          
-          if (type === 'income') {
-            totalIncome += amountInYuan;
-          } else if (type === 'expense') {
-            totalExpense += amountInYuan;
+        console.log('查询时间范围:', {
+          start: monthStart.toISOString(),
+          end: monthEnd.toISOString()
+        });
+        
+        const monthlyRes = await getMonthStatistic({
+          startTime: monthStart.toISOString(),
+          endTime: monthEnd.toISOString()
+          // 不指定incomeExpense，获取收入和支出
+        });
+        
+        console.log('月度统计原始响应:', JSON.stringify(monthlyRes, null, 2));
+        
+        // 修正数据解析逻辑 - 匹配后端返回格式
+        if (monthlyRes && monthlyRes.data) {
+          if (monthlyRes.data.List && Array.isArray(monthlyRes.data.List)) {
+            console.log('月度统计List长度:', monthlyRes.data.List.length);
             
-            // 计算本月支出
-            const tradeTime = transaction.TradeTime;
-            if (tradeTime) {
-              const transactionDate = new Date(tradeTime);
-              if (transactionDate >= currentMonthStart) {
-                monthlyExpense += amountInYuan;
+            if (monthlyRes.data.List.length > 0) {
+              const monthData = monthlyRes.data.List[0];
+              console.log('第一个月数据:', JSON.stringify(monthData, null, 2));
+              
+              if (monthData) {
+                const monthIncome = (monthData.income?.amount || 0) / 100; // 转换为元
+                const monthExpense = (monthData.expense?.amount || 0) / 100; // 转换为元
+                this.monthlyNet = monthIncome - monthExpense; // 计算净收支
+                
+                console.log('月度收支计算:');
+                console.log('- 收入:', monthIncome);
+                console.log('- 支出:', monthExpense);
+                console.log('- 净收支:', this.monthlyNet);
               }
+            } else {
+              console.log('月度统计List为空');
             }
+          } else {
+            console.error('月度统计响应格式错误，缺少List字段或List不是数组');
           }
-        });
+        } else {
+          console.error('月度统计响应数据为空');
+        }
         
-        this.balance = totalIncome - totalExpense;
-        this.expense = monthlyExpense;
-        
-        console.log('计算结果:', { 
-          totalIncome, 
-          totalExpense, 
-          balance: this.balance, 
-          monthlyExpense: this.expense 
-        });
+        console.log('=== 最终统计结果 ===');
+        console.log('余额:', this.balance); 
+        console.log('月度净收支:', this.monthlyNet);
         
       } catch (error) {
-        console.error('加载交易数据失败:', error);
+        console.error('加载统计数据失败:', error);
         
-        if (error.message && error.message.includes('Unauthorized')) {
+        // 修复TypeScript类型错误 - 安全地检查error对象
+        const errorMessage = (error && typeof error === 'object' && 'message' in error) 
+          ? String(error.message) 
+          : String(error);
+        
+        if (errorMessage.includes('Unauthorized')) {
           console.log('Token过期，清除本地存储并跳转到登录页');
           uni.removeStorageSync('token');
           uni.removeStorageSync('current_user');
@@ -163,7 +178,7 @@ export default {
           }, 1500);
         } else {
           this.balance = 0;
-          this.expense = 0;
+          this.monthlyNet = 0;
           uni.showToast({
             title: '数据加载失败',
             icon: 'none'
@@ -229,6 +244,9 @@ export default {
 .balance-value.expense {
   color: #ff3b30;
 }
+.balance-value.income {
+  color: #34c759; /* 绿色表示正收支 */
+}
 .expense-row {
   display: flex;
   align-items: center;
@@ -237,8 +255,13 @@ export default {
 }
 .expense-icon {
   font-size: 30rpx;
-  color: #ff3b30;
   margin-right: 6rpx;
+}
+.expense-icon.positive {
+  color: #34c759; /* 绿色向上箭头 */
+}
+.expense-icon.negative {
+  color: #ff3b30; /* 红色向下箭头 */
 }
 .divider {
   width: 60%;
