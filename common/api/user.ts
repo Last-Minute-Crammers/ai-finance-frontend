@@ -134,3 +134,141 @@ export const userLogout = () => {
   uni.removeStorageSync('token');
   console.log('User logged out, token cleared');
 }
+
+// ========== 新增社交互动相关API ==========
+
+// 获取好友消费分布
+export const getFriendConsumption = (friendId: number): Promise<ApiResponse<{
+  category: string;
+  percentage: number;
+}[]>> => {
+  return request({
+    url: `/api/user/friend/${friendId}/consumption`,
+    method: 'GET',
+    requireAuth: true
+  });
+}
+
+// 获取好友PK排行榜
+export const getFriendRanking = (): Promise<ApiResponse<{
+  username: string;
+  savings: number;
+  rank: number;
+}[]>> => {
+  return request({
+    url: '/api/user/friend/ranking',
+    method: 'GET',
+    requireAuth: true
+  });
+}
+
+// 给好友发表评论/吐槽
+export const postFriendComment = (friendId: number, content: string): Promise<ApiResponse<null>> => {
+  return request({
+    url: `/api/user/friend/${friendId}/comment`,
+    method: 'POST',
+    data: { content },
+    requireAuth: true
+  });
+}
+
+// 获取好友评论列表
+export const getFriendComments = (friendId: number): Promise<ApiResponse<{
+  content: string;
+  author: string;
+  createTime?: string;
+}[]>> => {
+  return request({
+    url: `/api/user/friend/${friendId}/comments`,
+    method: 'GET',
+    requireAuth: true
+  });
+}
+
+// 设置存钱目标
+export const setSavingsGoal = (data: {
+  target: number;
+  deadline?: string;
+  description?: string;
+}): Promise<ApiResponse<null>> => {
+  return request({
+    url: '/api/user/savings/goal',
+    method: 'POST',
+    data,
+    requireAuth: true
+  });
+}
+
+// 获取当前存钱目标
+export const getSavingsGoal = (): Promise<ApiResponse<{
+  target: number;
+  current: number;
+  progress: number;
+  deadline?: string;
+  description?: string;
+}>> => {
+  return request({
+    url: '/api/user/savings/goal',
+    method: 'GET',
+    requireAuth: true
+  });
+}
+
+// 获取好友邀请列表
+export const getFriendInvitations = (): Promise<ApiResponse<{
+  id: number;
+  fromUser: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createTime: string;
+}[]>> => {
+  return request({
+    url: '/api/user/friend/invitation',
+    method: 'GET',
+    requireAuth: true
+  });
+}
+
+// 发送好友邀请
+export const sendFriendInvitation = (data: {
+  email?: string;
+  username?: string;
+}): Promise<ApiResponse<null>> => {
+  return request({
+    url: '/api/user/friend/invitation',
+    method: 'POST',
+    data,
+    requireAuth: true
+  });
+}
+
+// 接受好友邀请
+export const acceptFriendInvitation = (invitationId: number): Promise<ApiResponse<null>> => {
+  return request({
+    url: `/api/user/friend/invitation/${invitationId}/accept`,
+    method: 'PUT',
+    requireAuth: true
+  });
+}
+
+// 拒绝好友邀请
+export const refuseFriendInvitation = (invitationId: number): Promise<ApiResponse<null>> => {
+  return request({
+    url: `/api/user/friend/invitation/${invitationId}/refuse`,
+    method: 'PUT',
+    requireAuth: true
+  });
+}
+
+// 获取好友列表
+export const getFriendList = (): Promise<ApiResponse<{
+  id: number;
+  username: string;
+  email: string;
+  status: 'online' | 'offline';
+}[]>> => {
+  return request({
+    url: '/api/user/friend/list',
+    method: 'GET',
+    requireAuth: true
+  });
+}
