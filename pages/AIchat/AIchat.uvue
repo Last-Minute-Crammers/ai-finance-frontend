@@ -4,6 +4,7 @@
     <view class="chat-header">
       <text class="chat-title">AI 理财助手</text>
       <text class="chat-subtitle">您的智能理财小伙伴</text>
+      <button class="history-btn" @tap="openDrawer">历史</button>
     </view>
 
     <!-- 聊天气泡区域 -->
@@ -23,17 +24,42 @@
       <input class="input-box" v-model="inputText" placeholder="请输入内容..." @confirm="sendMessage" />
       <button class="send-button" @tap="sendMessage">发送</button>
     </view>
+
+    <!-- 侧栏抽屉 -->
+    <view v-if="showDrawer" class="drawer-mask" @tap="closeDrawer"></view>
+    <view v-if="showDrawer" class="drawer">
+      <view class="drawer-header">
+        <text>历史会话</text>
+        <button class="drawer-close" @tap="closeDrawer">关闭</button>
+      </view>
+      <view class="drawer-body">
+        <view v-if="historyLoading" class="drawer-loading">加载中...</view>
+        <view v-else-if="chatHistory.length === 0" class="drawer-empty">暂无历史</view>
+        <view v-else>
+          <view v-for="item in chatHistory" :key="item.sessionId" class="drawer-item" @tap="loadSession(item.sessionId)">
+            <text class="drawer-title">{{ item.firstQuestion }}</text>
+            <text class="drawer-date">{{ item.createdAt }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
-import { sendAIMessage } from '../../common/api/finance'
+import { sendAIMessage, getAIChatHistory, getAIChatSessionDetail } from '../../common/api/ai'
 
 interface ChatMessage {
   role: 'ai' | 'user';
   text: string;
   loading?: boolean;
+}
+
+interface ChatSessionPreview {
+  sessionId: string;
+  firstQuestion: string;
+  createdAt: string;
 }
 
 const aiAvatar = '/static/icons/pet.png'
@@ -47,50 +73,96 @@ const messages = ref<ChatMessage[]>([
 const bottomAnchor = 'bottom-anchor'
 const scrollIntoView = ref(bottomAnchor)
 
+// 侧栏相关
+const showDrawer = ref(false)
+const historyLoading = ref(false)
+const chatHistory = ref<ChatSessionPreview[]>([])
+const currentSessionId = ref<string | null>(null)
+
+function openDrawer() {
+  showDrawer.value = true
+  loadHistory()
+}
+function closeDrawer() {
+  showDrawer.value = false
+}
+
+async function loadHistory() {
+  historyLoading.value = true
+  try {
+    const res = await getAIChatHistory()
+    if (res.success && Array.isArray(res.data)) {
+      chatHistory.value = res.data
+    } else {
+      chatHistory.value = []
+    }
+  } catch (e) {
+    chatHistory.value = []
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+// 加载某个会话的全部消息
+async function loadSession(sessionId: string) {
+  closeDrawer()
+  currentSessionId.value = sessionId
+  try {
+    const res = await getAIChatSessionDetail(sessionId)
+    if (res.success && Array.isArray(res.data)) {
+      // 按createdAt升序排序，保证历史顺序
+      const sorted = res.data.slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      messages.value = sorted.flatMap((item: any) => {
+        const arr = []
+        if (item.input) {
+          arr.push({ role: 'user', text: item.input })
+        }
+        if (item.response && item.response.trim() !== '') {
+          arr.push({ role: 'ai', text: item.response })
+        }
+        return arr
+      })
+      scrollToBottom()
+    }
+  } catch (e) {
+    // 错误处理
+  }
+}
+
 async function sendMessage() {
   const content = inputText.value.trim()
   if (!content || isLoading.value) return
-  
-  // 添加用户消息
   messages.value.push({ role: 'user', text: content })
   inputText.value = ''
   scrollToBottom()
-  
-  // 添加AI加载消息
   const loadingMsgIndex = messages.value.length
   messages.value.push({ role: 'ai', text: '正在思考中...', loading: true })
   scrollToBottom()
-  
   isLoading.value = true
-  
   try {
-    const response = await sendAIMessage(content)
-    console.log('AI response received:', response) // 添加调试日志
-    
-    // 移除加载消息，添加AI回复
+    const response = await sendAIMessage(content, currentSessionId.value || undefined)
     messages.value.splice(loadingMsgIndex, 1)
-    
-    // 修复：使用正确的属性名访问响应数据
     if (response.success && response.data) {
       messages.value.push({ role: 'ai', text: response.data })
+      // 若当前无sessionId，需刷新历史并查找最新sessionId
+      if (!currentSessionId.value) {
+        await loadHistory()
+        if (chatHistory.value.length > 0) {
+          // 找到最新会话（假设最新在最前）
+          currentSessionId.value = chatHistory.value[0].sessionId
+        }
+      }
     } else {
-      // 处理后端返回错误的情况
       const errorMsg = response.error || '抱歉，我暂时无法回答这个问题。'
       messages.value.push({ role: 'ai', text: errorMsg })
     }
   } catch (error) {
-    // 移除加载消息，添加错误提示
     messages.value.splice(loadingMsgIndex, 1)
     messages.value.push({ 
       role: 'ai', 
       text: '抱歉，我暂时无法连接到AI服务。请稍后再试或联系技术支持。' 
     })
-    console.error('AI chat error:', error)
-    
-    uni.showToast({
-      title: 'AI服务暂时不可用',
-      icon: 'none'
-    })
+    uni.showToast({ title: 'AI服务暂时不可用', icon: 'none' })
   } finally {
     isLoading.value = false
     scrollToBottom()
@@ -195,5 +267,77 @@ function scrollToBottom() {
 }
 .scroll-anchor {
   height: 1rpx;
+}
+
+.history-btn {
+  position: absolute;
+  right: 32rpx;
+  top: 40rpx;
+  background: #fff;
+  color: #4e54c8;
+  border-radius: 20rpx;
+  padding: 8rpx 24rpx;
+  font-size: 24rpx;
+  border: 1rpx solid #4e54c8;
+}
+.drawer-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.2);
+  z-index: 99;
+}
+.drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 70vw;
+  max-width: 500rpx;
+  background: #fff;
+  z-index: 100;
+  box-shadow: -4rpx 0 16rpx rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+}
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 24rpx 16rpx;
+  border-bottom: 1rpx solid #eee;
+  font-size: 30rpx;
+  font-weight: bold;
+}
+.drawer-close {
+  background: #f5f7fa;
+  color: #888;
+  border-radius: 16rpx;
+  padding: 4rpx 16rpx;
+  font-size: 24rpx;
+  border: none;
+}
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24rpx;
+}
+.drawer-item {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  cursor: pointer;
+}
+.drawer-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+.drawer-date {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-left: 12rpx;
+}
+.drawer-loading, .drawer-empty {
+  color: #888;
+  text-align: center;
+  margin-top: 40rpx;
+  font-size: 26rpx;
 }
 </style>
