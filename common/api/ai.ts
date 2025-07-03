@@ -3,10 +3,10 @@ import { request } from '../../utils/request'
 // AI聊天对话
 export const sendAIMessage = (message: string) => {
   return request({
-    url: '/api/public/ai/chat',
+    url: '/api/user/ai/chat',
     method: 'POST',
     data: { message },
-    requireAuth: false
+    requireAuth: true
   });
 }
 
