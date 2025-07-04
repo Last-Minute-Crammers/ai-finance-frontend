@@ -34,40 +34,161 @@
       </view>
     </view>
 
-    <!-- AI 建议区块 -->
+    <!-- AI 总结与建议区块 -->
     <view class="card ai-card">
-      <text class="section-title">AI理财建议</text>
-
-      <view class="suggestion">
-        <text class="bulb">💡</text>
-        <view class="content">
-          <text class="main">减少外卖开支</text>
-          <text class="desc">您本月外卖支出 ¥1,245，占总支出 30%。尝试每周减少两次外卖，每月可节约约 ¥500。</text>
-        </view>
-      </view>
-
-      <view class="suggestion">
-        <text class="bulb">💡</text>
-        <view class="content">
-          <text class="main">尝试52周存钱法</text>
-          <text class="desc">从第1周存 ¥10 开始，每周递增 ¥10，一年可存下 ¥13,780。</text>
-        </view>
-      </view>
-
+      <text class="section-title">AI收支总结</text>
+      <view class="summary">{{ summary }}</view>
+      <text class="section-title" style="margin-top: 24rpx;">AI理财建议</text>
+      <view class="suggestion">{{ suggestion }}</view>
       <view class="tag-row">
-        <view class="tag">佛系消费派</view>
-        <view class="tag">储蓄达人</view>
-        <view class="tag">餐饮优化空间</view>
+        <view class="tag" v-for="tag in tags" :key="tag">{{ tag }}</view>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { getAIReport } from '@/common/api/report'
+import { getMonthStatistic, getMonthlyStatistic } from '@/common/api/transaction'
+// 新增：获取类别统计数据和单日/单周统计数据的API（假设已实现）
+import { getCategoryStatistic, getDailyStatistic, getWeeklyStatistic } from '@/common/api/transaction'
 
 const tabs = ['周报', '月报', '年报']
 const activeTab = ref('月报')
+
+const summary = ref('')
+const suggestion = ref('')
+const tags = ref<string[]>([])
+
+// 统计数据对象
+const yourStatsData = ref({})
+
+// 获取近一周、近一月、近一年时间范围
+function getTimeRange(type: 'week' | 'month' | 'year') {
+  const now = new Date()
+  let start: Date
+  if (type === 'week') {
+    start = new Date(now)
+    start.setDate(now.getDate() - 6)
+  } else if (type === 'month') {
+    start = new Date(now)
+    start.setMonth(now.getMonth() - 1)
+  } else {
+    start = new Date(now)
+    start.setFullYear(now.getFullYear() - 1)
+  }
+  // 统一为 ISO 字符串
+  return {
+    startTime: start.toISOString(),
+    endTime: now.toISOString()
+  }
+}
+
+// 获取统计数据
+async function fetchStats(type: 'week' | 'month' | 'year') {
+  const { startTime, endTime } = getTimeRange(type)
+  // 转为 Date 对象，后端才能正确解析
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+  let res
+  if (type === 'week') {
+    res = await getMonthStatistic({ startTime: start, endTime: end })
+  } else if (type === 'month') {
+    res = await getMonthStatistic({ startTime: start, endTime: end })
+  } else {
+    res = await getMonthlyStatistic({ startTime: start, endTime: end })
+  }
+  yourStatsData.value = res.data
+  return res.data // 新增返回数据
+}
+
+async function fetchAIReport() {
+  const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
+  // 1. 获取主统计数据
+  const statsArr = await fetchStats(type)
+  let promptStats: any = {}
+  let categoryStats: any = {}
+  let extraStats: any = {}
+
+  // 统一时间范围
+  const now = new Date();
+  let start: Date, end: Date;
+  if (type === 'week') {
+    start = new Date(now);
+    start.setDate(now.getDate() - 6);
+    end = now;
+  } else if (type === 'month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  } else {
+    start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+    end = now;
+  }
+  const startTime = start.toISOString();
+  const endTime = end.toISOString();
+
+  if (type === 'week') {
+    const weekStats = Array.isArray(statsArr) ? statsArr[statsArr.length - 1] : statsArr
+    promptStats = weekStats?.IEStatistic || {}
+    // 获取最近一周的类别统计
+    const categoryRes = await getCategoryStatistic({
+      startTime,
+      endTime,
+      incomeExpense: 'expense', // 或 'income'，如需两类可分别请求
+      limit: 10
+    })
+    categoryStats = categoryRes?.data?.List || []
+    // 获取最近一周的单日统计
+    const dailyRes = await getDailyStatistic({
+      startTime,
+      endTime,
+      incomeExpense: 'expense'
+    })
+    extraStats = dailyRes?.data?.List || []
+  } else if (type === 'month') {
+    const monthStats = Array.isArray(statsArr) ? statsArr[statsArr.length - 1] : statsArr
+    promptStats = monthStats?.IEStatistic || {}
+    const categoryRes = await getCategoryStatistic({
+      startTime,
+      endTime,
+      incomeExpense: 'expense',
+      limit: 10
+    })
+    categoryStats = categoryRes?.data?.List || []
+    const weeklyRes = await getWeeklyStatistic({
+      startTime,
+      endTime,
+      incomeExpense: 'expense'
+    })
+    extraStats = weeklyRes?.data?.List || []
+  } else {
+    promptStats = statsArr
+    const categoryRes = await getCategoryStatistic({
+      startTime,
+      endTime,
+      incomeExpense: 'expense',
+      limit: 10
+    })
+    categoryStats = categoryRes?.data?.List || []
+    // 年报不需要额外的extraStats
+  }
+
+  // 组装prompt参数
+  const aiPrompt = {
+    type,
+    stats: promptStats,
+    categoryStats,
+    extraStats
+  }
+
+  const res = await getAIReport(aiPrompt)
+  summary.value = res.summary
+  suggestion.value = res.suggestion
+  tags.value = res.tags
+}
+
+watch(activeTab, fetchAIReport, { immediate: true })
 
 const reportData = [
   { label: '总收入', value: '¥8,500', trend: '↑5% 较上月', trendType: 'green' },
