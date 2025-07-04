@@ -129,17 +129,22 @@ async function fetchAIReport() {
   const endTime = end.toISOString();
 
   if (type === 'week') {
-    const weekStats = Array.isArray(statsArr) ? statsArr[statsArr.length - 1] : statsArr
-    promptStats = weekStats?.IEStatistic || {}
-    // 获取最近一周的类别统计
+    let weekList = Array.isArray(statsArr?.List) ? statsArr.List : []
+    weekList = weekList.filter(item =>
+      Number(item.income?.amount || item.Income?.Amount || 0) !== 0 ||
+      Number(item.expense?.amount || item.Expense?.Amount || 0) !== 0
+    )
+    if (weekList.length === 0 && Array.isArray(statsArr?.List)) {
+      weekList = statsArr.List
+    }
+    promptStats = { list: weekList }
     const categoryRes = await getCategoryStatistic({
       startTime,
       endTime,
-      incomeExpense: 'expense', // 或 'income'，如需两类可分别请求
+      incomeExpense: 'expense',
       limit: 10
     })
     categoryStats = categoryRes?.data?.List || []
-    // 获取最近一周的单日统计
     const dailyRes = await getDailyStatistic({
       startTime,
       endTime,
@@ -147,8 +152,15 @@ async function fetchAIReport() {
     })
     extraStats = dailyRes?.data?.List || []
   } else if (type === 'month') {
-    const monthStats = Array.isArray(statsArr) ? statsArr[statsArr.length - 1] : statsArr
-    promptStats = monthStats?.IEStatistic || {}
+    let monthList = Array.isArray(statsArr?.List) ? statsArr.List : []
+    monthList = monthList.filter(item =>
+      Number(item.income?.amount || item.Income?.Amount || 0) !== 0 ||
+      Number(item.expense?.amount || item.Expense?.Amount || 0) !== 0
+    )
+    if (monthList.length === 0 && Array.isArray(statsArr?.List)) {
+      monthList = statsArr.List
+    }
+    promptStats = { list: monthList }
     const categoryRes = await getCategoryStatistic({
       startTime,
       endTime,
@@ -163,7 +175,15 @@ async function fetchAIReport() {
     })
     extraStats = weeklyRes?.data?.List || []
   } else {
-    promptStats = statsArr
+    let yearList = Array.isArray(statsArr?.List) ? statsArr.List : []
+    yearList = yearList.filter(item =>
+      Number(item.income?.amount || item.Income?.Amount || 0) !== 0 ||
+      Number(item.expense?.amount || item.Expense?.Amount || 0) !== 0
+    )
+    if (yearList.length === 0 && Array.isArray(statsArr?.List)) {
+      yearList = statsArr.List
+    }
+    promptStats = { list: yearList }
     const categoryRes = await getCategoryStatistic({
       startTime,
       endTime,
