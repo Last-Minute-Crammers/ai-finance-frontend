@@ -4,8 +4,18 @@ export function getAIReport(data: {
   type: 'week' | 'month' | 'year',
   stats: any
 }) {
+  // 如果stats为空，则使用正确的时间范围
+  if (!data.stats || Object.keys(data.stats).length === 0) {
+    const { startTime, endTime } = getTimeRange(data.type)
+    data.stats = {
+      start_time: startTime,
+      end_time: endTime,
+      type: data.type
+    }
+  }
+  
   return request({
-    url: '/api/report/ai',
+    url: '/api/user/report/ai',
     method: 'POST',
     data,
     requireAuth: true
@@ -60,8 +70,8 @@ function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, end
     case 'week':
       // 获取本周开始（周一）
       const day = now.getDay()
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1)
-      startTime = new Date(now.setDate(diff))
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1) // 如果是周日，则减6天；否则减(day-1)天
+      startTime = new Date(now.getFullYear(), now.getMonth(), diff)
       break
     case 'month':
       // 获取本月开始

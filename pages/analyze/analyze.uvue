@@ -1,222 +1,692 @@
 <template>
-  <view class="charts-box">
-    <qiun-data-charts 
-      type="column"
-      :opts="opts"
-      :chartData="chartData"
-    />
-  </view>
-  <view class="charts-box">
-    <qiun-data-charts 
-      type="pie"
-      :opts="pieOpts"
-      :chartData="pieChartData"
-    />
+  <view class="container">
+    <!-- 顶部标题栏 -->
+    <view class="header">
+      <text class="back" @click="goBack">←</text>
+      <text class="title">财务分析</text>
+      <text class="subtitle">深度分析您的财务状况</text>
+    </view>
+
+    <!-- 时间选择器 -->
+    <view class="time-selector">
+      <view class="tabs">
+        <view
+          v-for="tab in timeTabs"
+          :key="tab.value"
+          :class="['tab', activeTimeTab === tab.value ? 'active' : '']"
+          @click="switchTimeTab(tab.value)"
+        >
+          {{ tab.label }}
+        </view>
+      </view>
+    </view>
+
+    <!-- 总览卡片 -->
+    <view class="overview-card">
+      <view class="overview-header">
+        <text class="overview-title">财务总览</text>
+        <text class="overview-period">{{ getPeriodText() }}</text>
+      </view>
+      <view class="overview-grid">
+        <view class="overview-item">
+          <text class="overview-label">总收入</text>
+          <text class="overview-value income">¥{{ formatAmount(totalStats.income) }}</text>
+          <text class="overview-count">{{ totalStats.incomeCount }}笔</text>
+        </view>
+        <view class="overview-item">
+          <text class="overview-label">总支出</text>
+          <text class="overview-value expense">¥{{ formatAmount(totalStats.expense) }}</text>
+          <text class="overview-count">{{ totalStats.expenseCount }}笔</text>
+        </view>
+        <view class="overview-item">
+          <text class="overview-label">净收入</text>
+          <text :class="['overview-value', totalStats.netIncome >= 0 ? 'income' : 'expense']">
+            ¥{{ formatAmount(totalStats.netIncome) }}
+          </text>
+          <text class="overview-count">{{ totalStats.savingsRate }}%</text>
+        </view>
+        <view class="overview-item">
+          <text class="overview-label">总资产</text>
+          <text :class="['overview-value', totalStats.totalAssets >= 0 ? 'income' : 'expense']">
+            ¥{{ formatAmount(totalStats.totalAssets) }}
+          </text>
+          <text class="overview-count">累计</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 收支趋势图 -->
+    <view class="chart-card">
+      <view class="chart-header">
+        <text class="chart-title">收支趋势</text>
+        <text class="chart-subtitle">{{ getPeriodText() }}收支变化</text>
+      </view>
+      <view class="chart-container">
+        <qiun-data-charts 
+          type="column"
+          :opts="columnOpts"
+          :chartData="trendChartData"
+        />
+      </view>
+    </view>
+
+    <!-- 支出分类饼图 -->
+    <view class="chart-card">
+      <view class="chart-header">
+        <text class="chart-title">支出分类</text>
+        <text class="chart-subtitle">按分类统计支出</text>
+      </view>
+      <view class="chart-container">
+        <qiun-data-charts 
+          type="pie"
+          :opts="pieOpts"
+          :chartData="categoryChartData"
+        />
+      </view>
+    </view>
+
+    <!-- 分类排行榜 -->
+    <view class="ranking-card">
+      <view class="ranking-header">
+        <text class="ranking-title">支出排行榜</text>
+        <view class="ranking-tabs">
+          <view
+            v-for="tab in rankingTabs"
+            :key="tab.value"
+            :class="['ranking-tab', activeRankingTab === tab.value ? 'active' : '']"
+            @click="switchRankingTab(tab.value)"
+          >
+            {{ tab.label }}
+          </view>
+        </view>
+      </view>
+      <view class="ranking-list">
+        <view 
+          v-for="(item, index) in rankingList" 
+          :key="item.id"
+          class="ranking-item"
+        >
+          <view class="ranking-rank">{{ index + 1 }}</view>
+          <view class="ranking-info">
+            <text class="ranking-name">{{ item.categoryName }}</text>
+            <text class="ranking-count">{{ item.count }}笔交易</text>
+          </view>
+          <text class="ranking-amount">¥{{ formatAmount(item.amount) }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view v-if="isLoading" class="loading-overlay">
+      <text class="loading-text">加载中...</text>
+    </view>
   </view>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      chartData: {},
-      //这里的 opts 是图表类型 type="column" 的全部配置参数，您可以将此配置复制到 config-ucharts.js 文件中下标为 ['column'] 的节点中来覆盖全局默认参数。实际应用过程中 opts 只需传入与全局默认参数中不一致的【某一个属性】即可实现同类型的图表显示不同的样式，达到页面简洁的需求。
-      opts: {
-        timing: "easeOut",
-        duration: 1000,
-        rotate: false,
-        rotateLock: false,
-        color: ["#1890FF","#91CB74","#FAC858","#EE6666","#73C0DE","#3CA272","#FC8452","#9A60B4","#ea7ccc"],
-        padding: [13,10,20,5],
-        fontSize: 13,
-        fontColor: "#666666",
-        dataLabel: true,
-        dataPointShape: true,
-        dataPointShapeType: "solid",
-        touchMoveLimit: 60,
-        enableScroll: false,
-        enableMarkLine: false,
-        legend: {
-          show: true,
-          position: "bottom",
-          float: "center",
-          padding: 5,
-          margin: 5,
-          backgroundColor: "rgba(0,0,0,0)",
-          borderColor: "rgba(0,0,0,0)",
-          borderWidth: 0,
-          fontSize: 13,
-          fontColor: "#666666",
-          lineHeight: 11,
-          hiddenColor: "#CECECE",
-          itemGap: 10
-        },
-        xAxis: {
-          disableGrid: true,
-          disabled: false,
-          axisLine: true,
-          axisLineColor: "#CCCCCC",
-          calibration: false,
-          fontColor: "#666666",
-          fontSize: 13,
-          lineHeight: 20,
-          marginTop: 0,
-          rotateLabel: false,
-          rotateAngle: 45,
-          itemCount: 5,
-          boundaryGap: "center",
-          splitNumber: 5,
-          gridColor: "#CCCCCC",
-          gridType: "solid",
-          dashLength: 4,
-          gridEval: 1,
-          scrollShow: false,
-          scrollAlign: "left",
-          scrollColor: "#A6A6A6",
-          scrollBackgroundColor: "#EFEBEF",
-          title: "",
-          titleFontSize: 13,
-          titleOffsetY: 0,
-          titleOffsetX: 0,
-          titleFontColor: "#666666",
-          format: ""
-        },
-        yAxis: {
-          data: [
-            {
-              min: 0
-            }
-          ],
-          disabled: false,
-          disableGrid: false,
-          splitNumber: 5,
-          gridType: "solid",
-          dashLength: 8,
-          gridColor: "#CCCCCC",
-          padding: 10,
-          showTitle: false
-        },
-        extra: {
-          column: {
-            type: "group",
-            width: 30,
-            activeBgColor: "#000000",
-            activeBgOpacity: 0.08,
-            seriesGap: 2,
-            categoryGap: 3,
-            barBorderCircle: false,
-            linearType: "none",
-            linearOpacity: 1,
-            colorStop: 0,
-            meterBorder: 1,
-            meterFillColor: "#FFFFFF",
-            labelPosition: "outside"
-          },
-          tooltip: {
-            showBox: true,
-            showArrow: true,
-            showCategory: false,
-            borderWidth: 0,
-            borderRadius: 0,
-            borderColor: "#000000",
-            borderOpacity: 0.7,
-            bgColor: "#000000",
-            bgOpacity: 0.7,
-            gridType: "solid",
-            dashLength: 4,
-            gridColor: "#CCCCCC",
-            boxPadding: 3,
-            fontSize: 13,
-            lineHeight: 20,
-            fontColor: "#FFFFFF",
-            legendShow: true,
-            legendShape: "auto",
-            splitLine: true,
-            horizentalLine: false,
-            xAxisLabel: false,
-            yAxisLabel: false,
-            labelBgColor: "#FFFFFF",
-            labelBgOpacity: 0.7,
-            labelFontColor: "#666666"
-          },
-          markLine: {
-            type: "solid",
-            dashLength: 4,
-            data: []
-          }
-        }
-      },
-      pieChartData: {},
-      pieOpts: {
-        color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4", "#ea7ccc"],
-        padding: [15, 15, 15, 15],
-        legend: {
-          show: true,
-          position: "bottom",
-          fontSize: 13,
-          fontColor: "#666666"
-        },
-        extra: {
-          pie: {
-            activeOpacity: 0.5,
-            activeRadius: 10,
-            offsetAngle: 0,
-            labelWidth: 15,
-            border: true,
-            borderWidth: 3,
-            borderColor: "#FFFFFF"
-          }
-        }
-      }
-    };
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { 
+  getUserStatistics, 
+  getTotalStatistics,
+  getCategoryRanking 
+} from '../../common/api/analyze'
+
+// 时间选择器
+const timeTabs = [
+  { label: '本周', value: 'week' },
+  { label: '本月', value: 'month' },
+  { label: '本年', value: 'year' }
+]
+const activeTimeTab = ref('month')
+
+// 排行榜选择器
+const rankingTabs = [
+  { label: '支出', value: 'expense' },
+  { label: '收入', value: 'income' }
+]
+const activeRankingTab = ref('expense')
+
+// 数据状态
+const isLoading = ref(false)
+const totalStats = ref({
+  income: 0,
+  expense: 0,
+  netIncome: 0,
+  totalAssets: 0,
+  incomeCount: 0,
+  expenseCount: 0,
+  savingsRate: 0
+})
+
+const trendChartData = ref({})
+const categoryChartData = ref({})
+const rankingList = ref([])
+
+// 图表配置
+const columnOpts = {
+  color: ["#91CB74", "#EE6666"],
+  padding: [15, 15, 15, 15],
+  legend: {
+    show: true,
+    position: "bottom",
+    fontSize: 13,
+    fontColor: "#666666"
   },
-  onReady() {
-    this.getServerData();
-    this.getPieData();
+  xAxis: {
+    disableGrid: true,
+    fontColor: "#666666",
+    fontSize: 12
   },
-  methods: {
-    getServerData() {
-      //模拟从服务器获取数据时的延时
-      setTimeout(() => {
-        //模拟服务器返回数据，如果数据格式和标准格式不同，需自行按下面的格式拼接
-        let res = {
-            categories: ["2018","2019","2020","2021","2022","2023"],
-            series: [
-              {
-                name: "目标值",
-                data: [35,36,31,33,13,34]
-              },
-              {
-                name: "完成量",
-                data: [18,27,21,24,6,28]
-              }
-            ]
-          };
-        this.chartData = JSON.parse(JSON.stringify(res));
-      }, 500);
-    },
-    getPieData() {
-      // 示例饼图数据
-      let res = {
-        series: [
-          { name: "餐饮", data: 30 },
-          { name: "购物", data: 20 },
-          { name: "交通", data: 15 },
-          { name: "娱乐", data: 35 },
-    
-        ]
-      };
-      this.pieChartData = JSON.parse(JSON.stringify(res));
+  yAxis: {
+    data: [{ min: 0 }],
+    disabled: false,
+    disableGrid: false,
+    splitNumber: 5,
+    gridType: "solid",
+    dashLength: 8,
+    gridColor: "#CCCCCC",
+    padding: 10,
+    showTitle: false
+  },
+  extra: {
+    column: {
+      type: "group",
+      width: 30,
+      seriesGap: 2,
+      categoryGap: 3
     }
   }
-};
+}
+
+const pieOpts = {
+  color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"],
+  padding: [15, 15, 15, 15],
+  legend: {
+    show: true,
+    position: "bottom",
+    fontSize: 12,
+    fontColor: "#666666"
+  },
+  extra: {
+    pie: {
+      activeOpacity: 0.5,
+      activeRadius: 10,
+      offsetAngle: 0,
+      labelWidth: 15,
+      border: true,
+      borderWidth: 3,
+      borderColor: "#FFFFFF"
+    }
+  }
+}
+
+// 方法
+function goBack() {
+  uni.navigateBack()
+}
+
+function switchTimeTab(tab: string) {
+  activeTimeTab.value = tab
+  loadData()
+}
+
+function switchRankingTab(tab: string) {
+  activeRankingTab.value = tab
+  loadRankingData()
+}
+
+function getPeriodText() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  
+  switch (activeTimeTab.value) {
+    case 'week':
+      return `${year}年第${Math.ceil((now.getTime() - new Date(year, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) + 1)}周`
+    case 'month':
+      return `${year}年${month}月`
+    case 'year':
+      return `${year}年`
+    default:
+      return ''
+  }
+}
+
+function formatAmount(amount: number): string {
+  return (amount / 100).toFixed(2)
+}
+
+async function loadData() {
+  if (isLoading.value) return
+  
+  isLoading.value = true
+  
+  try {
+    // 并行加载数据
+    const [statsResponse, totalResponse] = await Promise.all([
+      getUserStatistics(activeTimeTab.value),
+      getTotalStatistics()
+    ])
+    
+    console.log('统计数据响应:', statsResponse)
+    console.log('总统计数据响应:', totalResponse)
+    
+    // 处理统计数据
+    if (statsResponse?.data?.list && statsResponse.data.list.length > 0) {
+      processTrendData(statsResponse.data.list)
+    }
+    
+    // 处理总统计数据
+    if (totalResponse?.data) {
+      processTotalStats(totalResponse.data)
+    }
+    
+    // 加载分类排行榜
+    await loadRankingData()
+    
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    uni.showToast({
+      title: '加载失败，请重试',
+      icon: 'none'
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function processTrendData(statsList: any[]) {
+  const categories = []
+  const incomeData = []
+  const expenseData = []
+  
+  // 按时间排序
+  const sortedStats = statsList.sort((a, b) => 
+    new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+  )
+  
+  sortedStats.forEach(stat => {
+    const date = new Date(stat.start_time)
+    let label = ''
+    
+    switch (activeTimeTab.value) {
+      case 'week':
+        label = `第${Math.ceil((date.getTime() - new Date(date.getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) + 1)}周`
+        break
+      case 'month':
+        label = `${date.getMonth() + 1}月`
+        break
+      case 'year':
+        label = `${date.getFullYear()}年`
+        break
+    }
+    
+    categories.push(label)
+    incomeData.push(stat.statistics.income.amount / 100)
+    expenseData.push(stat.statistics.expense.amount / 100)
+  })
+  
+  trendChartData.value = {
+    categories,
+    series: [
+      {
+        name: "收入",
+        data: incomeData
+      },
+      {
+        name: "支出",
+        data: expenseData
+      }
+    ]
+  }
+}
+
+function processTotalStats(data: any) {
+  const income = data.income || { amount: 0, count: 0 }
+  const expense = data.expense || { amount: 0, count: 0 }
+  const totalAssets = data.total_assets || 0
+  
+  const incomeAmount = income.amount
+  const expenseAmount = expense.amount
+  const netIncome = incomeAmount - expenseAmount
+  const savingsRate = incomeAmount > 0 ? Math.round((netIncome / incomeAmount) * 100) : 0
+  
+  totalStats.value = {
+    income: incomeAmount,
+    expense: expenseAmount,
+    netIncome,
+    totalAssets,
+    incomeCount: income.count,
+    expenseCount: expense.count,
+    savingsRate
+  }
+}
+
+async function loadRankingData() {
+  try {
+    const response = await getCategoryRanking({
+      type: activeTimeTab.value,
+      income_expense: activeRankingTab.value,
+      limit: 10
+    })
+    
+    console.log('分类排行榜响应:', response)
+    
+    if (response?.data?.list) {
+      rankingList.value = response.data.list.map(item => ({
+        id: item.category?.id || 0,
+        categoryName: item.category?.name || '未知分类',
+        amount: item.amount,
+        count: item.count
+      }))
+      
+      // 更新饼图数据
+      updateCategoryChart()
+    }
+  } catch (error) {
+    console.error('加载排行榜失败:', error)
+  }
+}
+
+function updateCategoryChart() {
+  if (activeRankingTab.value === 'expense' && rankingList.value.length > 0) {
+    const series = rankingList.value.slice(0, 8).map(item => ({
+      name: item.categoryName,
+      data: item.amount / 100
+    }))
+    
+    categoryChartData.value = { series }
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>
-  /* 请根据实际需求修改父元素尺寸，组件自动识别宽高 */
-  .charts-box {
-    width: 100%;
-    height: 300px;
-    margin-bottom: 20px;
-  }
+.container {
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部栏 */
+.header {
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 80rpx 30rpx 40rpx;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.2);
+}
+
+.back {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+  font-weight: bold;
+}
+
+.title, .subtitle {
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8rpx;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 时间选择器 */
+.time-selector {
+  margin: 30rpx;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20rpx;
+  padding: 6rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.tab {
+  font-size: 26rpx;
+  color: #666;
+  padding: 16rpx 32rpx;
+  border-radius: 16rpx;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: bold;
+}
+
+/* 总览卡片 */
+.overview-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 30rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+}
+
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.overview-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.overview-period {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30rpx;
+}
+
+.overview-item {
+  text-align: center;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+}
+
+.overview-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.overview-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.overview-value.income {
+  color: #91CB74;
+}
+
+.overview-value.expense {
+  color: #EE6666;
+}
+
+.overview-count {
+  font-size: 20rpx;
+  color: #999;
+}
+
+/* 图表卡片 */
+.chart-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 30rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+  margin-bottom: 20rpx;
+}
+
+.chart-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.chart-subtitle {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.chart-container {
+  height: 400rpx;
+}
+
+/* 排行榜卡片 */
+.ranking-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 30rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+}
+
+.ranking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.ranking-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.ranking-tabs {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 16rpx;
+  padding: 4rpx;
+}
+
+.ranking-tab {
+  font-size: 22rpx;
+  color: #666;
+  padding: 8rpx 16rpx;
+  border-radius: 12rpx;
+  transition: all 0.3s;
+}
+
+.ranking-tab.active {
+  background: white;
+  color: #667eea;
+  font-weight: bold;
+}
+
+.ranking-list {
+  max-height: 600rpx;
+  overflow-y: auto;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.ranking-item:last-child {
+  border-bottom: none;
+}
+
+.ranking-rank {
+  width: 60rpx;
+  height: 60rpx;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+}
+
+.ranking-info {
+  flex: 1;
+}
+
+.ranking-name {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.ranking-count {
+  font-size: 20rpx;
+  color: #999;
+}
+
+.ranking-amount {
+  font-size: 26rpx;
+  color: #EE6666;
+  font-weight: bold;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-text {
+  color: white;
+  font-size: 28rpx;
+}
 </style>
