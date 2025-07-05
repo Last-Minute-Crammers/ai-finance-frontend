@@ -48,11 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { getAIReport } from '@/common/api/report'
-import { getMonthStatistic, getMonthlyStatistic } from '@/common/api/transaction'
-// 新增：获取类别统计数据和单日/单周统计数据的API（假设已实现）
-import { getCategoryStatistic, getDailyStatistic, getWeeklyStatistic } from '@/common/api/transaction'
+import { ref, watch, onMounted } from 'vue'
+import { getHistoryReport } from '../../common/api/report'
 
 const tabs = ['周报', '月报', '年报']
 const activeTab = ref('月报')
@@ -61,154 +58,48 @@ const summary = ref('')
 const suggestion = ref('')
 const tags = ref<string[]>([])
 
-// 统计数据对象
-const yourStatsData = ref({})
-
-// 获取近一周、近一月、近一年时间范围
-function getTimeRange(type: 'week' | 'month' | 'year') {
+function getPeriod(type: 'week' | 'month' | 'year') {
   const now = new Date()
-  let start: Date
   if (type === 'week') {
-    start = new Date(now)
-    start.setDate(now.getDate() - 6)
+    const year = now.getFullYear()
+    // 使用与后端一致的周数计算方式
+    const week = Math.ceil((now.getTime() - new Date(year, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) + 1)
+    return `${year}-W${String(week).padStart(2, '0')}`
   } else if (type === 'month') {
-    start = new Date(now)
-    start.setMonth(now.getMonth() - 1)
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   } else {
-    start = new Date(now)
-    start.setFullYear(now.getFullYear() - 1)
-  }
-  // 统一为 ISO 字符串
-  return {
-    startTime: start.toISOString(),
-    endTime: now.toISOString()
+    return `${now.getFullYear()}`
   }
 }
 
-// 获取统计数据
-async function fetchStats(type: 'week' | 'month' | 'year') {
-  const { startTime, endTime } = getTimeRange(type)
-  // 转为 Date 对象，后端才能正确解析
-  const start = new Date(startTime)
-  const end = new Date(endTime)
-  let res
-  if (type === 'week') {
-    res = await getMonthStatistic({ startTime: start, endTime: end })
-  } else if (type === 'month') {
-    res = await getMonthStatistic({ startTime: start, endTime: end })
-  } else {
-    res = await getMonthlyStatistic({ startTime: start, endTime: end })
-  }
-  yourStatsData.value = res.data
-  return res.data // 新增返回数据
-}
-
-async function fetchAIReport() {
+async function fetchHistoryReport() {
   const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
-  // 1. 获取主统计数据
-  const statsArr = await fetchStats(type)
-  let promptStats: any = {}
-  let categoryStats: any = {}
-  let extraStats: any = {}
-
-  // 统一时间范围
-  const now = new Date();
-  let start: Date, end: Date;
-  if (type === 'week') {
-    start = new Date(now);
-    start.setDate(now.getDate() - 6);
-    end = now;
-  } else if (type === 'month') {
-    start = new Date(now.getFullYear(), now.getMonth(), 1);
-    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  } else {
-    start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
-    end = now;
-  }
-  const startTime = start.toISOString();
-  const endTime = end.toISOString();
-
-  if (type === 'week') {
-    let weekList = Array.isArray(statsArr?.List) ? statsArr.List : []
-    weekList = weekList.filter(item =>
-      Number(item.income?.amount || item.Income?.Amount || 0) !== 0 ||
-      Number(item.expense?.amount || item.Expense?.Amount || 0) !== 0
-    )
-    if (weekList.length === 0 && Array.isArray(statsArr?.List)) {
-      weekList = statsArr.List
+  const period = getPeriod(type)
+  console.log('请求历史报告参数:', { type, period })
+  try {
+    const res = await getHistoryReport(type, period)
+    console.log('历史报告响应:', res)
+    if (res?.data?.data) {
+      summary.value = res.data.data.Summary
+      suggestion.value = res.data.data.Suggestion
+      tags.value = JSON.parse(res.data.data.Tags || '[]')
+      return
+    } else {
+      // 没有历史报告数据，显示默认信息
+      summary.value = '还没有开始记账，暂无历史报告。'
+      suggestion.value = ''
+      tags.value = []
     }
-    promptStats = { list: weekList }
-    const categoryRes = await getCategoryStatistic({
-      startTime,
-      endTime,
-      incomeExpense: 'expense',
-      limit: 10
-    })
-    categoryStats = categoryRes?.data?.List || []
-    const dailyRes = await getDailyStatistic({
-      startTime,
-      endTime,
-      incomeExpense: 'expense'
-    })
-    extraStats = dailyRes?.data?.List || []
-  } else if (type === 'month') {
-    let monthList = Array.isArray(statsArr?.List) ? statsArr.List : []
-    monthList = monthList.filter(item =>
-      Number(item.income?.amount || item.Income?.Amount || 0) !== 0 ||
-      Number(item.expense?.amount || item.Expense?.Amount || 0) !== 0
-    )
-    if (monthList.length === 0 && Array.isArray(statsArr?.List)) {
-      monthList = statsArr.List
-    }
-    promptStats = { list: monthList }
-    const categoryRes = await getCategoryStatistic({
-      startTime,
-      endTime,
-      incomeExpense: 'expense',
-      limit: 10
-    })
-    categoryStats = categoryRes?.data?.List || []
-    const weeklyRes = await getWeeklyStatistic({
-      startTime,
-      endTime,
-      incomeExpense: 'expense'
-    })
-    extraStats = weeklyRes?.data?.List || []
-  } else {
-    let yearList = Array.isArray(statsArr?.List) ? statsArr.List : []
-    yearList = yearList.filter(item =>
-      Number(item.income?.amount || item.Income?.Amount || 0) !== 0 ||
-      Number(item.expense?.amount || item.Expense?.Amount || 0) !== 0
-    )
-    if (yearList.length === 0 && Array.isArray(statsArr?.List)) {
-      yearList = statsArr.List
-    }
-    promptStats = { list: yearList }
-    const categoryRes = await getCategoryStatistic({
-      startTime,
-      endTime,
-      incomeExpense: 'expense',
-      limit: 10
-    })
-    categoryStats = categoryRes?.data?.List || []
-    // 年报不需要额外的extraStats
+  } catch (e) {
+    console.error('获取历史报告失败:', e)
+    summary.value = '还没有开始记账，暂无历史报告。'
+    suggestion.value = ''
+    tags.value = []
   }
-
-  // 组装prompt参数
-  const aiPrompt = {
-    type,
-    stats: promptStats,
-    categoryStats,
-    extraStats
-  }
-
-  const res = await getAIReport(aiPrompt)
-  summary.value = res.summary
-  suggestion.value = res.suggestion
-  tags.value = res.tags
 }
 
-watch(activeTab, fetchAIReport, { immediate: true })
+onMounted(fetchHistoryReport)
+watch(activeTab, fetchHistoryReport, { immediate: true })
 
 const reportData = [
   { label: '总收入', value: '¥8,500', trend: '↑5% 较上月', trendType: 'green' },

@@ -70,8 +70,8 @@ const isLoading = ref(false)
 const messages = ref<ChatMessage[]>([
   { role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' }
 ])
-const bottomAnchor = 'bottom-anchor'
-const scrollIntoView = ref(bottomAnchor)
+const bottomAnchor = ref('bottom-anchor')
+const scrollIntoView = ref('bottom-anchor')
 
 // 侧栏相关
 const showDrawer = ref(false)

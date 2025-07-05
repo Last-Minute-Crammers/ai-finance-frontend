@@ -310,9 +310,24 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
     headers['Authorization'] = 'Bearer ' + token;
   }
 
+  // 处理GET请求的查询参数
+  let url = BASE_URL + options.url;
+  if (options.method === 'GET' && options.params) {
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(options.params)) {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, String(value));
+      }
+    }
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  }
+
   return new Promise<T>((resolve, reject) => {
     uni.request({
-      url: BASE_URL + options.url,
+      url: url,
       method: options.method || 'GET',
       data: options.data,
       header: headers,
