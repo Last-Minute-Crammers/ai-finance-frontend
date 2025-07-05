@@ -164,3 +164,46 @@ export const getMonthlyStatistic = (params?: {
     requireAuth: true
   });
 }
+
+// 获取类别统计
+export const getCategoryStatistic = (params: {
+  startTime?: string;
+  endTime?: string;
+  incomeExpense?: 'income' | 'expense';
+  limit?: number;
+}): Promise<ApiResponse<any>> => {
+  return request<ApiResponse<any>>({
+    url: '/api/user/transaction/statistic/category_rank',
+    method: 'POST',
+    data: params,
+    requireAuth: true
+  });
+}
+
+// 获取单日统计
+export const getDailyStatistic = (params: {
+  startTime?: string;
+  endTime?: string;
+  incomeExpense?: 'income' | 'expense';
+}): Promise<ApiResponse<any>> => {
+  return request<ApiResponse<any>>({
+    url: '/api/user/transaction/statistic/day',
+    method: 'POST',
+    data: params,
+    requireAuth: true
+  });
+}
+
+// 获取单周统计
+export const getWeeklyStatistic = (params: {
+  startTime?: string;
+  endTime?: string;
+  incomeExpense?: 'income' | 'expense';
+}): Promise<ApiResponse<any>> => {
+  return request<ApiResponse<any>>({
+    url: '/api/user/transaction/statistic/week',
+    method: 'POST',
+    data: params,
+    requireAuth: true
+  });
+}

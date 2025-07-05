@@ -26,9 +26,9 @@ interface RequestOptions {
   data?: any;
   params?: any;
   requireAuth?: boolean;
-  // Add timeout and retries
   timeout?: number;
   retries?: number;
+  headers?: Record<string, string>; // 新增headers字段
 }
 
 // 自定义错误接口
@@ -300,188 +300,54 @@ export const pingBackend = async () => {
   }
 };
 
-export const request = async (options: RequestOptions) => {
-  const { 
-    url, 
-    method = 'GET', 
-    data, 
-    params, 
-    requireAuth = false,
-    timeout = 30000,
-    retries = 0
-  } = options;
-  
-  let fullUrl = BASE_URL + url;
-  if (params) {
-    const queryString = Object.entries(params)
-      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-      .join('&');
-    fullUrl += `?${queryString}`;
+export const request = async <T = any>(options: RequestOptions): Promise<T> => {
+  const token = getToken();
+  const headers = {
+    ...(options.headers || {}),
+    'Content-Type': 'application/json',
+  };
+  if (options.requireAuth !== false && token) {
+    headers['Authorization'] = 'Bearer ' + token;
   }
 
-  // 构建请求头
-  const headers: Record<string, string> = {};
-
-  if (!(data instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  if (requireAuth) {
-    const token = getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-      console.log('Added Authorization header:', `Bearer ${token.substring(0, 20)}...`);
-    } else {
-      console.warn('请求需要认证但未找到token');
-      uni.showToast({
-        title: '请先登录',
-        icon: 'none'
-      });
-      throw new Error('No authentication token found');
+  // 处理GET请求的查询参数
+  let url = BASE_URL + options.url;
+  if (options.method === 'GET' && options.params) {
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(options.params)) {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, String(value));
+      }
+    }
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
     }
   }
 
-  let currentRetry = 0;
-  
-  while (true) {
-    try {
-      console.log(`Making ${method} request to: ${fullUrl} (attempt ${currentRetry + 1})`);
-      console.log('Request headers:', headers);
-      console.log('Request params:', params);
-      
-      const response = await new Promise((resolve, reject) => {
-        uni.request({
-          url: fullUrl,
-          method,
-          data,
-          header: headers,
-          timeout,
-          success: (res) => {
-            if (!res) {
-              reject(new Error('未收到响应数据'));
-              return;
-            }
-            resolve(res);
-          },
-          fail: (err) => {
-            reject(err || new Error('请求失败'));
-          }
-        });
-      }) as any;
-
-      if (!response || typeof response.statusCode !== 'number') {
-        throw new Error('无效的响应格式');
-      }
-
-      console.log('Response status:', response.statusCode);
-      console.log('Response data:', response.data);
-
-      if (response.statusCode === 200) {
-        return response.data;
-      } else if (response.statusCode === 401) {
-        console.error('Authentication failed');
-        const currentToken = getToken();
-        console.log('Current token when 401 occurred:', currentToken ? `${currentToken.substring(0, 20)}...` : 'No token');
-        
-        uni.removeStorageSync('token');
-        uni.showToast({
-          title: '登录已过期，请重新登录',
-          icon: 'none'
-        });
-        throw new Error('Unauthorized');
-      } else if (response.statusCode === 400) {
-        console.error('客户端请求错误 (400):', response.data);
-        let errorMessage = '请求参数错误';
-        
-        if (response.data) {
-          if (typeof response.data === 'string') {
-            errorMessage = response.data;
-            // 特殊处理EOF错误
-            if (response.data.includes('EOF')) {
-              errorMessage = '请求参数格式错误，请检查数据格式';
-            }
-          } else if (response.data.Msg) {
-            errorMessage = response.data.Msg;
-          } else if (response.data.message) {
-            errorMessage = response.data.message;
-          }
+  return new Promise<T>((resolve, reject) => {
+    uni.request({
+      url: url,
+      method: options.method || 'GET',
+      data: options.data,
+      header: headers,
+      timeout: options.timeout || 30000,
+      success: (res) => {
+        if (!res) {
+          reject(new Error('未收到响应数据'));
+          return;
         }
-        
-        console.error('400错误详情:', {
-          url: fullUrl,
-          method,
-          headers,
-          data, // 记录实际发送的数据
-          params,
-          errorMessage
-        });
-        
-        throw new Error(`请求参数错误: ${errorMessage}`);
-      } else {
-        let errorMessage = `请求失败 (${response.statusCode})`;
-        
-        if (response.data) {
-          if (typeof response.data === 'string') {
-            errorMessage += ': ' + response.data.substring(0, 100);
-          } else if (response.data.error) {
-            errorMessage += ': ' + response.data.error;
-          } else if (response.data.message) {
-            errorMessage += ': ' + response.data.message;
-          }
+        if (!res.statusCode || res.statusCode !== 200) {
+          reject(new Error(`请求失败 (${res.statusCode})`));
+          return;
         }
-        
-        throw new Error(errorMessage);
+        resolve(res.data as T);
+      },
+      fail: (err) => {
+        reject(err || new Error('请求失败'));
       }
-    } catch (error: any) {
-      const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
-        ? (error as any).message
-        : String(error);
-      console.error('请求错误详情:', errMsg, error);
-      
-      // 检查是否应该重试
-      if (currentRetry < retries) {
-        console.log(`重试请求 (${currentRetry + 1}/${retries})...`);
-        currentRetry++;
-        // 等待一会再重试
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        continue;
-      }
-      
-      // 网络连接错误 - 提供更详细的诊断
-      // 安全检查error对象结构
-      if (typeof error === 'object' && error !== null && 'errMsg' in error) {
-        const errMsgStr = String(error.errMsg);
-        
-        if (errMsgStr.includes('request:fail')) {
-          if (errMsgStr.includes('timeout')) {
-            uni.showToast({
-              title: '网络超时，请检查网络连接',
-              icon: 'none'
-            });
-            throw new Error('网络超时');
-          } else if (errMsgStr.includes('CONNECTION_REFUSED')) {
-            uni.showToast({
-              title: '无法连接到后端服务器',
-              icon: 'none'
-            });
-            console.error('连接诊断: 后端服务器可能未启动或不在端口8080上运行');
-            throw new Error('后端服务器连接失败');
-          } else {
-            console.error('网络错误详情:', errMsgStr);
-            throw new Error('网络连接错误: ' + errMsgStr);
-          }
-        }
-      }
-      
-      if (errMsg !== 'Unauthorized') {
-        uni.showToast({
-          title: errMsg || '网络连接失败',
-          icon: 'none'
-        });
-      }
-      throw error;
-    }
-  }
+    });
+  });
 };
 
 // 添加一个检查token有效性的函数

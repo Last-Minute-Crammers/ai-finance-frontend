@@ -6,9 +6,9 @@
       <text class="title">社交互动</text>
       <text class="subtitle">与好友一起理财更有趣</text>
 
-      <!-- 搜索框 -->
+      <!-- 搜索好友按钮 -->
       <view class="search-bar">
-        <input v-model="searchQuery" placeholder="搜索好友或话题" class="search-input" />
+        <button class="search-friend-btn" @click="goToAddFriend">搜索好友</button>
       </view>
     </view>
 
@@ -28,10 +28,7 @@
 
     <!-- 我的好友 -->
     <view class="friends-card">
-      <view style="display: flex; justify-content: space-between; align-items: center;">
-        <text class="friends-title">我的好友</text>
-        <button class="add-friend-btn" @click="goToAddFriend">好友添加</button>
-      </view>
+      <text class="friends-title">我的好友</text>
       <view v-for="(friend, index) in friendsData" :key="index" class="friend-item">
         <text class="friend-name">{{ friend.name }}</text>
         <text class="friend-status">本周消费减少 {{ friend.spendReduction }}%</text>
@@ -108,14 +105,18 @@ const goToAddFriend = () => {
   display: flex;
   justify-content: center;
 }
-.search-input {
+.search-friend-btn {
   width: 85%;
-  padding: 12rpx 16rpx;
-  font-size: 24rpx;
+  padding: 15rpx 20rpx;
+  font-size: 28rpx;
   border: none;
-  background-color: #f5f7fa;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 30rpx;
-  outline: none;
+  color: #4e54c8;
+  font-weight: 500;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  display: block;
 }
 
 /* 排行榜 */
@@ -195,13 +196,5 @@ const goToAddFriend = () => {
   color: #4e54c8;
   cursor: pointer;
 }
-.add-friend-btn {
-  background: #4e54c8;
-  color: #fff;
-  border: none;
-  border-radius: 20rpx;
-  padding: 10rpx 30rpx;
-  font-size: 24rpx;
-  margin-left: 20rpx;
-}
+
 </style>

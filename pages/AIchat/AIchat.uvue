@@ -4,15 +4,22 @@
     <view class="chat-header">
       <text class="chat-title">AI 理财助手</text>
       <text class="chat-subtitle">您的智能理财小伙伴</text>
+      <button class="history-btn" @tap="openDrawer">历史</button>
     </view>
 
     <!-- 聊天气泡区域 -->
     <scroll-view class="chat-body" scroll-y :scroll-into-view="scrollIntoView" scroll-with-animation>
-      <view v-for="(msg, index) in messages" :key="index" :id="'msg-' + index"
-        class="chat-message" :class="msg.role">
-        <image class="avatar" :src="msg.role === 'ai' ? aiAvatar : userAvatar" />
-        <view class="bubble">
-          <text>{{ msg.text }}</text>
+      <view v-if="sessionLoading" class="loading-container">
+        <text class="loading-text">正在加载历史对话...</text>
+      </view>
+      <view v-else>
+        <!-- 调试信息已移除 -->
+        <view v-for="(msg, index) in messages" :key="index" :id="'msg-' + index"
+          class="chat-message" :class="msg.role">
+          <image class="avatar" :src="msg.role === 'ai' ? aiAvatar : userAvatar" />
+          <view class="bubble">
+            <text>{{ msg.text }}</text>
+          </view>
         </view>
       </view>
       <view :id="bottomAnchor" class="scroll-anchor"></view>
@@ -23,12 +30,34 @@
       <input class="input-box" v-model="inputText" placeholder="请输入内容..." @confirm="sendMessage" />
       <button class="send-button" @tap="sendMessage">发送</button>
     </view>
+
+    <!-- 侧栏抽屉 -->
+    <view v-if="showDrawer" class="drawer-mask" @tap="closeDrawer"></view>
+    <view v-if="showDrawer" class="drawer">
+      <view class="drawer-header">
+        <text>历史会话</text>
+        <button class="drawer-close" @tap="closeDrawer">关闭</button>
+      </view>
+      <view class="drawer-body">
+        <view v-if="historyLoading" class="drawer-loading">加载中...</view>
+        <view v-else-if="chatHistory.length === 0" class="drawer-empty">暂无历史</view>
+        <view v-else>
+          <view v-for="item in chatHistory" :key="item.sessionId" class="drawer-item" @tap="loadSession(item.sessionId)">
+            <view class="drawer-item-content">
+              <text class="drawer-title">{{ item.firstQuestion }}</text>
+              <text class="drawer-date">{{ formatDate(item.createdAt) }}</text>
+            </view>
+            <!-- 箭头已移除 -->
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
-import { sendAIMessage } from '../../common/api/finance'
+import { ref, nextTick, onMounted } from 'vue'
+import { sendAIMessage, getAIChatHistory, getAIChatSessionDetail } from '../../common/api/ai'
 
 interface ChatMessage {
   role: 'ai' | 'user';
@@ -36,61 +65,182 @@ interface ChatMessage {
   loading?: boolean;
 }
 
+interface ChatSessionPreview {
+  sessionId: string;
+  firstQuestion: string;
+  createdAt: string;
+}
+
 const aiAvatar = '/static/icons/pet.png'
 const userAvatar = '/static/icons/user.png'
 
 const inputText = ref('')
 const isLoading = ref(false)
-const messages = ref<ChatMessage[]>([
-  { role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' }
-])
-const bottomAnchor = 'bottom-anchor'
-const scrollIntoView = ref(bottomAnchor)
+const messages = ref<ChatMessage[]>([])
+const bottomAnchor = ref('bottom-anchor')
+const scrollIntoView = ref('bottomAnchor')
+
+// 侧栏相关
+const showDrawer = ref(false)
+const historyLoading = ref(false)
+const chatHistory = ref<ChatSessionPreview[]>([])
+const currentSessionId = ref<string | null>(null)
+const sessionLoading = ref(false)
+
+// 页面初始化时检查是否有传入的sessionId
+onMounted(() => {
+  console.log('AI聊天页面初始化')
+  // 检查页面参数中是否有sessionId
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1]
+  console.log('当前页面信息:', currentPage)
+  
+  if (currentPage && currentPage.options && currentPage.options.sessionId) {
+    const sessionId = currentPage.options.sessionId
+    console.log('检测到传入的sessionId:', sessionId)
+    loadSession(sessionId)
+  } else {
+    console.log('没有检测到传入的sessionId，显示默认欢迎语')
+    // 显示默认欢迎语
+    messages.value = [{ role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' }]
+  }
+})
+
+function openDrawer() {
+  showDrawer.value = true
+  loadHistory()
+}
+function closeDrawer() {
+  showDrawer.value = false
+}
+
+async function loadHistory() {
+  historyLoading.value = true
+  try {
+    const res = await getAIChatHistory()
+    console.log('历史记录API响应:', res)
+    if (res.success && Array.isArray(res.data)) {
+      chatHistory.value = res.data.map((item: any) => ({
+        sessionId: item.sessionId,
+        firstQuestion: item.firstQuestion || '未知对话',
+        createdAt: item.createdAt || ''
+      }))
+      console.log('处理后的历史记录:', chatHistory.value)
+    } else {
+      chatHistory.value = []
+      console.warn('历史记录响应格式错误:', res)
+    }
+  } catch (e) {
+    console.error('加载历史记录失败:', e)
+    chatHistory.value = []
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+// 加载某个会话的全部消息
+async function loadSession(sessionId: string) {
+  closeDrawer()
+  currentSessionId.value = sessionId
+  sessionLoading.value = true
+  console.log('开始加载会话:', sessionId)
+  
+  try {
+    const res = await getAIChatSessionDetail(sessionId)
+    console.log('会话详情API响应:', res)
+    
+    if (res.success && Array.isArray(res.data)) {
+      // 按createdAt升序排序，保证历史顺序
+      const sorted = res.data.slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      console.log('排序后的会话数据:', sorted)
+      
+      messages.value = []
+      
+      // 处理每条聊天记录
+      sorted.forEach((item: any, index: number) => {
+        console.log(`处理第${index + 1}条记录:`, item)
+        console.log(`- input: "${item.Input}"`)
+        console.log(`- response: "${item.Response}"`)
+        
+        // 添加用户输入
+        if (item.Input && item.Input.trim() !== '') {
+          messages.value.push({ role: 'user', text: item.Input })
+          console.log(`添加用户消息: "${item.Input}"`)
+        }
+        // 添加AI回复
+        if (item.Response && item.Response.trim() !== '') {
+          messages.value.push({ role: 'ai', text: item.Response })
+          console.log(`添加AI消息: "${item.Response}"`)
+        }
+      })
+      
+      console.log('处理完成后的消息数组:', messages.value)
+      
+      // 只有在真正没有历史消息时才显示默认欢迎语
+      if (messages.value.length === 0) {
+        console.log('没有找到历史消息，显示默认欢迎语')
+        messages.value.push({ role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' })
+      } else {
+        console.log('成功加载历史消息，消息数量:', messages.value.length)
+      }
+      
+      scrollToBottom()
+      console.log('成功加载会话:', sessionId, '消息数量:', messages.value.length)
+    } else {
+      // 如果请求失败，显示错误信息
+      messages.value = [{ role: 'ai', text: '加载历史对话失败，请稍后重试。' }]
+      console.error('加载会话失败: 响应数据格式错误', res)
+    }
+  } catch (e) {
+    console.error('加载会话失败:', e)
+    messages.value = [{ role: 'ai', text: '加载历史对话失败，请稍后重试。' }]
+  } finally {
+    sessionLoading.value = false
+  }
+}
 
 async function sendMessage() {
   const content = inputText.value.trim()
   if (!content || isLoading.value) return
   
-  // 添加用户消息
   messages.value.push({ role: 'user', text: content })
   inputText.value = ''
   scrollToBottom()
   
-  // 添加AI加载消息
   const loadingMsgIndex = messages.value.length
   messages.value.push({ role: 'ai', text: '正在思考中...', loading: true })
   scrollToBottom()
-  
   isLoading.value = true
   
   try {
-    const response = await sendAIMessage(content)
-    console.log('AI response received:', response) // 添加调试日志
-    
-    // 移除加载消息，添加AI回复
+    console.log('发送消息，当前sessionId:', currentSessionId.value)
+    const response = await sendAIMessage(content, currentSessionId.value || undefined)
     messages.value.splice(loadingMsgIndex, 1)
     
-    // 修复：使用正确的属性名访问响应数据
     if (response.success && response.data) {
       messages.value.push({ role: 'ai', text: response.data })
+      
+      // 如果是新对话且没有sessionId，需要获取新创建的sessionId
+      if (!currentSessionId.value) {
+        await loadHistory()
+        if (chatHistory.value.length > 0) {
+          // 找到最新会话（假设最新在最前）
+          currentSessionId.value = chatHistory.value[0].sessionId
+          console.log('获取到新的sessionId:', currentSessionId.value)
+        }
+      }
     } else {
-      // 处理后端返回错误的情况
       const errorMsg = response.error || '抱歉，我暂时无法回答这个问题。'
       messages.value.push({ role: 'ai', text: errorMsg })
     }
   } catch (error) {
-    // 移除加载消息，添加错误提示
+    console.error('发送消息失败:', error)
     messages.value.splice(loadingMsgIndex, 1)
     messages.value.push({ 
       role: 'ai', 
       text: '抱歉，我暂时无法连接到AI服务。请稍后再试或联系技术支持。' 
     })
-    console.error('AI chat error:', error)
-    
-    uni.showToast({
-      title: 'AI服务暂时不可用',
-      icon: 'none'
-    })
+    uni.showToast({ title: 'AI服务暂时不可用', icon: 'none' })
   } finally {
     isLoading.value = false
     scrollToBottom()
@@ -99,8 +249,31 @@ async function sendMessage() {
 
 function scrollToBottom() {
   nextTick(() => {
-    scrollIntoView.value = bottomAnchor
+    scrollIntoView.value = bottomAnchor.value
   })
+}
+
+// 格式化日期显示
+function formatDate(dateString: string): string {
+  if (!dateString) return ''
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    } else if (diffDays === 1) {
+      return '昨天'
+    } else if (diffDays < 7) {
+      return `${diffDays}天前`
+    } else {
+      return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+    }
+  } catch (e) {
+    return dateString
+  }
 }
 </script>
 
@@ -133,6 +306,16 @@ function scrollToBottom() {
 .chat-body {
   flex: 1;
   padding: 30rpx 24rpx;
+}
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200rpx;
+}
+.loading-text {
+  color: #888;
+  font-size: 28rpx;
 }
 
 .chat-message {
@@ -195,5 +378,105 @@ function scrollToBottom() {
 }
 .scroll-anchor {
   height: 1rpx;
+}
+
+.history-btn {
+  position: absolute;
+  right: 32rpx;
+  top: 40rpx;
+  background: #fff;
+  color: #4e54c8;
+  border-radius: 20rpx;
+  padding: 8rpx 24rpx;
+  font-size: 24rpx;
+  border: 1rpx solid #4e54c8;
+}
+.drawer-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.2);
+  z-index: 99;
+}
+.drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 70vw;
+  max-width: 500rpx;
+  background: #fff;
+  z-index: 100;
+  box-shadow: -4rpx 0 16rpx rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+}
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 24rpx 16rpx;
+  border-bottom: 1rpx solid #eee;
+  font-size: 30rpx;
+  font-weight: bold;
+}
+.drawer-close {
+  background: #f5f7fa;
+  color: #888;
+  border-radius: 16rpx;
+  padding: 4rpx 16rpx;
+  font-size: 24rpx;
+  border: none;
+}
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24rpx;
+  text-align: left; /* 强制左对齐 */
+}
+.drawer-item {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.drawer-item-content {
+  flex: 1;
+  text-align: left;
+  width: 100%;
+  display: block;
+}
+.drawer-item-arrow {
+  color: #ccc;
+  font-size: 24rpx;
+  margin-left: 16rpx;
+}
+.drawer-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  text-align: left;
+  display: block;
+}
+.drawer-date {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-left: 12rpx;
+  text-align: left;
+  display: block;
+}
+.drawer-loading, .drawer-empty {
+  color: #888;
+  text-align: center;
+  margin-top: 40rpx;
+  font-size: 26rpx;
+}
+
+.debug-info {
+  padding: 10rpx 20rpx;
+  background-color: #f0f0f0;
+  border-radius: 10rpx;
+  margin-bottom: 20rpx;
+  font-size: 24rpx;
+  color: #555;
 }
 </style>

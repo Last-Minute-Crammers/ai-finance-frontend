@@ -1,12 +1,12 @@
 import { request } from '../../utils/request'
 
 // AI聊天对话
-export const sendAIMessage = (message: string) => {
+export const sendAIMessage = (message: string, sessionId?: string) => {
   return request({
-    url: '/api/public/ai/chat',
+    url: '/api/user/ai/chat',
     method: 'POST',
-    data: { message },
-    requireAuth: false
+    data: sessionId ? { message, sessionId } : { message },
+    requireAuth: true
   });
 }
 
@@ -20,5 +20,25 @@ export const voiceRecognition = (audioFile: File) => {
     method: 'POST',
     data: formData,
     requireAuth: false
+  });
+}
+
+// 获取AI聊天历史
+export const getAIChatHistory = (offset = 0, limit = 20) => {
+  return request({
+    url: '/api/user/ai/chat/history',
+    method: 'GET',
+    params: { offset, limit },
+    requireAuth: true
+  });
+}
+
+// 获取指定会话的全部聊天记录
+export const getAIChatSessionDetail = (sessionId: string) => {
+  return request({
+    url: '/api/user/ai/chat/session',
+    method: 'GET',
+    params: { sessionId },
+    requireAuth: true
   });
 }

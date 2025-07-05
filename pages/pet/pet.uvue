@@ -11,20 +11,9 @@
     <view class="card">
       <view class="avatar-wrapper">
         <image src="/static/icons/pet.png" class="avatar" mode="aspectFit" />
-        <view class="level">5</view>
       </view>
       <text class="pet-name">理财小汪</text>
-      <text class="pet-status">状态：<text class="status-green">很开心</text></text>
-      <view class="comment">
-        主人，您这个月的储蓄进度很棒哦！已经完成了 65% 的目标，继续保持！
-      </view>
-      <view class="progress-label-row">
-        <text>本月储蓄目标</text>
-        <text>65%</text>
-      </view>
-      <view class="progress-bar">
-        <view class="progress-inner" :style="{ width: '65%' }"></view>
-      </view>
+      <text class="pet-status">状态：<text :class="statusClass">{{ petMood }}</text></text>
     </view>
 
     <!-- 聊天按钮 -->
@@ -52,9 +41,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { getTotalStatistic } from '../../common/api/transaction'
 
 const showAllBadges = ref(false)
+const petMood = ref('很开心')
+const statusClass = ref('status-green')
 
 const allBadges = [
   { name: '目标达人', icon: '🎯' },
@@ -77,6 +69,45 @@ const toggleShowAll = () => {
 const goToChat = () => {
   uni.navigateTo({ url: '/pages/AIchat/AIchat' })
 }
+
+// 根据收支情况设置宠物心情
+const updatePetMood = async () => {
+  try {
+    const response = await getTotalStatistic()
+    console.log('宠物页面 - 总统计响应:', response)
+    
+    if (response?.Data) {
+      const { Income, Expense } = response.Data
+      console.log('宠物页面 - 收入数据:', Income)
+      console.log('宠物页面 - 支出数据:', Expense)
+      
+      const balance = (Income?.Amount || 0) - (Expense?.Amount || 0)
+      console.log('宠物页面 - 计算余额:', balance)
+      
+      if (balance <= 0) {
+        petMood.value = '很担心'
+        statusClass.value = 'status-red'
+      } else if (balance <= 1000) {
+        petMood.value = '很欣慰'
+        statusClass.value = 'status-yellow'
+      } else {
+        petMood.value = '很开心'
+        statusClass.value = 'status-green'
+      }
+      
+      console.log('宠物页面 - 最终心情:', petMood.value)
+    }
+  } catch (error) {
+    console.error('获取收支数据失败:', error)
+    // 默认设置为很开心
+    petMood.value = '很开心'
+    statusClass.value = 'status-green'
+  }
+}
+
+onMounted(() => {
+  updatePetMood()
+})
 </script>
 
 <style scoped>
@@ -164,33 +195,11 @@ const goToChat = () => {
 .status-green {
   color: #35b765;
 }
-.comment {
-  background-color: #f9f9f9;
-  padding: 20rpx;
-  border-radius: 16rpx;
-  margin: 20rpx 0;
-  font-size: 24rpx;
-  line-height: 1.6;
-  color: #333;
+.status-yellow {
+  color: #f39c12;
 }
-.progress-label-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 24rpx;
-  color: #333;
-   align-items: center;
-}
-.progress-bar {
-  height: 16rpx;
-  width: 90%;
-  background: #eee;
-  border-radius: 10rpx;
-  margin: 10rpx auto;
-  overflow: hidden;
-}
-.progress-inner {
-  height: 100%;
-  background: linear-gradient(to right, #4e54c8, #8f94fb);
+.status-red {
+  color: #e74c3c;
 }
 
 /* 聊天按钮 */

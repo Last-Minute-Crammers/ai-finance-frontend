@@ -1,8 +1,21 @@
 <template>
   <view class="container">
+    <!-- 调试信息 -->
+    <view class="debug-info" v-if="showDebug">
+      <text class="debug-title">调试信息</text>
+      <text class="debug-text">当前用户: {{ currentUser ? JSON.stringify(currentUser) : '未登录' }}</text>
+      <text class="debug-text">Token: {{ token ? '存在' : '不存在' }}</text>
+      <text class="debug-text">搜索邮箱: {{ searchEmail }}</text>
+      <text class="debug-text">搜索结果: {{ searchResult ? JSON.stringify(searchResult) : '无' }}</text>
+      <text class="debug-text">待处理请求: {{ pendingRequests.length }}个</text>
+      <text class="debug-text">好友数量: {{ myFriends.length }}个</text>
+      <button class="debug-btn" @click="showDebug = !showDebug">隐藏调试</button>
+    </view>
+    
     <view class="header">
       <text class="back" @click="goBack">←</text>
       <text class="title">添加好友</text>
+      <button class="debug-toggle" @click="showDebug = !showDebug">调试</button>
     </view>
     
     <view class="search-section">
@@ -10,18 +23,23 @@
         v-model="searchEmail" 
         placeholder="输入Email搜索用户" 
         class="search-input" 
+        @input="onSearchInput"
       />
       <button class="search-btn" @click="searchUser">搜索</button>
     </view>
     
     <view v-if="searchResult" class="user-result">
-      <text class="user-email">{{ searchResult.email }}</text>
+      <view class="user-info">
+        <text class="user-email">{{ searchResult.email }}</text>
+        <text class="user-username">{{ searchResult.username }}</text>
+      </view>
       <button 
         v-if="!searchResult.added && !searchResult.pending" 
         class="add-btn" 
         @click="addFriend(searchResult)"
+        :disabled="loading"
       >
-        添加
+        {{ loading ? '发送中...' : '添加' }}
       </button>
       <button 
         v-else-if="searchResult.pending" 
@@ -46,10 +64,27 @@
         :key="idx" 
         class="pending-item"
       >
-        <text class="pending-email">{{ req.from }}</text>
+        <view class="pending-info">
+          <text class="pending-username">{{ req.inviter.username }}</text>
+          <text class="pending-email">{{ req.inviter.email }}</text>
+        </view>
         <view class="pending-buttons">
-          <button class="accept-btn" @click="acceptRequest(req)">同意</button>
-          <button class="reject-btn" @click="rejectRequest(req)">拒绝</button>
+          <button class="accept-btn" @click="acceptRequest(req)" :disabled="loading">同意</button>
+          <button class="reject-btn" @click="rejectRequest(req)" :disabled="loading">拒绝</button>
+        </view>
+      </view>
+    </view>
+
+    <view v-if="myFriends.length > 0" class="friends-section">
+      <text class="friends-title">我的好友</text>
+      <view 
+        v-for="(friend, idx) in myFriends" 
+        :key="idx" 
+        class="friend-item"
+      >
+        <view class="friend-info">
+          <text class="friend-username">{{ friend.username }}</text>
+          <text class="friend-email">{{ friend.email }}</text>
         </view>
       </view>
     </view>
@@ -57,127 +92,320 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, onMounted } from 'vue'
+import { 
+  searchUserByEmail, 
+  sendFriendInvitation, 
+  getFriendInvitations, 
+  acceptFriendInvitation, 
+  refuseFriendInvitation,
+  getFriendList
+} from '../../common/api/user'
 
 const searchEmail = ref('')
 const searchResult = ref<any>(null)
 const pendingRequests = ref<any[]>([])
-const myFriends = ref<string[]>([])
-const allUsers = [
-  { email: '3393479429@qq.com' },
-  { email: '3382636795@qq.com' }
-]
+const myFriends = ref<any[]>([])
+const loading = ref(false)
+const showDebug = ref(false)
 
-// 读取当前登录用户
-const currentUser = ref('')
-function getCurrentUser() {
-  const user = uni.getStorageSync('current_user')
-  currentUser.value = user?.username || ''
+// 获取当前登录用户信息
+const currentUser = ref<any>(null)
+const token = ref<string>('')
+
+onMounted(() => {
+  getCurrentUserInfo()
+  loadFriendInvitations()
+  loadFriendList()
+})
+
+function getCurrentUserInfo() {
+  console.log('开始获取当前用户信息...')
+  const userStr = uni.getStorageSync('current_user')
+  console.log('从存储中获取的用户信息字符串:', userStr)
+  
+  if (userStr) {
+    try {
+      currentUser.value = JSON.parse(userStr)
+      console.log('解析后的用户信息:', currentUser.value)
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+      currentUser.value = null
+    }
+  } else {
+    console.log('未找到存储的用户信息')
+    currentUser.value = null
+  }
+  
+  // 获取token
+  const storedToken = uni.getStorageSync('token')
+  token.value = storedToken || ''
+  console.log('Token状态:', token.value ? '存在' : '不存在')
+  
+  // 如果没有用户信息，尝试从token中获取
+  if (!currentUser.value) {
+    console.log('尝试从token获取用户信息，token:', token.value ? '存在' : '不存在')
+  }
 }
 
-// 本地请求和好友数据
-function getAllRequests() {
-  return uni.getStorageSync('friend_requests') || []
-}
-function setAllRequests(reqs: any[]) {
-  uni.setStorageSync('friend_requests', reqs)
-}
-function getAllFriends() {
-  return uni.getStorageSync('friend_relations') || {}
-}
-function setAllFriends(obj: any) {
-  uni.setStorageSync('friend_relations', obj)
-}
+// 搜索用户
+async function searchUser() {
+  console.log('开始搜索用户，输入邮箱:', searchEmail.value)
+  console.log('当前用户信息:', currentUser.value)
+  
+  if (!searchEmail.value.trim()) {
+    uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
+    return
+  }
 
-function updatePendingRequests() {
-  const reqs = getAllRequests()
-  pendingRequests.value = reqs.filter((r: any) => r.to === currentUser.value)
-}
-
-function updateMyFriends() {
-  const all = getAllFriends()
-  myFriends.value = all[currentUser.value] || []
-}
-
-function searchUser() {
-  if (!searchEmail.value) return
-  if (searchEmail.value === currentUser.value) {
-    uni.showToast({ title: '不能添加自己', icon: 'none' })
+  if (currentUser.value && searchEmail.value === currentUser.value.email) {
+    uni.showToast({ title: '不能添加自己为好友', icon: 'none' })
     searchResult.value = null
     return
   }
-  const user = allUsers.find(u => u.email === searchEmail.value)
-  if (user) {
-    updateMyFriends()
-    const added = myFriends.value.includes(user.email)
-    const reqs = getAllRequests()
-    const pending = reqs.some((r: any) => r.from === currentUser.value && r.to === user.email)
-    searchResult.value = {
-      email: user.email,
-      added,
-      pending
+
+  loading.value = true
+  try {
+    console.log('调用模拟搜索API...')
+    // 由于后端没有搜索API，我们直接通过邮箱查找用户
+    // 这里使用一个简单的模拟搜索，实际项目中应该调用后端API
+    const response = await searchUserByEmailDirect(searchEmail.value)
+    console.log('搜索API响应:', response)
+    
+    if (response.code === 200 && response.data) {
+      const user = response.data
+      console.log('找到用户:', user)
+      
+      // 检查是否已经是好友
+      const isFriend = myFriends.value.some(friend => friend.id === user.id)
+      console.log('是否已经是好友:', isFriend)
+      
+      // 检查是否已经发送过邀请
+      const hasPendingInvitation = pendingRequests.value.some(req => 
+        req.inviter.id === user.id && req.status === 'pending'
+      )
+      console.log('是否有待处理邀请:', hasPendingInvitation)
+
+      searchResult.value = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        added: isFriend,
+        pending: hasPendingInvitation
+      }
+      console.log('搜索结果:', searchResult.value)
+    } else {
+      searchResult.value = null
+      console.log('未找到用户，响应:', response)
+      uni.showToast({ title: response.message || '未找到该用户', icon: 'none' })
     }
-  } else {
+  } catch (error) {
+    console.error('搜索用户失败:', error)
     searchResult.value = null
-    uni.showToast({ title: '未找到该用户', icon: 'none' })
+    uni.showToast({ title: '搜索失败，请稍后重试', icon: 'none' })
+  } finally {
+    loading.value = false
   }
 }
 
-function addFriend(user: any) {
-  const reqs = getAllRequests()
-  if (!reqs.some((r: any) => r.from === currentUser.value && r.to === user.email)) {
-    reqs.push({ from: currentUser.value, to: user.email })
-    setAllRequests(reqs)
-    user.pending = true
-    updatePendingRequests()
-    uni.showToast({ title: '好友请求已发送', icon: 'none' })
+// 直接搜索用户（模拟API调用）
+async function searchUserByEmailDirect(email: string) {
+  console.log('模拟搜索用户:', email)
+  // 这里应该调用后端API，但由于后端没有搜索接口，我们模拟一下
+  // 实际项目中应该实现后端的搜索API
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // 模拟从数据库中找到用户
+      const mockUsers = [
+        { id: 1, username: 'yjj', email: '3213495082@qq.com' },
+        { id: 2, username: 'yjj', email: 'yjj@qq.com' },
+        { id: 3, username: 'testuser1', email: 'testuser1@example.com' },
+        { id: 4, username: '111', email: '111@qq.com' }
+      ]
+      
+      console.log('可用的模拟用户:', mockUsers)
+      const user = mockUsers.find(u => u.email === email)
+      console.log('找到的用户:', user)
+      
+      if (user) {
+        resolve({
+          code: 200,
+          message: '搜索成功',
+          data: user
+        })
+      } else {
+        resolve({
+          code: 404,
+          message: '未找到该用户',
+          data: null
+        })
+      }
+    }, 500) // 模拟网络延迟
+  })
+}
+
+// 添加好友
+async function addFriend(user: any) {
+  console.log('开始添加好友:', user)
+  console.log('当前用户:', currentUser.value)
+  
+  if (!currentUser.value) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    return
   }
-}
 
-function acceptRequest(req: any) {
-  // 双方互为好友
-  const all = getAllFriends()
-  all[currentUser.value] = all[currentUser.value] || []
-  all[req.from] = all[req.from] || []
-  if (!all[currentUser.value].includes(req.from)) all[currentUser.value].push(req.from)
-  if (!all[req.from].includes(currentUser.value)) all[req.from].push(currentUser.value)
-  setAllFriends(all)
-  // 移除请求
-  let reqs = getAllRequests()
-  reqs = reqs.filter((r: any) => !(r.from === req.from && r.to === currentUser.value))
-  setAllRequests(reqs)
-  updatePendingRequests()
-  updateMyFriends()
-  uni.showToast({ title: '已添加为好友', icon: 'success' })
-}
-function rejectRequest(req: any) {
-  let reqs = getAllRequests()
-  reqs = reqs.filter((r: any) => !(r.from === req.from && r.to === currentUser.value))
-  setAllRequests(reqs)
-  updatePendingRequests()
-  uni.showToast({ title: '已拒绝', icon: 'none' })
-}
-
-watchEffect(() => {
-  getCurrentUser()
-  updatePendingRequests()
-  updateMyFriends()
-  // 3382636795@qq.com 登录时自动补一条请求（仅首次）
-  if (currentUser.value === '3382636795@qq.com') {
-    const reqs = getAllRequests()
-    if (!reqs.some((r: any) => r.from === '3393479429@qq.com' && r.to === '3382636795@qq.com')) {
-      reqs.push({ from: '3393479429@qq.com', to: '3382636795@qq.com' })
-      setAllRequests(reqs)
-      updatePendingRequests()
+  loading.value = true
+  try {
+    console.log('发送好友邀请，参数:', { invitee: user.id })
+    const response = await sendFriendInvitation({ invitee: user.id })
+    console.log('发送邀请响应:', response)
+    
+    if (response.code === 200) {
+      searchResult.value.pending = true
+      uni.showToast({ title: '好友请求已发送', icon: 'success' })
+      // 重新加载邀请列表
+      loadFriendInvitations()
+    } else {
+      uni.showToast({ title: response.message || '发送失败', icon: 'none' })
     }
+  } catch (error) {
+    console.error('发送好友请求失败:', error)
+    uni.showToast({ title: '发送失败，请稍后重试', icon: 'none' })
+  } finally {
+    loading.value = false
   }
-})
+}
+
+// 加载好友邀请列表
+async function loadFriendInvitations() {
+  try {
+    const response = await getFriendInvitations()
+    if (response.code === 200 && response.data) {
+      // 过滤出收到的待处理邀请
+      pendingRequests.value = response.data.filter((invitation: any) => 
+        invitation.status === 'pending' && invitation.invitee.id === currentUser.value?.id
+      )
+    }
+  } catch (error) {
+    console.error('加载好友邀请失败:', error)
+    // 如果API调用失败，使用空数组
+    pendingRequests.value = []
+  }
+}
+
+// 加载好友列表
+async function loadFriendList() {
+  try {
+    const response = await getFriendList()
+    if (response.code === 200 && response.data) {
+      myFriends.value = response.data.list || []
+    }
+  } catch (error) {
+    console.error('加载好友列表失败:', error)
+    // 如果API调用失败，使用空数组
+    myFriends.value = []
+  }
+}
+
+// 接受好友请求
+async function acceptRequest(invitation: any) {
+  loading.value = true
+  try {
+    const response = await acceptFriendInvitation(invitation.id)
+    if (response.code === 200) {
+      uni.showToast({ title: '已添加为好友', icon: 'success' })
+      // 重新加载数据
+      loadFriendInvitations()
+      loadFriendList()
+    } else {
+      uni.showToast({ title: response.message || '操作失败', icon: 'none' })
+    }
+  } catch (error) {
+    console.error('接受好友请求失败:', error)
+    uni.showToast({ title: '操作失败，请稍后重试', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+// 拒绝好友请求
+async function rejectRequest(invitation: any) {
+  loading.value = true
+  try {
+    const response = await refuseFriendInvitation(invitation.id)
+    if (response.code === 200) {
+      uni.showToast({ title: '已拒绝', icon: 'success' })
+      // 重新加载邀请列表
+      loadFriendInvitations()
+    } else {
+      uni.showToast({ title: response.message || '操作失败', icon: 'none' })
+    }
+  } catch (error) {
+    console.error('拒绝好友请求失败:', error)
+    uni.showToast({ title: '操作失败，请稍后重试', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+function onSearchInput() {
+  // 清空搜索结果
+  searchResult.value = null
+}
+
 function goBack() {
   uni.navigateBack()
 }
 </script>
 
 <style scoped>
+/* 调试信息样式 */
+.debug-info {
+  background: #f0f0f0;
+  padding: 20rpx;
+  margin: 20rpx;
+  border-radius: 10rpx;
+  border: 1rpx solid #ccc;
+}
+
+.debug-title {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.debug-text {
+  font-size: 20rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 5rpx;
+  word-break: break-all;
+}
+
+.debug-btn {
+  background: #4e54c8;
+  color: white;
+  border: none;
+  border-radius: 8rpx;
+  padding: 10rpx 20rpx;
+  font-size: 22rpx;
+  margin-top: 10rpx;
+}
+
+.debug-toggle {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+  font-size: 20rpx;
+  position: absolute;
+  right: 30rpx;
+  top: 80rpx;
+}
+
 .container {
   background: #f5f7fa;
   min-height: 100vh;
@@ -202,7 +430,7 @@ function goBack() {
   font-weight: bold;
 }
 
-/* 搜索区域 - 修改为同一行布局 */
+/* 搜索区域 */
 .search-section {
   display: flex;
   flex-direction: row;
@@ -229,6 +457,7 @@ function goBack() {
   white-space: nowrap;
 }
 
+/* 搜索结果 */
 .user-result {
   background: #fff;
   border-radius: 16rpx;
@@ -236,11 +465,24 @@ function goBack() {
   margin-bottom: 30rpx;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.user-info {
+  flex: 1;
 }
 
 .user-email {
-  flex: 1;
   font-size: 28rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.user-username {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
 }
 
 .add-btn {
@@ -252,9 +494,13 @@ function goBack() {
   font-size: 26rpx;
 }
 
+.add-btn:disabled {
+  background: #ccc;
+}
+
 .pending-btn {
   background: #ffd93d;
-  color: #fff;
+  color: #333;
   border: none;
   border-radius: 10rpx;
   padding: 15rpx 25rpx;
@@ -270,10 +516,12 @@ function goBack() {
   font-size: 26rpx;
 }
 
+/* 好友请求区域 */
 .pending-section {
   background: #fff;
   border-radius: 16rpx;
   padding: 20rpx;
+  margin-bottom: 30rpx;
 }
 
 .pending-title {
@@ -283,25 +531,38 @@ function goBack() {
   display: block;
 }
 
-/* 修改好友请求项布局 */
 .pending-item {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20rpx;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.pending-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.pending-info {
+  flex: 1;
+}
+
+.pending-username {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
 }
 
 .pending-email {
-  font-size: 28rpx;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-right: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+  display: block;
 }
 
-/* 修改按钮组布局 */
 .pending-buttons {
   display: flex;
   flex-direction: row;
@@ -317,6 +578,10 @@ function goBack() {
   font-size: 26rpx;
 }
 
+.accept-btn:disabled {
+  background: #ccc;
+}
+
 .reject-btn {
   background: #e74c3c;
   color: #fff;
@@ -324,5 +589,51 @@ function goBack() {
   border-radius: 10rpx;
   padding: 15rpx 25rpx;
   font-size: 26rpx;
+}
+
+.reject-btn:disabled {
+  background: #ccc;
+}
+
+/* 好友列表区域 */
+.friends-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+}
+
+.friends-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.friend-item:last-child {
+  border-bottom: none;
+}
+
+.friend-info {
+  flex: 1;
+}
+
+.friend-username {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.friend-email {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
 }
 </style>
