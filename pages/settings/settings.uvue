@@ -2,218 +2,236 @@
   <view class="container">
     <!-- 顶部 -->
     <view class="header">
-      <text class="back">←</text>
-      <text class="title">设置</text>
-      <text class="subtitle">个性化您的体验</text>
+      <text class="back" @click="goBack">←</text>
+      <view class="title-section">
+        <text class="title">设置</text>
+        <text class="subtitle">个人信息管理</text>
+      </view>
     </view>
 
-    <!-- 设置项列表 -->
-    <view class="settings-list">
-      <!-- 昵称设置 -->
-      <view class="settings-item">
-        <text class="item-label">昵称</text>
-        <input v-model="nickname" class="item-input" placeholder="请输入昵称" />
-      </view>
-
-      <!-- 头像设置 -->
-      <view class="settings-item">
-        <text class="item-label">头像</text>
-        <view class="item-avatar" @click="chooseAvatar">
+    <!-- 用户信息卡片 -->
+    <view class="user-card">
+      <view class="info-item">
+        <text class="info-label">头像</text>
+        <view class="info-content" @click="chooseAvatar">
           <image :src="avatarUrl" class="avatar" mode="aspectFill" />
         </view>
       </view>
-
-      <!-- 显示用户ID -->
-      <view class="settings-item">
-        <text class="item-label">用户ID</text>
-        <view class="item-value">{{ userId }}</view>
+      
+      <view class="info-item">
+        <text class="info-label">昵称</text>
+        <text class="info-content">{{ nickname || '未设置' }}</text>
       </view>
-
-      <!-- 修改密码 -->
-      <view class="settings-item">
-        <text class="item-label">修改密码</text>
-        <input v-model="oldPassword" class="item-input" type="password" placeholder="请输入旧密码" />
-        <input v-model="newPassword" class="item-input" type="password" placeholder="请输入新密码" />
-        <text class="item-action" @click="changePassword">修改</text>
-      </view>
-
-      <!-- 更多设置 -->
-      <view class="settings-item">
-        <text class="item-label">更多设置</text>
-        <text class="item-action" @click="goToMoreSettings">查看全部</text>
+      
+      <view class="info-item">
+        <text class="info-label">用户ID</text>
+        <text class="info-content">{{ userId || '未知' }}</text>
       </view>
     </view>
 
     <!-- 退出按钮 -->
-    <view class="logout-button">
-      <button class="logout-btn" @click="logout">退出登录</button>
+    <view class="logout-section">
+      <button class="logout-btn" @click="showLogoutConfirm">
+        <text class="logout-icon">🚪</text>
+        <text class="logout-text">退出登录</text>
+      </button>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
-const nickname = ref('张三')  // 默认昵称
-const avatarUrl = ref('/static/icons/default-avatar.png')  // 默认头像
-const userId = ref('U123456789')  // 默认用户ID
-const oldPassword = ref('')
-const newPassword = ref('')
+const nickname = ref('')
+const avatarUrl = ref('/static/icons/default-avatar.png')
+const userId = ref('')
 
-// 选择头像
+onMounted(() => {
+  // 从本地存储获取当前用户信息
+  const userStr = uni.getStorageSync('current_user')
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr)
+      nickname.value = user.username || ''
+      userId.value = user.id ? String(user.id) : ''
+      // 头像可根据后端实际字段调整
+      // avatarUrl.value = user.avatarUrl || avatarUrl.value
+    } catch (e) {
+      // ignore
+    }
+  }
+})
+
+function goBack() {
+  uni.navigateBack()
+}
+
 function chooseAvatar() {
   uni.chooseImage({
     count: 1,
     success: (res) => {
       avatarUrl.value = res.tempFilePaths[0]
+      uni.showToast({
+        title: '头像更新成功',
+        icon: 'success'
+      })
     }
   })
 }
 
-// 修改密码
-function changePassword() {
-  if (!oldPassword.value || !newPassword.value) {
-    uni.showToast({
-      title: '请输入旧密码和新密码',
-      icon: 'none'
-    })
-    return
-  }
-  // 调用 API 修改密码（此处模拟）
-  uni.showToast({
-    title: '密码修改成功',
-    icon: 'success',
-    duration: 2000
+function showLogoutConfirm() {
+  uni.showModal({
+    title: '确认退出',
+    content: '确定要退出登录吗？',
+    confirmText: '退出',
+    cancelText: '取消',
+    confirmColor: '#dc143c',
+    success: (res) => {
+      if (res.confirm) {
+        logout()
+      }
+    }
   })
 }
 
-// 退出登录功能
 function logout() {
-  uni.showToast({
-    title: '已退出登录',
-    icon: 'success',
-    duration: 2000
+  uni.showLoading({
+    title: '退出中...'
   })
-  // 清除用户登录状态数据
-  uni.removeStorageSync('current_user');
-  // 退出登录后跳转到登录页面
-  uni.navigateTo({
-    url: '/pages/login/login'
-  })
-}
-
-// 跳转到更多设置页面
-function goToMoreSettings() {
-  uni.navigateTo({ url: '/pages/more-settings/more-settings' })
+  
+  setTimeout(() => {
+    uni.hideLoading()
+    uni.showToast({
+      title: '已退出登录',
+      icon: 'success',
+      duration: 2000
+    })
+    uni.removeStorageSync('current_user');
+    uni.removeStorageSync('token');
+    uni.reLaunch({ url: '/pages/login/login' })
+  }, 1000)
 }
 </script>
 
 <style scoped>
 .container {
-  background-color: #f5f7fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
   padding-bottom: 10%;
 }
 
-/* 顶部区域 */
 .header {
-  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 80rpx 30rpx 40rpx;
   border-bottom-left-radius: 30rpx;
   border-bottom-right-radius: 30rpx;
   position: relative;
   text-align: center;
+  box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.2);
 }
+
 .back {
   position: absolute;
   left: 30rpx;
   top: 80rpx;
   font-size: 36rpx;
   color: white;
+  font-weight: bold;
 }
-.title, .subtitle {
-  width: 100%;
-  display: block;
+
+.title-section {
   text-align: center;
 }
+
 .title {
   font-size: 36rpx;
   font-weight: bold;
   color: white;
+  display: block;
+  margin-bottom: 8rpx;
 }
+
 .subtitle {
   font-size: 24rpx;
-  color: #f0f0f0;
-  margin-top: 10rpx;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
 }
 
-/* 设置项 */
-.settings-list {
-  margin-top: 40rpx;
+.user-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 40rpx 30rpx 20rpx 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
 }
 
-.settings-item {
-  background-color: #fff;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.info-item {
+  margin-bottom: 40rpx;
 }
 
-.item-label {
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
   font-size: 26rpx;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.info-content {
+  font-size: 30rpx;
   color: #333;
-}
-
-.item-input {
-  font-size: 24rpx;
-  padding: 10rpx;
-  border-radius: 12rpx;
-  width: 60%;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-}
-
-.item-avatar {
-  width: 60rpx;
-  height: 60rpx;
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: #f0f0f0;
+  font-weight: 600;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatar {
-  width: 100%;
-  height: 100%;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: 3rpx solid #667eea;
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.2);
 }
 
-.item-value {
-  font-size: 24rpx;
-  color: #666;
-}
-
-.item-action {
-  font-size: 24rpx;
-  color: #4e54c8;
-  cursor: pointer;
-}
-
-.logout-button {
-  margin-top: 50rpx;
-  padding: 30rpx;
-  text-align: center;
-  align-items: center;
+.logout-section {
+  margin: 40rpx 30rpx 0 30rpx;
 }
 
 .logout-btn {
-  background-color: #e74c3c;
-  color: white;
+  width: 100%;
+  background: linear-gradient(135deg, #dc143c, #b22222);
+  color: #fff;
   font-size: 28rpx;
-  padding: 16rpx 40rpx;
-  border-radius: 30rpx;
-  width: 80%;
+  border: none;
+  border-radius: 20rpx;
+  padding: 30rpx 0;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(220, 20, 60, 0.3);
+  transition: transform 0.2s;
+}
+
+.logout-btn:active {
+  transform: scale(0.98);
+}
+
+.logout-icon {
+  font-size: 24rpx;
+}
+
+.logout-text {
+  font-size: 28rpx;
 }
 </style>
