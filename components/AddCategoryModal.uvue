@@ -1,0 +1,385 @@
+<template>
+  <view v-if="visible" class="modal-overlay" @click="closeModal">
+    <view class="modal-content" @click.stop>
+      <view class="modal-header">
+        <text class="modal-title">添加分类</text>
+        <text class="close-btn" @click="closeModal">×</text>
+      </view>
+      
+      <view class="modal-body">
+        <!-- 分类名称输入 -->
+        <view class="input-group">
+          <text class="input-label">分类名称</text>
+          <input 
+            class="input-field" 
+            v-model="categoryName" 
+            placeholder="请输入分类名称"
+            maxlength="20"
+          />
+        </view>
+        
+        <!-- 分类图标选择 -->
+        <view class="input-group">
+          <text class="input-label">分类图标</text>
+          <view class="icon-grid">
+            <view 
+              v-for="icon in availableIcons" 
+              :key="icon"
+              class="icon-item"
+              :class="{ selected: selectedIcon === icon }"
+              @click="selectIcon(icon)"
+            >
+              <text class="icon-text">{{ icon }}</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 当前页面类型显示 -->
+        <view class="type-info">
+          <text class="type-label">当前类型：</text>
+          <text class="type-value">{{ currentTypeDisplay }}</text>
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="btn-confirm" @click="createCategory" :disabled="!canSubmit">
+          {{ loading ? '创建中...' : '创建分类' }}
+        </button>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { createCategoryWithCurrentType } from '../common/api/category'
+import { getCurrentType, hasValidPageType } from '../utils/pageState'
+
+// Props
+interface Props {
+  visible: boolean
+}
+
+const props = defineProps<Props>()
+
+// Emits
+const emit = defineEmits<{
+  'update:visible': [value: boolean]
+  'created': [category: any]
+}>()
+
+// 响应式数据
+const categoryName = ref('')
+const selectedIcon = ref('📁')
+const loading = ref(false)
+
+// 可用图标列表
+const availableIcons = [
+  '📁', '🍔', '🚗', '🏠', '👕', '📱', '💊', '🎬', '📚', '🎮',
+  '💼', '💰', '🎁', '✈️', '🏥', '🎓', '💍', '🏖️', '🎯', '🎨'
+]
+
+// 计算属性
+const currentTypeDisplay = computed(() => {
+  const currentType = getCurrentType()
+  return currentType || '未设置'
+})
+
+const canSubmit = computed(() => {
+  const hasName = categoryName.value.trim().length > 0
+  const hasType = hasValidPageType()
+  console.log('按钮状态检查:', { 
+    hasName, 
+    hasType, 
+    categoryName: categoryName.value,
+    currentType: getCurrentType()
+  })
+  return hasName && hasType
+})
+
+// 方法
+const selectIcon = (icon: string) => {
+  selectedIcon.value = icon
+}
+
+const closeModal = () => {
+  emit('update:visible', false)
+  resetForm()
+}
+
+const resetForm = () => {
+  categoryName.value = ''
+  selectedIcon.value = '📁'
+  loading.value = false
+}
+
+const createCategory = async () => {
+  if (!canSubmit.value) {
+    uni.showToast({
+      title: '请填写分类名称',
+      icon: 'none'
+    })
+    return
+  }
+  
+  try {
+    loading.value = true
+    
+    // 添加超时处理
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('请求超时')), 10000) // 10秒超时
+    })
+    
+    const responsePromise = createCategoryWithCurrentType(
+      categoryName.value.trim(),
+      selectedIcon.value
+    )
+    
+    const response = await Promise.race([responsePromise, timeoutPromise]) as any
+    
+    if (response && response.code === 200) {
+      // 根据消息类型显示不同的提示
+      if (response.message === 'success (local only)') {
+        uni.showToast({
+          title: '分类已保存到本地',
+          icon: 'success',
+          duration: 2000
+        })
+      } else {
+        uni.showToast({
+          title: '分类创建成功！',
+          icon: 'success',
+          duration: 2000
+        })
+      }
+      
+      emit('created', response.data)
+      closeModal()
+    } else {
+      throw new Error(response?.message || '创建失败')
+    }
+  } catch (error) {
+    console.error('创建分类失败:', error)
+    
+    // 根据错误类型显示不同的提示
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    
+    if (errorMessage.includes('网络') || errorMessage.includes('连接')) {
+      uni.showToast({
+        title: '网络连接失败，请检查网络',
+        icon: 'none',
+        duration: 3000
+      })
+    } else if (errorMessage.includes('认证') || errorMessage.includes('token')) {
+      uni.showToast({
+        title: '登录已过期，请重新登录',
+        icon: 'none',
+        duration: 3000
+      })
+    } else {
+      uni.showToast({
+        title: `创建失败: ${errorMessage}`,
+        icon: 'none',
+        duration: 3000
+      })
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听visible变化
+watch(() => props.visible, (newVal) => {
+  if (newVal && !hasValidPageType()) {
+    uni.showToast({
+      title: '请先在记账页面选择类型',
+      icon: 'none'
+    })
+    closeModal()
+  }
+})
+</script>
+
+<style>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20rpx;
+  width: 80%;
+  max-width: 600rpx;
+  max-height: 85vh;
+  overflow: hidden;
+  position: relative;
+  top: -5vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.close-btn {
+  font-size: 40rpx;
+  color: #999;
+  padding: 10rpx;
+}
+
+.modal-body {
+  padding: 30rpx;
+  overflow-y: auto;
+  flex: 1;
+  max-height: 60vh;
+  /* 滚动条样式优化 */
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 transparent;
+}
+
+/* Webkit浏览器的滚动条样式 */
+.modal-body::-webkit-scrollbar {
+  width: 6rpx;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3rpx;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.input-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 15rpx;
+  display: block;
+}
+
+.input-field {
+  width: 100%;
+  padding: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+  background: #f9f9f9;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15rpx;
+  margin-top: 15rpx;
+}
+
+.icon-item {
+  width: 60rpx;
+  height: 60rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+}
+
+.icon-item.selected {
+  border-color: #4e54c8;
+  background: #e0e3ff;
+}
+
+.icon-text {
+  font-size: 32rpx;
+}
+
+.type-info {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background: #f0f2ff;
+  border-radius: 10rpx;
+  margin-top: 20rpx;
+}
+
+.type-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.type-value {
+  font-size: 26rpx;
+  color: #4e54c8;
+  font-weight: bold;
+  margin-left: 10rpx;
+}
+
+.modal-footer {
+  display: flex;
+  padding: 20rpx 30rpx;
+  border-top: 2rpx solid #f0f0f0;
+  gap: 15rpx;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+.btn-confirm {
+  width: 160rpx;
+  padding: 15rpx 18rpx;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  font-weight: bold;
+  border: none;
+  min-height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(78, 84, 200, 0.3);
+  letter-spacing: 2rpx;
+  margin: 0 auto;
+}
+
+.btn-confirm:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 8rpx rgba(78, 84, 200, 0.3);
+}
+
+.btn-confirm:disabled {
+  background: #ccc;
+  color: #999;
+  box-shadow: none;
+  transform: none;
+}
+</style> 

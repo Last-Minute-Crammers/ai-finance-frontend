@@ -47,13 +47,13 @@ export const getTransactionList = (params: TransactionListParams = {}): Promise<
   });
 }
 
-// 创建交易记录 - 更新参数类型定义
+// 创建交易记录 - 更新参数类型定义以匹配后端API
 export const createTransaction = (data: {
-  amount: number;
-  categoryId: number;
-  incomeExpense: 'income' | 'expense';
-  remark: string;
-  tradeTime?: string;
+  CategoryId: number;
+  IncomeExpense: 'income' | 'expense';
+  Amount: number;
+  Remark: string;
+  TradeTime: string;
 }): Promise<ApiResponse<Transaction>> => {
   console.log('createTransaction called with data:', data);
   

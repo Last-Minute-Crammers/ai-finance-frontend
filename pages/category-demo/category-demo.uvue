@@ -1,0 +1,200 @@
+<template>
+  <view class="demo-container">
+    <view class="header">
+      <text class="back-btn" @click="goBack">←</text>
+      <text class="header-title">分类管理演示</text>
+    </view>
+    
+    <view class="content">
+      <view class="info-card">
+        <text class="info-title">当前页面状态</text>
+        <view class="info-item">
+          <text class="info-label">页面类型：</text>
+          <text class="info-value">{{ currentType || '未设置' }}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">income_expense：</text>
+          <text class="info-value">{{ currentIncomeExpense || '未设置' }}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">页面路径：</text>
+          <text class="info-value">{{ currentPath || '未设置' }}</text>
+        </view>
+      </view>
+      
+      <view class="action-card">
+        <text class="action-title">操作演示</text>
+        <button class="action-btn" @click="showAddCategory" :disabled="!hasValidType">
+          {{ hasValidType ? '添加分类' : '请先进入记账页面选择类型' }}
+        </button>
+        <text class="action-tip">点击按钮可以添加分类，会自动使用当前页面的类型</text>
+      </view>
+      
+      <view class="tip-card">
+        <text class="tip-title">使用说明</text>
+        <text class="tip-text">1. 先进入记账页面，选择"支出"或"收入"类型</text>
+        <text class="tip-text">2. 然后进入此页面，就可以添加对应类型的分类</text>
+        <text class="tip-text">3. 分类会自动同步到本地存储</text>
+      </view>
+    </view>
+    
+    <!-- 添加分类模态框 -->
+    <AddCategoryModal 
+      v-model:visible="showAddCategoryModal"
+      @created="onCategoryCreated"
+    />
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { getCurrentType, getCurrentIncomeExpense, getPagePath, hasValidPageType } from '../../utils/pageState'
+import AddCategoryModal from '../../components/AddCategoryModal.uvue'
+
+// 响应式数据
+const showAddCategoryModal = ref(false)
+
+// 计算属性
+const currentType = computed(() => getCurrentType())
+const currentIncomeExpense = computed(() => getCurrentIncomeExpense())
+const currentPath = computed(() => getPagePath())
+const hasValidType = computed(() => hasValidPageType())
+
+// 方法
+const goBack = () => {
+  uni.navigateBack()
+}
+
+const showAddCategory = () => {
+  if (!hasValidType.value) {
+    uni.showToast({
+      title: '请先进入记账页面选择类型',
+      icon: 'none'
+    })
+    return
+  }
+  showAddCategoryModal.value = true
+}
+
+const onCategoryCreated = (newCategory: any) => {
+  console.log('新分类已创建:', newCategory)
+  uni.showToast({
+    title: '分类创建成功！',
+    icon: 'success'
+  })
+}
+
+onMounted(() => {
+  console.log('当前页面状态:', {
+    type: currentType.value,
+    incomeExpense: currentIncomeExpense.value,
+    path: currentPath.value,
+    hasValidType: hasValidType.value
+  })
+})
+</script>
+
+<style>
+.demo-container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.header {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  padding: 80rpx 30rpx 40rpx;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  text-align: center;
+  position: relative;
+}
+
+.back-btn {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+}
+
+.content {
+  padding: 30rpx;
+}
+
+.info-card, .action-card, .tip-card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.info-title, .action-title, .tip-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #4e54c8;
+  font-weight: bold;
+}
+
+.action-btn {
+  width: 100%;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  color: white;
+  padding: 24rpx;
+  font-size: 32rpx;
+  border-radius: 40rpx;
+  border: none;
+  margin-bottom: 20rpx;
+}
+
+.action-btn:disabled {
+  background: #ccc;
+  color: #999;
+}
+
+.action-tip {
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  display: block;
+}
+
+.tip-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 10rpx;
+  display: block;
+}
+</style> 
