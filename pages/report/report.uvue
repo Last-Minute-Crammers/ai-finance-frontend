@@ -2,7 +2,7 @@
   <view class="container">
     <!-- 顶部标题栏 -->
     <view class="header">
-      <text class="back">←</text>
+      <text class="back" @click="goBack">←</text>
       <text class="title">财务报告</text>
       <text class="subtitle">智能分析您的财务状况</text>
 
@@ -11,18 +11,26 @@
           v-for="tab in tabs"
           :key="tab"
           :class="['tab', activeTab === tab ? 'active' : '']"
-          @click="activeTab = tab"
+          @click="switchTab(tab)"
         >
           {{ tab }}
         </view>
       </view>
     </view>
 
+    <!-- 生成报告按钮 -->
+    <view class="generate-section">
+      <button class="generate-btn" @click="generateReport" :disabled="isGenerating">
+        <text v-if="isGenerating">生成中...</text>
+        <text v-else>生成{{ activeTab }}</text>
+      </button>
+    </view>
+
     <!-- 报告区块 -->
-    <view class="card report-card">
+    <view class="card report-card" v-if="reportData.length > 0">
       <view class="report-header">
-        <text class="report-title">10月财务报告</text>
-        <text class="report-date">生成于 2023-11-01</text>
+        <text class="report-title">{{ getReportTitle() }}</text>
+        <text class="report-date">生成于 {{ getCurrentDate() }}</text>
       </view>
 
       <view class="report-grid">
@@ -35,21 +43,26 @@
     </view>
 
     <!-- AI 总结与建议区块 -->
-    <view class="card ai-card">
+    <view class="card ai-card" v-if="summary || suggestion">
       <text class="section-title">AI收支总结</text>
-      <view class="summary">{{ summary }}</view>
+      <view class="summary">{{ summary || '暂无数据' }}</view>
       <text class="section-title" style="margin-top: 24rpx;">AI理财建议</text>
-      <view class="suggestion">{{ suggestion }}</view>
-      <view class="tag-row">
+      <view class="suggestion">{{ suggestion || '暂无建议' }}</view>
+      <view class="tag-row" v-if="tags.length > 0">
         <view class="tag" v-for="tag in tags" :key="tag">{{ tag }}</view>
       </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" v-if="!summary && !suggestion && !isGenerating">
+      <text class="empty-text">点击上方按钮生成{{ activeTab }}</text>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
-import { getHistoryReport } from '../../common/api/report'
+import { ref, onMounted } from 'vue'
+import { getAIReport, getUserStatistics } from '../../common/api/report'
 
 const tabs = ['周报', '月报', '年报']
 const activeTab = ref('月报')
@@ -57,56 +70,170 @@ const activeTab = ref('月报')
 const summary = ref('')
 const suggestion = ref('')
 const tags = ref<string[]>([])
+const isGenerating = ref(false)
 
-function getPeriod(type: 'week' | 'month' | 'year') {
+// 报告数据
+const reportData = ref([
+  { label: '总收入', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+  { label: '总支出', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+  { label: '储蓄率', value: '0%', trend: '暂无数据', trendType: 'gray' },
+  { label: '预算执行', value: '0%', trend: '暂无数据', trendType: 'gray' }
+])
+
+function goBack() {
+  uni.navigateBack()
+}
+
+function switchTab(tab: string) {
+  activeTab.value = tab
+  // 切换tab时清空之前的数据
+  summary.value = ''
+  suggestion.value = ''
+  tags.value = []
+  resetReportData()
+}
+
+function resetReportData() {
+  reportData.value = [
+    { label: '总收入', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+    { label: '总支出', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+    { label: '储蓄率', value: '0%', trend: '暂无数据', trendType: 'gray' },
+    { label: '预算执行', value: '0%', trend: '暂无数据', trendType: 'gray' }
+  ]
+}
+
+function getReportTitle() {
   const now = new Date()
-  if (type === 'week') {
-    const year = now.getFullYear()
-    // 使用与后端一致的周数计算方式
-    const week = Math.ceil((now.getTime() - new Date(year, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) + 1)
-    return `${year}-W${String(week).padStart(2, '0')}`
-  } else if (type === 'month') {
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  
+  if (activeTab.value === '周报') {
+    return `${year}年第${Math.ceil((now.getTime() - new Date(year, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) + 1)}周财务报告`
+  } else if (activeTab.value === '月报') {
+    return `${year}年${month}月财务报告`
   } else {
-    return `${now.getFullYear()}`
+    return `${year}年财务报告`
   }
 }
 
-async function fetchHistoryReport() {
-  const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
-  const period = getPeriod(type)
-  console.log('请求历史报告参数:', { type, period })
+function getCurrentDate() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+async function generateReport() {
+  if (isGenerating.value) return
+  
+  isGenerating.value = true
+  
   try {
-    const res = await getHistoryReport(type, period)
-    console.log('历史报告响应:', res)
-    if (res?.data?.data) {
-      summary.value = res.data.data.Summary
-      suggestion.value = res.data.data.Suggestion
-      tags.value = JSON.parse(res.data.data.Tags || '[]')
-      return
+    // 根据后端API，传递type和空的stats（后端会自动查询数据）
+    const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
+    
+    // 并行获取AI报告和用户统计数据
+    const [aiResponse, statsResponse] = await Promise.all([
+      getAIReport({
+        type,
+        stats: {} // 传递空对象，让后端自动查询数据
+      }),
+      getUserStatistics(type)
+    ])
+    
+    console.log('AI报告生成响应:', aiResponse)
+    console.log('用户统计数据响应:', statsResponse)
+    
+    // 处理AI报告数据
+    if (aiResponse && (aiResponse.summary || aiResponse.suggestion || aiResponse.tags)) {
+      summary.value = aiResponse.summary || ''
+      suggestion.value = aiResponse.suggestion || ''
+      tags.value = aiResponse.tags || []
     } else {
-      // 没有历史报告数据，显示默认信息
-      summary.value = '还没有开始记账，暂无历史报告。'
-      suggestion.value = ''
-      tags.value = []
+      throw new Error('AI返回数据格式错误')
     }
-  } catch (e) {
-    console.error('获取历史报告失败:', e)
-    summary.value = '还没有开始记账，暂无历史报告。'
-    suggestion.value = ''
-    tags.value = []
+    
+    // 处理用户统计数据
+    if (statsResponse && statsResponse.data && statsResponse.data.list && statsResponse.data.list.length > 0) {
+      updateReportDataWithRealStats(statsResponse.data.list)
+    } else {
+      // 如果没有统计数据，显示默认信息
+      updateReportDataWithNoData()
+    }
+    
+    uni.showToast({
+      title: '报告生成成功',
+      icon: 'success'
+    })
+  } catch (error) {
+    console.error('生成报告失败:', error)
+    uni.showToast({
+      title: '生成失败，请重试',
+      icon: 'none'
+    })
+    
+    // 显示默认信息
+    summary.value = '生成报告时出现错误，请检查网络连接或稍后重试。'
+    suggestion.value = '建议检查您的网络连接，确保能够正常访问服务器。'
+    tags.value = ['网络错误', '请重试', '稍后再来']
+    updateReportDataWithNoData()
+  } finally {
+    isGenerating.value = false
   }
 }
 
-onMounted(fetchHistoryReport)
-watch(activeTab, fetchHistoryReport, { immediate: true })
+function updateReportDataWithRealStats(statsList: any[]) {
+  // 获取最新的统计数据（通常是数组中的第一个元素）
+  const latestStats = statsList[0]
+  
+  if (latestStats && latestStats.statistics) {
+    const income = latestStats.statistics.income || { amount: 0, count: 0 }
+    const expense = latestStats.statistics.expense || { amount: 0, count: 0 }
+    
+    const incomeAmount = income.amount / 100 // 转换为元
+    const expenseAmount = expense.amount / 100 // 转换为元
+    const savings = incomeAmount - expenseAmount
+    const savingsRate = incomeAmount > 0 ? (savings / incomeAmount * 100) : 0
+    
+    reportData.value = [
+      { 
+        label: '总收入', 
+        value: `¥${incomeAmount.toFixed(2)}`, 
+        trend: `${income.count}笔交易`, 
+        trendType: 'green' 
+      },
+      { 
+        label: '总支出', 
+        value: `¥${expenseAmount.toFixed(2)}`, 
+        trend: `${expense.count}笔交易`, 
+        trendType: 'red' 
+      },
+      { 
+        label: '储蓄率', 
+        value: `${savingsRate.toFixed(1)}%`, 
+        trend: savings >= 0 ? '正储蓄' : '负储蓄', 
+        trendType: savings >= 0 ? 'green' : 'red' 
+      },
+      { 
+        label: '净收入', 
+        value: `¥${savings.toFixed(2)}`, 
+        trend: savings >= 0 ? '收入大于支出' : '支出大于收入', 
+        trendType: savings >= 0 ? 'green' : 'red' 
+      }
+    ]
+  }
+}
 
-const reportData = [
-  { label: '总收入', value: '¥8,500', trend: '↑5% 较上月', trendType: 'green' },
-  { label: '总支出', value: '¥4,200', trend: '↓12% 较上月', trendType: 'red' },
-  { label: '储蓄率', value: '50.6%', trend: '↑3% 较上月', trendType: 'green' },
-  { label: '预算执行', value: '82%', trend: '↓8% 较上月', trendType: 'red' }
-]
+function updateReportDataWithNoData() {
+  reportData.value = [
+    { label: '总收入', value: '¥0.00', trend: '暂无交易记录', trendType: 'gray' },
+    { label: '总支出', value: '¥0.00', trend: '暂无交易记录', trendType: 'gray' },
+    { label: '储蓄率', value: '0.0%', trend: '暂无数据', trendType: 'gray' },
+    { label: '净收入', value: '¥0.00', trend: '暂无数据', trendType: 'gray' }
+  ]
+}
+
+onMounted(() => {
+  // 页面加载时不自动生成报告，等待用户点击按钮
+})
 </script>
 
 <style scoped>
@@ -173,6 +300,27 @@ const reportData = [
   font-weight: bold;
 }
 
+/* 生成按钮 */
+.generate-section {
+  margin: 30rpx;
+}
+
+.generate-btn {
+  width: 100%;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  color: white;
+  font-size: 28rpx;
+  border: none;
+  border-radius: 16rpx;
+  padding: 24rpx 0;
+  font-weight: bold;
+}
+
+.generate-btn:disabled {
+  background: #ccc;
+  color: #999;
+}
+
 /* 卡片 */
 .card {
   background: #fff;
@@ -233,6 +381,9 @@ const reportData = [
 .red {
   color: #e74c3c;
 }
+.gray {
+  color: #999;
+}
 
 /* AI建议 */
 .section-title {
@@ -240,23 +391,11 @@ const reportData = [
   font-weight: bold;
   margin-bottom: 20rpx;
 }
-.suggestion {
-  display: flex;
-  align-items: flex-start;
+.summary, .suggestion {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #333;
   margin-bottom: 24rpx;
-}
-.bulb {
-  font-size: 32rpx;
-  margin-right: 12rpx;
-}
-.content .main {
-  font-weight: bold;
-  font-size: 24rpx;
-}
-.content .desc {
-  font-size: 22rpx;
-  color: #666;
-  margin-top: 6rpx;
 }
 
 /* 标签组 */
@@ -272,5 +411,16 @@ const reportData = [
   border-radius: 30rpx;
   font-size: 22rpx;
   color: #333;
+}
+
+/* 空状态 */
+.empty-state {
+  margin: 100rpx 30rpx;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
 }
 </style>
