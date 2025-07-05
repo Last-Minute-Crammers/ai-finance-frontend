@@ -166,18 +166,18 @@ async function loadSession(sessionId: string) {
       // 处理每条聊天记录
       sorted.forEach((item: any, index: number) => {
         console.log(`处理第${index + 1}条记录:`, item)
-        console.log(`- input: "${item.input}"`)
-        console.log(`- response: "${item.response}"`)
+        console.log(`- input: "${item.Input}"`)
+        console.log(`- response: "${item.Response}"`)
         
         // 添加用户输入
-        if (item.input && item.input.trim() !== '') {
-          messages.value.push({ role: 'user', text: item.input })
-          console.log(`添加用户消息: "${item.input}"`)
+        if (item.Input && item.Input.trim() !== '') {
+          messages.value.push({ role: 'user', text: item.Input })
+          console.log(`添加用户消息: "${item.Input}"`)
         }
         // 添加AI回复
-        if (item.response && item.response.trim() !== '') {
-          messages.value.push({ role: 'ai', text: item.response })
-          console.log(`添加AI消息: "${item.response}"`)
+        if (item.Response && item.Response.trim() !== '') {
+          messages.value.push({ role: 'ai', text: item.Response })
+          console.log(`添加AI消息: "${item.Response}"`)
         }
       })
       
@@ -256,7 +256,7 @@ async function sendMessage() {
 
 function scrollToBottom() {
   nextTick(() => {
-    scrollIntoView.value = bottomAnchor
+    scrollIntoView.value = bottomAnchor.value
   })
 }
 
