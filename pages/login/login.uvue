@@ -94,7 +94,7 @@ async function login() {
       console.log('登录成功，token已保存:', token.substring(0, 20) + '...')
       
       // 保存用户信息到本地存储
-      uni.setStorageSync('current_user', user)
+      uni.setStorageSync('current_user', JSON.stringify(user))
       
       uni.showToast({
         title: '登录成功',
