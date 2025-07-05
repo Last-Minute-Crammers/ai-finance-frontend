@@ -74,9 +74,15 @@ const goToChat = () => {
 const updatePetMood = async () => {
   try {
     const response = await getTotalStatistic()
-    if (response.code === 200 && response.data) {
-      const { income, expense } = response.data
-      const balance = income.amount - expense.amount
+    console.log('宠物页面 - 总统计响应:', response)
+    
+    if (response?.Data) {
+      const { Income, Expense } = response.Data
+      console.log('宠物页面 - 收入数据:', Income)
+      console.log('宠物页面 - 支出数据:', Expense)
+      
+      const balance = (Income?.Amount || 0) - (Expense?.Amount || 0)
+      console.log('宠物页面 - 计算余额:', balance)
       
       if (balance <= 0) {
         petMood.value = '很担心'
@@ -88,6 +94,8 @@ const updatePetMood = async () => {
         petMood.value = '很开心'
         statusClass.value = 'status-green'
       }
+      
+      console.log('宠物页面 - 最终心情:', petMood.value)
     }
   } catch (error) {
     console.error('获取收支数据失败:', error)
