@@ -1,5 +1,6 @@
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { createCategoryWithCurrentType, getAllIcons, type IconDefinition } from '../common/api/category'
+import { createCategoryWithCurrentType, getAllIcons, type IconDefinition, type Category } from '../common/api/category'
+import { type ApiResponse } from '../common/api/types'
 import { getCurrentType, hasValidPageType } from '../utils/pageState'
 
 // Props
@@ -38,7 +39,7 @@ const availableIcons = getAllIcons()
 
 // 计算属性
 const currentTypeDisplay = computed(() => {
-  return currentPageType.value || '未设置'
+  return currentPageType.value ?? '未设置'
 })
 
 const canSubmit = computed(() => {
@@ -49,30 +50,30 @@ const canSubmit = computed(() => {
     hasType, 
     categoryName: categoryName.value,
     currentType: currentPageType.value
-  }, " at components/AddCategoryModal.uvue:89")
+  }, " at components/AddCategoryModal.uvue:90")
   return hasName && hasType
 })
 
 // 方法
 const updateCurrentType = () => {
   currentPageType.value = getCurrentType()
-  console.log('AddCategoryModal - 当前页面类型已更新:', currentPageType.value, " at components/AddCategoryModal.uvue:101")
+  console.log('AddCategoryModal - 当前页面类型已更新:', currentPageType.value, " at components/AddCategoryModal.uvue:102")
 }
 
 const selectIcon = (icon: IconDefinition) => {
   selectedIconId.value = icon.id
-  console.log('选择图标:', icon.name, 'ID:', icon.id, " at components/AddCategoryModal.uvue:106")
-}
-
-const closeModal = () => {
-  emit('update:visible', false)
-  resetForm()
+  console.log('选择图标:', icon.name, 'ID:', icon.id, " at components/AddCategoryModal.uvue:107")
 }
 
 const resetForm = () => {
   categoryName.value = ''
   selectedIconId.value = 1
   loading.value = false
+}
+
+const closeModal = () => {
+  emit('update:visible', false)
+  resetForm()
 }
 
 const createCategory = async () => {
@@ -87,19 +88,14 @@ const createCategory = async () => {
   try {
     loading.value = true
     
-    // 添加超时处理
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('请求超时')), 10000) // 10秒超时
-    })
-    
-    const responsePromise = createCategoryWithCurrentType(
+    // 直接调用API，不使用Promise.race来避免类型问题
+    const response = await createCategoryWithCurrentType(
       categoryName.value.trim(),
-      selectedIconId.value
+      selectedIconId.value,
+      '#4e54c8' // 添加颜色参数
     )
     
-    const response = await Promise.race([responsePromise, timeoutPromise]) as any
-    
-    if (response && response.code === 200) {
+    if (response && typeof response === 'object' && 'code' in response && response.code === 200) {
       // 根据消息类型显示不同的提示
       if (response.message === 'success (local only)') {
         uni.showToast({
@@ -121,7 +117,7 @@ const createCategory = async () => {
       throw new Error(response?.message || '创建失败')
     }
   } catch (error) {
-    console.error('创建分类失败:', error, " at components/AddCategoryModal.uvue:166")
+    console.error('创建分类失败:', error, " at components/AddCategoryModal.uvue:162")
     
     // 根据错误类型显示不同的提示
     const errorMessage = error instanceof Error ? error.message : String(error)

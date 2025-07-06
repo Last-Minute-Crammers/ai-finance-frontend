@@ -1,0 +1,512 @@
+<template>
+  <view class="chart-container" :id="'ChartContainer'+chartId">
+    <view v-if="loading" class="loading-container">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+    <view v-else-if="error" class="error-container" @tap="retry">
+      <view class="error-icon">!</view>
+      <text class="error-text">{{error}}</text>
+      <text class="retry-text">点击重试</text>
+    </view>
+    <canvas
+      v-else
+      :id="chartId"
+      :canvasId="chartId"
+      :style="{ width: width + 'px', height: height + 'px' }"
+      @error="onError"
+      @touchstart="onTouchStart"
+      @touchmove="onTouchMove"
+      @touchend="onTouchEnd"
+    />
+  </view>
+</template>
+
+<script>
+export default {
+  name: 'SimpleChart',
+  props: {
+    type: {
+      type: String,
+      default: 'line',
+      validator: (value) => ['line', 'bar', 'pie', 'area'].includes(value)
+    },
+    data: {
+      type: Array,
+      default: () => []
+    },
+    categories: {
+      type: Array,
+      default: () => []
+    },
+    series: {
+      type: Array,
+      default: () => []
+    },
+    width: {
+      type: Number,
+      default: 300
+    },
+    height: {
+      type: Number,
+      default: 200
+    },
+    colors: {
+      type: Array,
+      default: () => ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE']
+    },
+    showLegend: {
+      type: Boolean,
+      default: true
+    },
+    showGrid: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      chartId: '',
+      loading: false,
+      error: null,
+      ctx: null,
+      chartData: null
+    };
+  },
+  mounted() {
+    this.chartId = 'chart_' + Math.random().toString(36).substr(2, 9);
+    this.$nextTick(() => {
+      this.initChart();
+    });
+  },
+  methods: {
+    async initChart() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        // 获取canvas上下文
+        this.ctx = uni.createCanvasContext(this.chartId, this);
+        
+        // 处理数据
+        this.processData();
+        
+        // 绘制图表
+        await this.drawChart();
+        
+        this.loading = false;
+      } catch (err) {
+        console.error('图表初始化失败:', err);
+        this.error = err.message || '图表加载失败';
+        this.loading = false;
+      }
+    },
+    
+    processData() {
+      // 处理传入的数据格式
+      if (this.data && this.data.length > 0) {
+        this.chartData = this.data;
+      } else if (this.series && this.series.length > 0) {
+        this.chartData = {
+          categories: this.categories,
+          series: this.series
+        };
+      } else {
+        throw new Error('请提供有效的图表数据');
+      }
+    },
+    
+    async drawChart() {
+      if (!this.ctx || !this.chartData) return;
+      
+      const ctx = this.ctx;
+      const width = this.width;
+      const height = this.height;
+      
+      // 清空画布
+      ctx.clearRect(0, 0, width, height);
+      
+      // 设置背景
+      ctx.setFillStyle('#FFFFFF');
+      ctx.fillRect(0, 0, width, height);
+      
+      switch (this.type) {
+        case 'line':
+          this.drawLineChart(ctx, width, height);
+          break;
+        case 'bar':
+          this.drawBarChart(ctx, width, height);
+          break;
+        case 'pie':
+          this.drawPieChart(ctx, width, height);
+          break;
+        case 'area':
+          this.drawAreaChart(ctx, width, height);
+          break;
+      }
+      
+      // 绘制图例
+      if (this.showLegend) {
+        this.drawLegend(ctx, width, height);
+      }
+      
+      // 执行绘制
+      ctx.draw();
+    },
+    
+    drawLineChart(ctx, width, height) {
+      const padding = 40;
+      const chartWidth = width - padding * 2;
+      const chartHeight = height - padding * 2;
+      
+      if (!this.chartData.series || this.chartData.series.length === 0) return;
+      
+      const series = this.chartData.series[0];
+      const data = series.data || [];
+      const categories = this.chartData.categories || [];
+      
+      if (data.length === 0) return;
+      
+      // 计算数据范围
+      const minValue = Math.min(...data);
+      const maxValue = Math.max(...data);
+      const valueRange = maxValue - minValue || 1;
+      
+      // 绘制网格
+      if (this.showGrid) {
+        this.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue);
+      }
+      
+      // 绘制折线
+      ctx.setStrokeStyle(this.colors[0]);
+      ctx.setLineWidth(2);
+      ctx.beginPath();
+      
+      data.forEach((value, index) => {
+        const x = padding + (index / (data.length - 1)) * chartWidth;
+        const y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.stroke();
+      
+      // 绘制数据点
+      ctx.setFillStyle(this.colors[0]);
+      data.forEach((value, index) => {
+        const x = padding + (index / (data.length - 1)) * chartWidth;
+        const y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+    },
+    
+    drawBarChart(ctx, width, height) {
+      const padding = 40;
+      const chartWidth = width - padding * 2;
+      const chartHeight = height - padding * 2;
+      
+      if (!this.chartData.series || this.chartData.series.length === 0) return;
+      
+      const series = this.chartData.series[0];
+      const data = series.data || [];
+      const categories = this.chartData.categories || [];
+      
+      if (data.length === 0) return;
+      
+      // 计算数据范围
+      const minValue = Math.min(...data);
+      const maxValue = Math.max(...data);
+      const valueRange = maxValue - minValue || 1;
+      
+      // 绘制网格
+      if (this.showGrid) {
+        this.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue);
+      }
+      
+      // 绘制柱状图
+      const barWidth = chartWidth / data.length * 0.8;
+      const barSpacing = chartWidth / data.length * 0.2;
+      
+      ctx.setFillStyle(this.colors[0]);
+      
+      data.forEach((value, index) => {
+        const x = padding + index * (barWidth + barSpacing) + barSpacing / 2;
+        const barHeight = ((value - minValue) / valueRange) * chartHeight;
+        const y = padding + chartHeight - barHeight;
+        
+        ctx.fillRect(x, y, barWidth, barHeight);
+      });
+    },
+    
+    drawPieChart(ctx, width, height) {
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) / 2 - 40;
+      
+      if (!this.chartData.series || this.chartData.series.length === 0) return;
+      
+      const series = this.chartData.series[0];
+      const data = series.data || [];
+      
+      if (data.length === 0) return;
+      
+      const total = data.reduce((sum, value) => sum + value, 0);
+      let currentAngle = -Math.PI / 2; // 从12点钟方向开始
+      
+      data.forEach((value, index) => {
+        const sliceAngle = (value / total) * 2 * Math.PI;
+        const color = this.colors[index % this.colors.length];
+        
+        // 绘制扇形
+        ctx.setFillStyle(color);
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+        ctx.closePath();
+        ctx.fill();
+        
+        currentAngle += sliceAngle;
+      });
+    },
+    
+    drawAreaChart(ctx, width, height) {
+      const padding = 40;
+      const chartWidth = width - padding * 2;
+      const chartHeight = height - padding * 2;
+      
+      if (!this.chartData.series || this.chartData.series.length === 0) return;
+      
+      const series = this.chartData.series[0];
+      const data = series.data || [];
+      
+      if (data.length === 0) return;
+      
+      // 计算数据范围
+      const minValue = Math.min(...data);
+      const maxValue = Math.max(...data);
+      const valueRange = maxValue - minValue || 1;
+      
+      // 绘制网格
+      if (this.showGrid) {
+        this.drawGrid(ctx, padding, chartWidth, chartHeight, data.length, minValue, maxValue);
+      }
+      
+      // 绘制面积图
+      ctx.setFillStyle(this.colors[0] + '40'); // 添加透明度
+      ctx.beginPath();
+      
+      // 绘制填充区域
+      data.forEach((value, index) => {
+        const x = padding + (index / (data.length - 1)) * chartWidth;
+        const y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      // 闭合路径
+      ctx.lineTo(padding + chartWidth, padding + chartHeight);
+      ctx.lineTo(padding, padding + chartHeight);
+      ctx.closePath();
+      ctx.fill();
+      
+      // 绘制边框线
+      ctx.setStrokeStyle(this.colors[0]);
+      ctx.setLineWidth(2);
+      ctx.beginPath();
+      
+      data.forEach((value, index) => {
+        const x = padding + (index / (data.length - 1)) * chartWidth;
+        const y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.stroke();
+    },
+    
+    drawGrid(ctx, padding, chartWidth, chartHeight, dataCount, minValue, maxValue) {
+      ctx.setStrokeStyle('#E5E5E5');
+      ctx.setLineWidth(1);
+      
+      // 绘制水平网格线
+      const gridLines = 5;
+      for (let i = 0; i <= gridLines; i++) {
+        const y = padding + (i / gridLines) * chartHeight;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(padding + chartWidth, y);
+        ctx.stroke();
+      }
+      
+      // 绘制垂直网格线
+      for (let i = 0; i <= dataCount; i++) {
+        const x = padding + (i / dataCount) * chartWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, padding);
+        ctx.lineTo(x, padding + chartHeight);
+        ctx.stroke();
+      }
+    },
+    
+    drawLegend(ctx, width, height) {
+      if (!this.chartData.series || this.chartData.series.length === 0) return;
+      
+      const series = this.chartData.series;
+      const legendY = height - 30;
+      const legendItemWidth = 80;
+      const legendItemHeight = 20;
+      
+      series.forEach((item, index) => {
+        const x = 10 + index * legendItemWidth;
+        const color = this.colors[index % this.colors.length];
+        
+        // 绘制图例颜色块
+        ctx.setFillStyle(color);
+        ctx.fillRect(x, legendY, 15, legendItemHeight);
+        
+        // 绘制图例文字
+        ctx.setFillStyle('#333333');
+        ctx.setFontSize(12);
+        const text = item.name || `系列${index + 1}`;
+        ctx.fillText(text, x + 20, legendY + 15);
+      });
+    },
+    
+    onError(e) {
+      console.error('Canvas错误:', e);
+      this.error = 'Canvas渲染错误';
+    },
+    
+    onTouchStart(e) {
+      // 处理触摸事件
+    },
+    
+    onTouchMove(e) {
+      // 处理触摸移动事件
+    },
+    
+    onTouchEnd(e) {
+      // 处理触摸结束事件
+    },
+    
+    retry() {
+      this.initChart();
+    },
+    
+    // 更新图表数据
+    updateData(newData) {
+      this.data = newData;
+      this.initChart();
+    },
+    
+    // 更新图表配置
+    updateConfig(newConfig) {
+      Object.assign(this.$props, newConfig);
+      this.initChart();
+    }
+  },
+  
+  watch: {
+    data: {
+      handler() {
+        this.initChart();
+      },
+      deep: true
+    },
+    series: {
+      handler() {
+        this.initChart();
+      },
+      deep: true
+    },
+    type() {
+      this.initChart();
+    }
+  }
+};
+</script>
+
+<style>
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666666;
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.error-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #FF3B30;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.error-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666666;
+  text-align: center;
+}
+
+.retry-text {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #007AFF;
+}
+</style> 

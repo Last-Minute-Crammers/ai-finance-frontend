@@ -1,0 +1,187 @@
+<template>
+  <view class="chartsview" :id="'ChartBoxId'+cid">
+    <view v-if="mixinDatacomLoading">
+      <QiunLoading :loadingType="loadingType" />
+    </view>
+    <view v-if="mixinDatacomErrorMessage && errorShow" @tap="reloading">
+      <QiunError :errorMessage="errorMessage" />
+    </view>
+    
+    <!-- 简化的图表渲染逻辑，适配uvue -->
+    <view
+      :style="{ background: background, width: '100%', height: '100%' }"
+      :id="'Chart'+cid"
+      v-show="showchart"
+    >
+      <canvas
+        :id="cid"
+        :canvasId="cid"
+        :style="{ width: cWidth + 'px', height: cHeight + 'px', background: background }"
+        :disable-scroll="disableScroll"
+        @error="_error"
+        v-show="showchart"
+      />
+    </view>
+  </view>
+</template>
+
+<script>
+// 由于移除了uni_modules依赖，这里需要提供一个替代方案
+// 暂时注释掉uCharts的导入，使用原生Canvas实现
+// import uCharts from '../uni_modules/qiun-data-charts/js_sdk/u-charts/u-charts.js';
+import QiunLoading from './QiunLoading.uvue';
+import QiunError from './QiunError.uvue';
+
+export default {
+  name: 'QiunDataCharts',
+  components: {
+    QiunLoading,
+    QiunError
+  },
+  props: {
+    type: {
+      type: String,
+      default: 'line'
+    },
+    chartData: {
+      type: Object,
+      default: () => ({})
+    },
+    opts: {
+      type: Object,
+      default: () => ({})
+    },
+    canvas2d: {
+      type: Boolean,
+      default: false
+    },
+    background: {
+      type: String,
+      default: 'none'
+    },
+    loadingType: {
+      type: Number,
+      default: 2
+    },
+    errorShow: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      cid: '',
+      cWidth: 0,
+      cHeight: 0,
+      showchart: true,
+      mixinDatacomLoading: false,
+      mixinDatacomErrorMessage: null,
+      errorMessage: null,
+      disableScroll: false,
+      chart: null
+    };
+  },
+  mounted() {
+    this.cid = 'qiun_' + Math.random().toString(36).substr(2, 9);
+    this.initChart();
+  },
+  methods: {
+    initChart() {
+      try {
+        this.mixinDatacomLoading = false;
+        this.mixinDatacomErrorMessage = null;
+        
+        // 获取容器尺寸
+        const query = uni.createSelectorQuery().in(this);
+        query.select('#ChartBoxId' + this.cid).boundingClientRect((rect) => {
+          if (rect) {
+            this.cWidth = rect.width;
+            this.cHeight = rect.height;
+            this.renderChart();
+          }
+        }).exec();
+      } catch (error) {
+        console.error('图表初始化失败:', error);
+        this.mixinDatacomErrorMessage = '图表初始化失败';
+        this.errorMessage = error.message || '未知错误';
+      }
+    },
+    
+    renderChart() {
+      try {
+        const ctx = uni.createCanvasContext(this.cid, this);
+        
+        // 合并配置
+        const config = {
+          type: this.type,
+          context: ctx,
+          width: this.cWidth,
+          height: this.cHeight,
+          ...this.chartData,
+          ...this.opts
+        };
+        
+        // 创建图表实例
+        this.chart = new uCharts(config);
+        this.chart.draw();
+        
+      } catch (error) {
+        console.error('图表渲染失败:', error);
+        this.mixinDatacomErrorMessage = '图表渲染失败';
+        this.errorMessage = error.message || '渲染错误';
+      }
+    },
+    
+    reloading() {
+      this.initChart();
+    },
+    
+    _error(e) {
+      console.error('Canvas错误:', e);
+      this.mixinDatacomErrorMessage = 'Canvas渲染错误';
+      this.errorMessage = 'Canvas错误';
+    },
+    
+    // 更新图表数据
+    updateData(newData) {
+      if (this.chart && newData) {
+        this.chart.updateData(newData);
+      }
+    },
+    
+    // 更新图表配置
+    updateConfig(newOpts) {
+      if (this.chart && newOpts) {
+        this.chart.updateConfig(newOpts);
+      }
+    }
+  },
+  
+  watch: {
+    chartData: {
+      handler(newVal) {
+        if (newVal && this.chart) {
+          this.updateData(newVal);
+        }
+      },
+      deep: true
+    },
+    opts: {
+      handler(newVal) {
+        if (newVal && this.chart) {
+          this.updateConfig(newVal);
+        }
+      },
+      deep: true
+    }
+  }
+};
+</script>
+
+<style>
+.chartsview {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+</style> 

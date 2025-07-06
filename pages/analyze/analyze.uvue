@@ -28,11 +28,16 @@
         <text class="chart-subtitle">{{ getPeriodText() }}收支变化</text>
       </view>
       <view class="chart-container">
-        <qiun-data-charts 
+        <SimpleChart 
           v-if="trendChartData.categories && trendChartData.categories.length > 0"
-          type="column"
-          :opts="columnOpts"
-          :chartData="trendChartData"
+          type="bar"
+          :series="trendChartData.series"
+          :categories="trendChartData.categories"
+          :width="350"
+          :height="200"
+          :colors="['#91CB74', '#EE6666']"
+          :showLegend="true"
+          :showGrid="true"
         />
         <view v-else class="empty-chart">
           <text class="empty-text">暂无数据</text>
@@ -47,11 +52,16 @@
         <text class="chart-subtitle">按分类统计支出</text>
       </view>
       <view class="chart-container pie-chart-container">
-        <qiun-data-charts 
+        <SimpleChart 
           v-if="categoryChartData.series && categoryChartData.series.length > 0"
           type="pie"
-          :opts="pieOpts"
-          :chartData="categoryChartData"
+          :series="categoryChartData.series"
+          :categories="[]"
+          :width="350"
+          :height="300"
+          :colors="['#1890FF', '#91CB74', '#FAC858', '#EE6666', '#73C0DE', '#3CA272', '#FC8452', '#9A60B4']"
+          :showLegend="false"
+          :showGrid="false"
         />
         <view v-else class="empty-chart">
           <text class="empty-text">暂无数据</text>
@@ -59,7 +69,7 @@
       </view>
       <view class="custom-legend" v-if="categoryChartData.series && categoryChartData.series.length > 0">
         <view class="legend-item" v-for="(item, idx) in categoryChartData.series" :key="item.name">
-          <view class="legend-dot" :style="{ backgroundColor: pieOpts.color[idx % pieOpts.color.length] }"></view>
+          <view class="legend-dot" :style="{ backgroundColor: chartColors.pie[idx % chartColors.pie.length] }"></view>
           <text class="legend-text">{{ item.name }}</text>
         </view>
       </view>
@@ -79,6 +89,7 @@ import {
   getTransactionListForCategory
 } from '../../common/api/analyze'
 import { getCategoryList } from '../../common/api/category'
+import SimpleChart from '../../components/SimpleChart.uvue'
 
 // 时间选择器
 const timeTabs = [
@@ -93,59 +104,10 @@ const isLoading = ref(false)
 const trendChartData = ref({})
 const categoryChartData = ref({})
 
-// 图表配置
-const columnOpts = {
-  color: ["#91CB74", "#EE6666"],
-  padding: [15, 15, 15, 15],
-  legend: {
-    show: true,
-    position: "bottom",
-    fontSize: 13,
-    fontColor: "#666666"
-  },
-  xAxis: {
-    disableGrid: true,
-    fontColor: "#666666",
-    fontSize: 12
-  },
-  yAxis: {
-    data: [{ min: 0 }],
-    disabled: false,
-    disableGrid: false,
-    splitNumber: 5,
-    gridType: "solid",
-    dashLength: 8,
-    gridColor: "#CCCCCC",
-    padding: 10,
-    showTitle: false
-  },
-  extra: {
-    column: {
-      type: "group",
-      width: 30,
-      seriesGap: 2,
-      categoryGap: 3
-    }
-  }
-}
-
-const pieOpts = {
-  color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"],
-  padding: [15, 15, 40, 15],
-  legend: {
-    show: false
-  },
-  extra: {
-    pie: {
-      activeOpacity: 0.5,
-      activeRadius: 10,
-      offsetAngle: 0,
-      labelWidth: 15,
-      border: true,
-      borderWidth: 3,
-      borderColor: "#FFFFFF"
-    }
-  }
+// 图表颜色配置
+const chartColors = {
+  bar: ["#91CB74", "#EE6666"],
+  pie: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"]
 }
 
 // 方法

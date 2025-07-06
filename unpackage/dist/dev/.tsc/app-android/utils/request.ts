@@ -42,7 +42,7 @@ interface UniRequestError {
 // 获取存储的 token - 添加调试日志
 const getToken = (): string => {
   const token = uni.getStorageSync('token') || '';
-  console.log('Retrieved token:', token ? `${token.substring(0, 20)}...` : 'No token found');
+  __f__('log','at utils/request.ts:45','Retrieved token:', token ? `${token.substring(0, 20)}...` : 'No token found');
   return token;
 };
 
@@ -52,7 +52,7 @@ declare const uni: any;
 // 设置后端URL
 export const setBackendUrl = (url: string): void => {
   uni.setStorageSync('backend_url', url);
-  console.log('Backend URL set to:', url);
+  __f__('log','at utils/request.ts:55','Backend URL set to:', url);
 };
 
 // 增强版设置后端URL函数，支持预设环境选择
@@ -78,13 +78,13 @@ export const healthCheck = async (): Promise<any> => {
       method: 'GET',
       timeout: 3000 // shorter timeout for health check
     });
-    console.log('Backend health check:', response);
+    __f__('log','at utils/request.ts:81','Backend health check:', response);
     return response;
   } catch (error: any) {
     const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
       ? (error as any).message
       : String(error);
-    console.error('Backend connection failed:', errMsg);
+    __f__('error','at utils/request.ts:87','Backend connection failed:', errMsg);
     throw error;
   }
 };
@@ -93,7 +93,7 @@ export const healthCheck = async (): Promise<any> => {
 export const checkBackendConnection = async (customUrl?: string): Promise<any> => {
   const targetUrl = customUrl || BASE_URL;
   try {
-    console.log('检查后端连接状态...', targetUrl);
+    __f__('log','at utils/request.ts:96','检查后端连接状态...', targetUrl);
     const startTime = Date.now();
     
     // 修复Promise.race逻辑，确保适当处理undefined
@@ -128,7 +128,7 @@ export const checkBackendConnection = async (customUrl?: string): Promise<any> =
       throw new Error('无效的响应格式');
     }
     
-    console.log('后端连接检查结果:', response, `响应时间: ${endTime - startTime}ms`);
+    __f__('log','at utils/request.ts:131','后端连接检查结果:', response, `响应时间: ${endTime - startTime}ms`);
     
     return {
       connected: response.statusCode === 200,
@@ -137,7 +137,7 @@ export const checkBackendConnection = async (customUrl?: string): Promise<any> =
       serverInfo: response.data || {}
     };
   } catch (error: any) {
-    console.error('后端连接检查失败:', error);
+    __f__('error','at utils/request.ts:140','后端连接检查失败:', error);
     
     // 处理错误对象，确保类型安全
     const errMsg = typeof error === 'object' && error !== null && 'message' in error 
@@ -181,7 +181,7 @@ export const checkBackendConnection = async (customUrl?: string): Promise<any> =
       ];
     }
     
-    console.log('连接诊断:', diagnostics);
+    __f__('log','at utils/request.ts:184','连接诊断:', diagnostics);
     return { connected: false, error: errMsg, diagnostics };
   }
 };
@@ -193,19 +193,19 @@ export const testConnection = async (maxRetries: number = 1): Promise<any> => {
   
   while (retries <= maxRetries) {
     try {
-      console.log(`测试连接到 ${BASE_URL}/api/test (尝试 ${retries + 1}/${maxRetries + 1})`);
+      __f__('log','at utils/request.ts:196',`测试连接到 ${BASE_URL}/api/test (尝试 ${retries + 1}/${maxRetries + 1})`);
       const response = await request({
         url: '/api/test',
         method: 'GET',
         timeout: 3000
       });
-      console.log('Connection test successful:', response);
+      __f__('log','at utils/request.ts:202','Connection test successful:', response);
       return response;
     } catch (error: any) {
       const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
         ? (error as any).message
         : String(error);
-      console.error(`Connection test failed (attempt ${retries + 1}):`, errMsg);
+      __f__('error','at utils/request.ts:208',`Connection test failed (attempt ${retries + 1}):`, errMsg);
       lastError = error;
       retries++;
       
