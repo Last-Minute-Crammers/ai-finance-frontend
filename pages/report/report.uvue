@@ -189,28 +189,15 @@ async function generateReport() {
   isGenerating.value = true
   
   try {
-    // 根据后端API，传递type和正确的时间范围
+    // 根据后端API，传递type
     const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
     
-    // 获取正确的时间范围
-    const { startTime, endTime } = getTimeRange(type)
+    console.log('开始生成AI报告，类型:', type)
     
-    // 并行获取AI报告和用户统计数据
-    const [aiResponse, statsResponse] = await Promise.all([
-      getAIReport({
-        type,
-        stats: {
-          start_time: startTime,
-          end_time: endTime,
-          type: type
-        }
-      }),
-      getTotalStatistics() // 暂时使用总统计API来测试
-    ])
+    // 调用AI报告API，它会自动获取所有需要的数据
+    const aiResponse = await getAIReport({ type })
     
     console.log('AI报告生成响应:', aiResponse)
-    console.log('用户统计数据响应:', statsResponse)
-    console.log('用户统计数据响应的完整结构:', JSON.stringify(statsResponse, null, 2))
     
     // 处理AI报告数据
     if (aiResponse && (aiResponse.summary || aiResponse.suggestion || aiResponse.tags)) {
@@ -223,36 +210,36 @@ async function generateReport() {
       throw new Error('AI返回数据格式错误')
     }
     
-    // 处理用户统计数据
-    if (statsResponse) {
-      console.log('找到统计数据，开始处理...')
-      // 尝试不同的方式访问数据
-      let totalStats = null
+    // 获取总统计数据用于显示基础信息
+    try {
+      const statsResponse = await getTotalStatistics()
+      console.log('总统计数据响应:', statsResponse)
       
-      if (statsResponse.Data) {
-        totalStats = statsResponse.Data
-        console.log('通过Data属性访问成功')
-      } else if (statsResponse.data) {
-        totalStats = statsResponse.data
-        console.log('通过data属性访问成功')
+      if (statsResponse) {
+        let totalStats = null
+        
+        if (statsResponse.Data) {
+          totalStats = statsResponse.Data
+        } else if (statsResponse.data) {
+          totalStats = statsResponse.data
+        } else {
+          totalStats = statsResponse
+        }
+        
+        console.log('总统计数据:', totalStats)
+        
+        if (totalStats && (totalStats.Income || totalStats.Expense)) {
+          updateReportDataWithTotalStats(totalStats)
+        } else {
+          console.log('没有找到有效的统计数据')
+          updateReportDataWithNoData()
+        }
       } else {
-        // 尝试直接访问
-        totalStats = statsResponse
-        console.log('直接访问statsResponse')
-      }
-      
-      console.log('总统计数据:', totalStats)
-      
-      if (totalStats && (totalStats.Income || totalStats.Expense)) {
-        updateReportDataWithTotalStats(totalStats)
-      } else {
-        console.log('没有找到有效的统计数据')
+        console.log('没有找到统计数据，显示默认信息')
         updateReportDataWithNoData()
       }
-    } else {
-      console.log('没有找到统计数据，显示默认信息')
-      console.log('statsResponse:', statsResponse)
-      // 如果没有统计数据，显示默认信息
+    } catch (statsError) {
+      console.error('获取统计数据失败:', statsError)
       updateReportDataWithNoData()
     }
     
