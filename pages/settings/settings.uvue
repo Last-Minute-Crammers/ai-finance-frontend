@@ -29,6 +29,43 @@
       </view>
     </view>
 
+    <!-- API连接测试卡片 -->
+    <view class="api-card">
+      <view class="card-header">
+        <text class="card-title">API连接状态</text>
+        <text class="card-subtitle">测试后端服务连接</text>
+      </view>
+      
+      <view class="connection-status">
+        <view class="status-indicator" :class="{ 'connected': isConnected, 'disconnected': !isConnected }">
+          <text class="status-dot"></text>
+          <text class="status-text">{{ isConnected ? '已连接' : '未连接' }}</text>
+        </view>
+        
+        <view class="api-info">
+          <text class="api-url">{{ currentApiUrl }}</text>
+          <text class="response-time" v-if="responseTime">响应时间: {{ responseTime }}ms</text>
+        </view>
+      </view>
+      
+      <view class="action-buttons">
+        <button class="test-btn" @click="testConnection" :disabled="isTesting">
+          <text class="btn-icon">🔄</text>
+          <text class="btn-text">{{ isTesting ? '测试中...' : '测试连接' }}</text>
+        </button>
+        
+        <button class="switch-btn" @click="showApiSelector">
+          <text class="btn-icon">⚙️</text>
+          <text class="btn-text">切换API</text>
+        </button>
+      </view>
+      
+      <view class="error-info" v-if="errorMessage">
+        <text class="error-title">连接错误:</text>
+        <text class="error-message">{{ errorMessage }}</text>
+      </view>
+    </view>
+
     <!-- 退出按钮 -->
     <view class="logout-section">
       <button class="logout-btn" @click="showLogoutConfirm">
@@ -41,10 +78,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { checkBackendConnection, setBackendEnvironment, getAvailableBackendUrls } from '@/utils/request'
 
 const nickname = ref('')
 const avatarUrl = ref('/static/icons/default-avatar.png')
 const userId = ref('')
+
+// API连接状态
+const isConnected = ref(false)
+const isTesting = ref(false)
+const currentApiUrl = ref('http://47.109.194.39/api')
+const responseTime = ref(0)
+const errorMessage = ref('')
 
 onMounted(() => {
   // 从本地存储获取当前用户信息
@@ -60,6 +105,15 @@ onMounted(() => {
       // ignore
     }
   }
+  
+  // 获取当前API URL
+  const backendUrl = uni.getStorageSync('backend_url')
+  if (backendUrl) {
+    currentApiUrl.value = backendUrl
+  }
+  
+  // 自动测试连接
+  testConnection()
 })
 
 function goBack() {
@@ -110,6 +164,71 @@ function logout() {
     uni.removeStorageSync('token');
     uni.reLaunch({ url: '/pages/login/login' })
   }, 1000)
+}
+
+// API连接测试函数
+async function testConnection() {
+  if (isTesting.value) return
+  
+  isTesting.value = true
+  errorMessage.value = ''
+  
+  try {
+    const result = await checkBackendConnection(currentApiUrl.value)
+    
+    if (result.connected) {
+      isConnected.value = true
+      responseTime.value = result.responseTime || 0
+      uni.showToast({
+        title: '连接成功',
+        icon: 'success'
+      })
+    } else {
+      isConnected.value = false
+      errorMessage.value = result.error || '连接失败'
+      uni.showToast({
+        title: '连接失败',
+        icon: 'error'
+      })
+    }
+  } catch (error: any) {
+    isConnected.value = false
+    errorMessage.value = error.message || '测试连接时发生错误'
+    uni.showToast({
+      title: '连接测试失败',
+      icon: 'error'
+    })
+  } finally {
+    isTesting.value = false
+  }
+}
+
+// 显示API选择器
+function showApiSelector() {
+  const availableUrls = getAvailableBackendUrls()
+  const urlOptions = Object.keys(availableUrls).map(key => ({
+    label: `${key}: ${availableUrls[key]}`,
+    value: key
+  }))
+  
+  uni.showActionSheet({
+    itemList: urlOptions.map(item => item.label),
+    success: (res) => {
+      const selectedKey = urlOptions[res.tapIndex].value
+      const selectedUrl = availableUrls[selectedKey]
+      
+      setBackendEnvironment(selectedKey)
+      currentApiUrl.value = selectedUrl
+      
+      uni.showToast({
+        title: 'API已切换',
+        icon: 'success'
+      })
+      
+      // 自动测试新连接
+      testConnection()
+    }
+  })
 }
 </script>
 
@@ -233,5 +352,159 @@ function logout() {
 
 .logout-text {
   font-size: 28rpx;
+}
+
+/* API连接测试卡片样式 */
+.api-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 20rpx 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.card-header {
+  margin-bottom: 30rpx;
+}
+
+.card-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.card-subtitle {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+}
+
+.connection-status {
+  margin-bottom: 30rpx;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.status-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+
+.status-indicator.connected .status-dot {
+  background: #4CAF50;
+  box-shadow: 0 0 8rpx rgba(76, 175, 80, 0.5);
+}
+
+.status-indicator.disconnected .status-dot {
+  background: #f44336;
+  box-shadow: 0 0 8rpx rgba(244, 67, 54, 0.5);
+}
+
+.status-text {
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.status-indicator.connected .status-text {
+  color: #4CAF50;
+}
+
+.status-indicator.disconnected .status-text {
+  color: #f44336;
+}
+
+.api-info {
+  background: #f8f9fa;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #667eea;
+}
+
+.api-url {
+  font-size: 24rpx;
+  color: #333;
+  font-family: monospace;
+  display: block;
+  margin-bottom: 8rpx;
+  word-break: break-all;
+}
+
+.response-time {
+  font-size: 22rpx;
+  color: #666;
+  display: block;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.test-btn, .switch-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 24rpx;
+  border: none;
+  border-radius: 12rpx;
+  padding: 20rpx 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.3);
+  transition: transform 0.2s;
+}
+
+.test-btn:active, .switch-btn:active {
+  transform: scale(0.98);
+}
+
+.test-btn:disabled {
+  background: #ccc;
+  box-shadow: none;
+}
+
+.btn-icon {
+  font-size: 20rpx;
+}
+
+.btn-text {
+  font-size: 24rpx;
+}
+
+.error-info {
+  background: #ffebee;
+  border: 1rpx solid #ffcdd2;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-top: 20rpx;
+}
+
+.error-title {
+  font-size: 24rpx;
+  color: #d32f2f;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.error-message {
+  font-size: 22rpx;
+  color: #c62828;
+  display: block;
+  word-break: break-all;
+  line-height: 1.4;
 }
 </style>

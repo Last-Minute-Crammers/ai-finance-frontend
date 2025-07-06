@@ -2,14 +2,15 @@
 
 // 为不同环境提供后端URL选项
 const BACKEND_URLS = {
+  production: 'http://47.109.194.39/api',
   local: 'http://localhost:8080',
   dockerHost: 'http://host.docker.internal:8080',
   ip: 'http://127.0.0.1:8080',
   external: 'http://192.168.1.100:8080'
 };
 
-// 更新默认URL配置，正确连接本地运行的前端到Docker中的后端
-const DEFAULT_URL = BACKEND_URLS.local; // 使用localhost而不是host.docker.internal
+// 更新默认URL配置，使用生产环境API
+const DEFAULT_URL = BACKEND_URLS.production; // 使用生产环境API
 
 const getBackendUrl = (): string => {
   // Try to get from storage first (allows runtime configuration)

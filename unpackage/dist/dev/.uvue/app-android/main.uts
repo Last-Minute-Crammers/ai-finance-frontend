@@ -23,7 +23,7 @@ export function main(app: IApp) {
 }
 export class UniAppConfig extends io.dcloud.uniapp.appframe.AppConfig {
     override name: string = "AI Financial Management";
-    override appid: string = "__UNI__F094AA7";
+    override appid: string = "__UNI__5A7011F";
     override versionName: string = "1.0.0";
     override versionCode: string = "100";
     override uniCompilerVersion: string = "4.64";

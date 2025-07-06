@@ -2,16 +2,17 @@
 
 // 为不同环境提供后端URL选项
 const BACKEND_URLS = {
+  production: 'http://47.109.194.39/api',
   local: 'http://localhost:8080',
   dockerHost: 'http://host.docker.internal:8080',
   ip: 'http://127.0.0.1:8080',
   external: 'http://192.168.1.100:8080'
 };
 
-// 更新默认URL配置，正确连接本地运行的前端到Docker中的后端
-const DEFAULT_URL = BACKEND_URLS.local; // 使用localhost而不是host.docker.internal
+// 更新默认URL配置，使用生产环境API
+const DEFAULT_URL = BACKEND_URLS.production; // 使用生产环境API
 
-const getBackendUrl = () => {
+const getBackendUrl = (): string => {
   // Try to get from storage first (allows runtime configuration)
   const configuredUrl = uni.getStorageSync('backend_url');
   return configuredUrl || DEFAULT_URL;
@@ -28,20 +29,20 @@ interface RequestOptions {
   requireAuth?: boolean;
   timeout?: number;
   retries?: number;
-  headers?: Record<string, string>; // 新增headers字段
+  headers?: any; // 这里不能用索引签名，必须用any
 }
 
-// 自定义错误接口
+// 自定义错误接口（UTS不支持索引签名，已移除）
 interface UniRequestError {
   errMsg?: string;
   message?: string;
-  [key: string]: any;
+  // [key: string]: any; // UTS不支持索引签名
 }
 
 // 获取存储的 token - 添加调试日志
-const getToken = () => {
+const getToken = (): string => {
   const token = uni.getStorageSync('token') || '';
-  __f__('log','at utils/request.ts:44','Retrieved token:', token ? `${token.substring(0, 20)}...` : 'No token found');
+  console.log('Retrieved token:', token ? `${token.substring(0, 20)}...` : 'No token found');
   return token;
 };
 
@@ -49,13 +50,13 @@ const getToken = () => {
 declare const uni: any;
 
 // 设置后端URL
-export const setBackendUrl = (url: string) => {
+export const setBackendUrl = (url: string): void => {
   uni.setStorageSync('backend_url', url);
-  __f__('log','at utils/request.ts:54','Backend URL set to:', url);
+  console.log('Backend URL set to:', url);
 };
 
 // 增强版设置后端URL函数，支持预设环境选择
-export const setBackendEnvironment = (envKey: keyof typeof BACKEND_URLS) => {
+export const setBackendEnvironment = (envKey: string): string | null => {
   if (BACKEND_URLS[envKey]) {
     const url = BACKEND_URLS[envKey];
     setBackendUrl(url);
@@ -65,34 +66,34 @@ export const setBackendEnvironment = (envKey: keyof typeof BACKEND_URLS) => {
 };
 
 // 增加一个获取所有可能后端URL的函数
-export const getAvailableBackendUrls = () => {
+export const getAvailableBackendUrls = (): any => {
   return BACKEND_URLS;
 };
 
 // 健康检查函数
-export const healthCheck = async () => {
+export const healthCheck = async (): Promise<any> => {
   try {
     const response = await request({
       url: '/api/public/health',
       method: 'GET',
       timeout: 3000 // shorter timeout for health check
     });
-    __f__('log','at utils/request.ts:80','Backend health check:', response);
+    console.log('Backend health check:', response);
     return response;
-  } catch (error) {
+  } catch (error: any) {
     const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
       ? (error as any).message
       : String(error);
-    __f__('error','at utils/request.ts:86','Backend connection failed:', errMsg);
+    console.error('Backend connection failed:', errMsg);
     throw error;
   }
 };
 
 // 检查后端连接状态 - 优化版，支持连接诊断
-export const checkBackendConnection = async (customUrl?: string) => {
+export const checkBackendConnection = async (customUrl?: string): Promise<any> => {
   const targetUrl = customUrl || BASE_URL;
   try {
-    __f__('log','at utils/request.ts:95','检查后端连接状态...', targetUrl);
+    console.log('检查后端连接状态...', targetUrl);
     const startTime = Date.now();
     
     // 修复Promise.race逻辑，确保适当处理undefined
@@ -101,14 +102,14 @@ export const checkBackendConnection = async (customUrl?: string) => {
         url: targetUrl + '/api/test',
         method: 'GET',
         timeout: 10000,
-        success: (response) => {
+        success: (response: any) => {
           if (!response) {
             reject(new Error('未收到后端响应'));
             return;
           }
           resolve(response);
         },
-        fail: (error) => {
+        fail: (error: any) => {
           reject(error || new Error('请求失败'));
         }
       });
@@ -119,7 +120,7 @@ export const checkBackendConnection = async (customUrl?: string) => {
     });
     
     // 使用Promise.race正确处理响应
-    const response = await Promise.race([requestPromise, timeoutPromise]) as any;
+    const response: any = await Promise.race([requestPromise, timeoutPromise]);
     const endTime = Date.now();
     
     // 安全检查response和statusCode
@@ -127,7 +128,7 @@ export const checkBackendConnection = async (customUrl?: string) => {
       throw new Error('无效的响应格式');
     }
     
-    __f__('log','at utils/request.ts:130','后端连接检查结果:', response, `响应时间: ${endTime - startTime}ms`);
+    console.log('后端连接检查结果:', response, `响应时间: ${endTime - startTime}ms`);
     
     return {
       connected: response.statusCode === 200,
@@ -136,15 +137,15 @@ export const checkBackendConnection = async (customUrl?: string) => {
       serverInfo: response.data || {}
     };
   } catch (error: any) {
-    __f__('error','at utils/request.ts:139','后端连接检查失败:', error);
+    console.error('后端连接检查失败:', error);
     
     // 处理错误对象，确保类型安全
     const errMsg = typeof error === 'object' && error !== null && 'message' in error 
-      ? String(error.message || error.errMsg) 
+      ? String((error as any).message || (error as any).errMsg) 
       : '未知错误';
 
-    const isConnectionRefused = typeof errMsg === 'string' && errMsg.includes('CONNECTION_REFUSED');
-    const isTimeout = typeof errMsg === 'string' && (errMsg.includes('timeout') || errMsg.includes('超时'));
+    const isConnectionRefused = typeof errMsg === 'string' && errMsg.indexOf('CONNECTION_REFUSED') !== -1;
+    const isTimeout = typeof errMsg === 'string' && (errMsg.indexOf('timeout') !== -1 || errMsg.indexOf('超时') !== -1);
     
     // 增强的诊断信息
     const diagnostics = {
@@ -157,54 +158,54 @@ export const checkBackendConnection = async (customUrl?: string) => {
     
     if (isConnectionRefused) {
       diagnostics.possibleCauses = [
-        "后端服务器未启动",
+        '后端服务器未启动',
         '端口8080可能被其他应用占用',
         '检查防火墙设置是否允许连接'
       ];
     }
     else if (isTimeout) {
       diagnostics.possibleCauses = [
-        "Docker容器端口映射不正确 - 检查docker-compose.yml",
-        "Docker网络配置问题 - 尝试使用127.0.0.1而不是localhost",
-        "防火墙阻止了连接 - 检查防火墙设置",
-        "后端服务响应过慢 - 检查服务器负载",
-        "后端服务未正确监听端口 - 检查后端日志"
+        'Docker容器端口映射不正确 - 检查docker-compose.yml',
+        'Docker网络配置问题 - 尝试使用127.0.0.1而不是localhost',
+        '防火墙阻止了连接 - 检查防火墙设置',
+        '后端服务响应过慢 - 检查服务器负载',
+        '后端服务未正确监听端口 - 检查后端日志'
       ];
     } else {
       // 添加通用错误原因
       diagnostics.possibleCauses = [
-        "后端服务未正确启动",
-        "API端点路径可能不正确",
-        "请求处理过程中出现错误",
-        "网络连接问题"
+        '后端服务未正确启动',
+        'API端点路径可能不正确',
+        '请求处理过程中出现错误',
+        '网络连接问题'
       ];
     }
     
-    __f__('log','at utils/request.ts:183','连接诊断:', diagnostics);
+    console.log('连接诊断:', diagnostics);
     return { connected: false, error: errMsg, diagnostics };
   }
 };
 
 // 测试连接函数 - 带有重试功能
-export const testConnection = async (maxRetries = 1) => {
+export const testConnection = async (maxRetries: number = 1): Promise<any> => {
   let retries = 0;
-  let lastError;
+  let lastError: any;
   
   while (retries <= maxRetries) {
     try {
-      __f__('log','at utils/request.ts:195',`测试连接到 ${BASE_URL}/api/test (尝试 ${retries + 1}/${maxRetries + 1})`);
+      console.log(`测试连接到 ${BASE_URL}/api/test (尝试 ${retries + 1}/${maxRetries + 1})`);
       const response = await request({
         url: '/api/test',
         method: 'GET',
         timeout: 3000
       });
-      __f__('log','at utils/request.ts:201','Connection test successful:', response);
+      console.log('Connection test successful:', response);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       const errMsg = (typeof error === 'object' && error !== null && 'message' in error)
         ? (error as any).message
         : String(error);
-      __f__('error','at utils/request.ts:207',`Connection test failed (attempt ${retries + 1}):`, errMsg);
+      console.error(`Connection test failed (attempt ${retries + 1}):`, errMsg);
       lastError = error;
       retries++;
       
@@ -219,7 +220,7 @@ export const testConnection = async (maxRetries = 1) => {
 };
 
 // 全面的连接测试函数
-export const runComprehensiveTest = async () => {
+export const runComprehensiveTest = async (): Promise<any> => {
   const testResults = {
     basic: false,
     health: false,
@@ -233,7 +234,7 @@ export const runComprehensiveTest = async () => {
     // 1. 基础连接测试
     await testConnection();
     testResults.basic = true;
-  } catch (error) {
+  } catch (error: any) {
     const errMsg = (typeof error === 'object' && error && 'message' in error)
       ? (error as any).message
       : String(error);
@@ -245,7 +246,7 @@ export const runComprehensiveTest = async () => {
     const healthResponse = await healthCheck();
     testResults.health = true;
     testResults.services = healthResponse.services || {};
-  } catch (error) {
+  } catch (error: any) {
     const errMsg = (typeof error === 'object' && error && 'message' in error)
       ? (error as any).message
       : String(error);
@@ -256,7 +257,7 @@ export const runComprehensiveTest = async () => {
     // 3. 公开API测试
     await request({ url: '/api/public/ping', method: 'GET' });
     testResults.public = true;
-  } catch (error) {
+  } catch (error: any) {
     const errMsg = (typeof error === 'object' && error && 'message' in error)
       ? (error as any).message
       : String(error);
@@ -267,7 +268,7 @@ export const runComprehensiveTest = async () => {
     // 4. 私有API测试 (可能因未登录而失败，这是正常的)
     await request({ url: '/api/transaction/list', method: 'GET', requireAuth: true });
     testResults.private = true;
-  } catch (error) {
+  } catch (error: any) {
     const errMsg = (typeof error === 'object' && error && 'message' in error)
       ? (error as any).message
       : String(error);
@@ -280,7 +281,7 @@ export const runComprehensiveTest = async () => {
 };
 
 // 简单的ping测试
-export const pingBackend = async () => {
+export const pingBackend = async (): Promise<any> => {
   try {
     const startTime = Date.now();
     await request({ url: '/api/test', method: 'GET' });
@@ -289,7 +290,7 @@ export const pingBackend = async () => {
       success: true,
       responseTime: endTime - startTime
     };
-  } catch (error) {
+  } catch (error: any) {
     const errMsg = (typeof error === 'object' && error && 'message' in error)
       ? (error as any).message
       : String(error);
@@ -302,7 +303,7 @@ export const pingBackend = async () => {
 
 export const request = async <T = any>(options: RequestOptions): Promise<T> => {
   const token = getToken();
-  const headers = {
+  const headers: any = {
     ...(options.headers || {}),
     'Content-Type': 'application/json',
   };
@@ -313,15 +314,17 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
   // 处理GET请求的查询参数
   let url = BASE_URL + options.url;
   if (options.method === 'GET' && options.params) {
-    const queryParams = new URLSearchParams();
-    for (const [key, value] of Object.entries(options.params)) {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, String(value));
+    // UTS不支持URLSearchParams，手动拼接
+    const params = options.params;
+    const queryArr: string[] = [];
+    for (const key in params) {
+      if (params[key] !== undefined && params[key] !== null) {
+        queryArr.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(params[key])));
       }
     }
-    const queryString = queryParams.toString();
+    const queryString = queryArr.join('&');
     if (queryString) {
-      url += (url.includes('?') ? '&' : '?') + queryString;
+      url += (url.indexOf('?') !== -1 ? '&' : '?') + queryString;
     }
   }
 
@@ -332,7 +335,7 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
       data: options.data,
       header: headers,
       timeout: options.timeout || 30000,
-      success: (res) => {
+      success: (res: any) => {
         if (!res) {
           reject(new Error('未收到响应数据'));
           return;
@@ -343,7 +346,7 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
         }
         resolve(res.data as T);
       },
-      fail: (err) => {
+      fail: (err: any) => {
         reject(err || new Error('请求失败'));
       }
     });
@@ -351,7 +354,7 @@ export const request = async <T = any>(options: RequestOptions): Promise<T> => {
 };
 
 // 添加一个检查token有效性的函数
-export const validateToken = async () => {
+export const validateToken = async (): Promise<any> => {
   try {
     const response = await request({
       url: '/api/user/profile',
