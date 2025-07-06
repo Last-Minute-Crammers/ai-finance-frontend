@@ -50,9 +50,9 @@
     <!-- AI 总结与建议区块 -->
     <view class="card ai-card" v-if="summary || suggestion">
       <text class="section-title">AI收支总结</text>
-      <view class="summary">{{ summary || '暂无数据' }}</view>
+      <view class="summary">{{ summary ?? '暂无数据' }}</view>
       <text class="section-title" style="margin-top: 24rpx;">AI理财建议</text>
-      <view class="suggestion">{{ suggestion || '暂无建议' }}</view>
+      <view class="suggestion">{{ suggestion ?? '暂无建议' }}</view>
       <view class="tag-row" v-if="tags.length > 0">
         <view class="tag" v-for="tag in tags" :key="tag">{{ tag }}</view>
       </view>

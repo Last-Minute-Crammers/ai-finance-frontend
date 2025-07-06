@@ -451,9 +451,9 @@ open class GenPagesReportReport : BasePage {
                     if (isTrue(summary.value || suggestion.value)) {
                         createElementVNode("view", utsMapOf("key" to 1, "class" to "card ai-card"), utsArrayOf(
                             createElementVNode("text", utsMapOf("class" to "section-title"), "AI收支总结"),
-                            createElementVNode("view", utsMapOf("class" to "summary"), toDisplayString(summary.value || "暂无数据"), 1),
+                            createElementVNode("view", utsMapOf("class" to "summary"), toDisplayString(summary.value ?: "暂无数据"), 1),
                             createElementVNode("text", utsMapOf("class" to "section-title", "style" to normalizeStyle(utsMapOf("margin-top" to "24rpx"))), "AI理财建议", 4),
-                            createElementVNode("view", utsMapOf("class" to "suggestion"), toDisplayString(suggestion.value || "暂无建议"), 1),
+                            createElementVNode("view", utsMapOf("class" to "suggestion"), toDisplayString(suggestion.value ?: "暂无建议"), 1),
                             if (tags.value.length > 0) {
                                 createElementVNode("view", utsMapOf("key" to 0, "class" to "tag-row"), utsArrayOf(
                                     createElementVNode(Fragment, null, RenderHelpers.renderList(tags.value, fun(tag, __key, __index, _cached): Any {

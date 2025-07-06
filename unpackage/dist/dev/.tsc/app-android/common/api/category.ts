@@ -52,24 +52,24 @@ export const getAllIcons = (): IconDefinition[] => {
 }
 
 // 本地存储工具函数
-const saveCategoriesToLocal = (categories: Category[]) => {
+const saveCategoriesToLocal = (categories: Category[]): void => {
   try {
     uni.setStorageSync(CATEGORY_STORAGE_KEY, JSON.stringify(categories))
     __f__('log','at common/api/category.ts:58','分类数据已保存到本地存储:', categories.length, '个分类')
-  } catch (error) {
+  } catch (error: any) {
     __f__('error','at common/api/category.ts:60','保存分类到本地存储失败:', error)
   }
 }
 
 const getCategoriesFromLocal = (): Category[] => {
   try {
-    const data = uni.getStorageSync(CATEGORY_STORAGE_KEY)
+    const data: string | null = uni.getStorageSync(CATEGORY_STORAGE_KEY)
     if (data) {
-      const categories = JSON.parse(data)
+      const categories: Category[] = JSON.parse(data)
       __f__('log','at common/api/category.ts:69','从本地存储获取分类数据:', categories.length, '个分类')
       return categories
     }
-  } catch (error) {
+  } catch (error: any) {
     __f__('error','at common/api/category.ts:73','从本地存储获取分类失败:', error)
   }
   return []
@@ -93,98 +93,74 @@ export interface Category {
 }
 
 // 获取分类列表
-export const getCategoryList = async (data: {
-  income_expense: 'income' | 'expense';
-}): Promise<ApiResponse<Category[]>> => {
+export const getCategoryList = async (data: { income_expense: 'income' | 'expense' }): Promise<ApiResponse<Category[]>> => {
   try {
-    // 先尝试从本地存储获取数据
-    const localCategories = getCategoriesFromLocal()
-    const filteredCategories = filterCategoriesByType(localCategories, data.income_expense)
-    
-    // 如果有本地数据，先返回本地数据
+    const localCategories: Category[] = getCategoriesFromLocal()
+    const filteredCategories: Category[] = filterCategoriesByType(localCategories, data.income_expense)
     if (filteredCategories.length > 0) {
-      __f__('log','at common/api/category.ts:106','使用本地分类数据:', filteredCategories.length, '个分类')
       return {
         code: 200,
         message: 'success',
         data: filteredCategories
       }
     }
-    
-    // 本地没有数据，从服务器获取
-    __f__('log','at common/api/category.ts:115','本地无数据，从服务器获取分类列表...')
-    const rawResponse = await request({
+    const rawResponse: any = await request({
       url: '/api/user/category/list',
       method: 'GET',
       params: data,
       requireAuth: true
     })
-    
-    // 转换后端数据格式为前端期望的格式
-    const transformedData = (rawResponse.Data || []).map((item: any) => {
-      // 根据后端返回的icon字符串，找到对应的iconId
-      const iconInfo = item.Icon || item.icon ? getIconByEmoji(item.Icon || item.icon) : undefined
-      
-      return {
-        id: item.ID, // 后端返回 ID，转换为前端期望的 id
-        name: item.Name,
-        iconId: iconInfo?.id || 1, // 根据emoji找到对应的ID，默认使用1
-        icon: item.Icon || item.icon,       // 保留：兼容旧数据
-        color: item.Color,
-        incomeExpense: item.IncomeExpense,
-        createTime: item.CreatedAt,
-        updateTime: item.UpdatedAt
+    const transformedData: Category[] = []
+    if (rawResponse.Data && Array.isArray(rawResponse.Data)) {
+      for (let i = 0; i < rawResponse.Data.length; i++) {
+        const item: any = rawResponse.Data[i]
+        const iconInfo: IconDefinition | undefined = item.Icon || item.icon ? getIconByEmoji(item.Icon || item.icon) : undefined
+        transformedData.push({
+          id: item.ID,
+          name: item.Name,
+          iconId: iconInfo?.id || 1,
+          icon: item.Icon || item.icon,
+          color: item.Color,
+          incomeExpense: item.IncomeExpense,
+          createTime: item.CreatedAt,
+          updateTime: item.UpdatedAt
+        })
       }
-    })
-    
-    const response = {
+    }
+    const response: ApiResponse<Category[]> = {
       code: 200,
       message: rawResponse.Msg || 'success',
       data: transformedData
     }
-    
-    __f__('log','at common/api/category.ts:146','转换后的响应格式:', response)
-    
-    // 如果服务器请求成功，同步到本地存储
     if (response.code === 200) {
-      // 确保 response.data 是数组
-      const newCategories = response.data || []
-      
+      const newCategories: Category[] = response.data || []
       if (newCategories.length > 0) {
-        // 合并现有本地数据和新的服务器数据
-        const existingCategories = getCategoriesFromLocal()
-        
-        // 创建ID映射，避免重复
-        const existingIds = new Set(existingCategories.map(cat => cat.id))
-        const uniqueNewCategories = newCategories.filter(cat => !existingIds.has(cat.id))
-        
-        const allCategories = [...existingCategories, ...uniqueNewCategories]
+        const existingCategories: Category[] = getCategoriesFromLocal()
+        const existingIds: Set<number> = new Set<number>()
+        for (let i = 0; i < existingCategories.length; i++) {
+          existingIds.add(existingCategories[i].id)
+        }
+        const uniqueNewCategories: Category[] = []
+        for (let i = 0; i < newCategories.length; i++) {
+          if (!existingIds.has(newCategories[i].id)) {
+            uniqueNewCategories.push(newCategories[i])
+          }
+        }
+        const allCategories: Category[] = [...existingCategories, ...uniqueNewCategories]
         saveCategoriesToLocal(allCategories)
-        
-        __f__('log','at common/api/category.ts:164','分类数据已同步到本地存储，总计:', allCategories.length, '个分类')
-      } else {
-        __f__('log','at common/api/category.ts:166','服务器返回空分类列表，无需更新本地存储')
       }
     }
-    
     return response
-  } catch (error) {
-    __f__('error','at common/api/category.ts:172','获取分类列表失败:', error)
-    
-    // 如果网络请求失败，尝试使用本地数据
-    const localCategories = getCategoriesFromLocal()
-    const filteredCategories = filterCategoriesByType(localCategories, data.income_expense)
-    
+  } catch (error: any) {
+    const localCategories: Category[] = getCategoriesFromLocal()
+    const filteredCategories: Category[] = filterCategoriesByType(localCategories, data.income_expense)
     if (filteredCategories.length > 0) {
-      __f__('log','at common/api/category.ts:179','网络请求失败，使用本地缓存数据:', filteredCategories.length, '个分类')
       return {
         code: 200,
         message: 'success (cached)',
         data: filteredCategories
       }
     }
-    
-    // 本地也没有数据，抛出错误
     throw error
   }
 }
@@ -208,7 +184,7 @@ export const createCategory = async (data: {
     income_expense: data.incomeExpense  // 转换为后端期望的字段名
   }
   
-  __f__('log','at common/api/category.ts:211','发送创建分类请求:', requestData)
+  __f__('log','at common/api/category.ts:187','发送创建分类请求:', requestData)
   
   const rawResponse = await request({
     url: '/api/user/category',
@@ -232,7 +208,7 @@ export const createCategoryWithCurrentType = async (name: string, iconId?: numbe
   const currentIncomeExpense = getCurrentIncomeExpense()
   
   if (!currentIncomeExpense) {
-    __f__('error','at common/api/category.ts:235','无法获取当前页面类型，请确保在记账页面中')
+    __f__('error','at common/api/category.ts:211','无法获取当前页面类型，请确保在记账页面中')
     uni.showToast({
       title: '请先在记账页面选择类型',
       icon: 'none'
@@ -260,7 +236,7 @@ export const createCategoryWithCurrentType = async (name: string, iconId?: numbe
     const localCategories = getCategoriesFromLocal()
     const allCategories = [...localCategories, tempCategory]
     saveCategoriesToLocal(allCategories)
-    __f__('log','at common/api/category.ts:263','分类已保存到本地:', tempCategory)
+    __f__('log','at common/api/category.ts:239','分类已保存到本地:', tempCategory)
     
     // 3. 尝试同步到后端
     try {
@@ -277,7 +253,7 @@ export const createCategoryWithCurrentType = async (name: string, iconId?: numbe
           cat.id === tempCategory.id ? response.data : cat
         ).filter((cat): cat is Category => cat !== undefined)
         saveCategoriesToLocal(updatedCategories)
-        __f__('log','at common/api/category.ts:280','分类已同步到后端:', response.data)
+        __f__('log','at common/api/category.ts:256','分类已同步到后端:', response.data)
         
         return {
           code: 200,
@@ -288,7 +264,7 @@ export const createCategoryWithCurrentType = async (name: string, iconId?: numbe
         throw new Error(response.message || '后端创建失败')
       }
     } catch (serverError) {
-      __f__('error','at common/api/category.ts:291','后端同步失败，但本地已保存:', serverError)
+      __f__('error','at common/api/category.ts:267','后端同步失败，但本地已保存:', serverError)
       
       // 5. 后端失败，但本地已保存，返回成功状态
       uni.showToast({
@@ -304,7 +280,7 @@ export const createCategoryWithCurrentType = async (name: string, iconId?: numbe
       }
     }
   } catch (localError) {
-    __f__('error','at common/api/category.ts:307','本地保存失败:', localError)
+    __f__('error','at common/api/category.ts:283','本地保存失败:', localError)
     
     // 6. 本地保存也失败
     uni.showToast({
@@ -346,7 +322,7 @@ export const refreshCategoryList = async (data: {
   income_expense: 'income' | 'expense';
 }): Promise<ApiResponse<Category[]>> => {
   try {
-    __f__('log','at common/api/category.ts:349','强制从服务器刷新分类列表...')
+    __f__('log','at common/api/category.ts:325','强制从服务器刷新分类列表...')
     const rawResponse = await request({
       url: '/api/user/category/list',
       method: 'GET',
@@ -377,7 +353,7 @@ export const refreshCategoryList = async (data: {
       data: transformedData
     }
     
-    __f__('log','at common/api/category.ts:380','转换后的响应格式:', response)
+    __f__('log','at common/api/category.ts:356','转换后的响应格式:', response)
     
     // 如果服务器请求成功，更新本地存储
     if (response.code === 200) {
@@ -394,12 +370,12 @@ export const refreshCategoryList = async (data: {
       const allCategories = [...otherTypeCategories, ...newCategories]
       
       saveCategoriesToLocal(allCategories)
-      __f__('log','at common/api/category.ts:397','分类数据已强制刷新并保存到本地存储，总计:', allCategories.length, '个分类')
+      __f__('log','at common/api/category.ts:373','分类数据已强制刷新并保存到本地存储，总计:', allCategories.length, '个分类')
     }
     
     return response
   } catch (error) {
-    __f__('error','at common/api/category.ts:402','强制刷新分类列表失败:', error)
+    __f__('error','at common/api/category.ts:378','强制刷新分类列表失败:', error)
     throw error
   }
 }
@@ -408,8 +384,8 @@ export const refreshCategoryList = async (data: {
 export const clearLocalCategories = () => {
   try {
     uni.removeStorageSync(CATEGORY_STORAGE_KEY)
-    __f__('log','at common/api/category.ts:411','本地分类缓存已清除')
+    __f__('log','at common/api/category.ts:387','本地分类缓存已清除')
   } catch (error) {
-    __f__('error','at common/api/category.ts:413','清除本地分类缓存失败:', error)
+    __f__('error','at common/api/category.ts:389','清除本地分类缓存失败:', error)
   }
 }

@@ -472,7 +472,7 @@ open class GenPagesAnalyzeAnalyze : BasePage {
                         )),
                         createElementVNode("view", utsMapOf("class" to "chart-container"), utsArrayOf(
                             if (isTrue(trendChartData.value.categories && trendChartData.value.categories.length > 0)) {
-                                createVNode(unref(GenComponentsSimpleChartClass), utsMapOf("key" to 0, "type" to "bar", "series" to trendChartData.value.series, "categories" to trendChartData.value.categories, "width" to 350, "height" to 200, "colors" to utsArrayOf(
+                                createVNode(unref(`default`), utsMapOf("key" to 0, "type" to "bar", "series" to trendChartData.value.series, "categories" to trendChartData.value.categories, "width" to 350, "height" to 200, "colors" to utsArrayOf(
                                     "#91CB74",
                                     "#EE6666"
                                 ), "showLegend" to true, "showGrid" to true), null, 8, utsArrayOf(
@@ -493,7 +493,7 @@ open class GenPagesAnalyzeAnalyze : BasePage {
                         )),
                         createElementVNode("view", utsMapOf("class" to "chart-container pie-chart-container"), utsArrayOf(
                             if (isTrue(categoryChartData.value.series && categoryChartData.value.series.length > 0)) {
-                                createVNode(unref(GenComponentsSimpleChartClass), utsMapOf("key" to 0, "type" to "pie", "series" to categoryChartData.value.series, "categories" to utsArrayOf(), "width" to 350, "height" to 300, "colors" to utsArrayOf(
+                                createVNode(unref(`default`), utsMapOf("key" to 0, "type" to "pie", "series" to categoryChartData.value.series, "categories" to utsArrayOf(), "width" to 350, "height" to 300, "colors" to utsArrayOf(
                                     "#1890FF",
                                     "#91CB74",
                                     "#FAC858",

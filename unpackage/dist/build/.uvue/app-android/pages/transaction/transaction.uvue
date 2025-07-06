@@ -245,9 +245,7 @@ const __sfc__ = defineComponent({
                 }
             }
             catch (error: any) {
-                const errorMessage = (error && typeof error === 'object' && resolveInOperator(error, 'message'))
-                    ? String(error.message)
-                    : String(error);
+                const errorMessage = error instanceof Error ? (error as Error).message : String(error);
                 uni.showToast({
                     title: `保存失败: ${errorMessage}`,
                     icon: 'none',

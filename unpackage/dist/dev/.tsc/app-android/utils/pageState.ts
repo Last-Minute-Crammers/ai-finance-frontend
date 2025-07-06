@@ -13,7 +13,7 @@ let pageState: PageState = {
 }
 
 // 设置页面类型
-export const setPageType = (type: '支出' | '收入') => {
+export const setPageType = (type: '支出' | '收入'): void => {
   pageState.currentType = type
   pageState.incomeExpense = type === '支出' ? 'expense' : 'income'
   __f__('log','at utils/pageState.ts:19','页面类型已设置:', type, 'income_expense:', pageState.incomeExpense)
@@ -30,7 +30,7 @@ export const getCurrentIncomeExpense = (): 'income' | 'expense' | null => {
 }
 
 // 设置页面路径
-export const setPagePath = (path: string) => {
+export const setPagePath = (path: string): void => {
   pageState.pagePath = path
   __f__('log','at utils/pageState.ts:35','页面路径已设置:', path)
 }
@@ -46,7 +46,7 @@ export const getPageState = (): PageState => {
 }
 
 // 重置状态
-export const resetPageState = () => {
+export const resetPageState = (): void => {
   pageState = {
     currentType: null,
     incomeExpense: null,

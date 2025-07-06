@@ -98,33 +98,29 @@ async function searchUser() {
 async function searchUserByEmailDirect(email: string) {
   // 这里应该调用后端API，但由于后端没有搜索接口，我们模拟一下
   // 实际项目中应该实现后端的搜索API
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // 模拟从数据库中找到用户
-      const mockUsers = [
-        { id: 1, username: 'yjj', email: '3213495082@qq.com' },
-        { id: 2, username: 'yjj', email: 'yjj@qq.com' },
-        { id: 3, username: 'testuser1', email: 'testuser1@example.com' },
-        { id: 4, username: '111', email: '111@qq.com' }
-      ]
-      
-      const user = mockUsers.find(u => u.email === email)
-      
-      if (user) {
-        resolve({
-          code: 200,
-          message: '搜索成功',
-          data: user
-        })
-      } else {
-        resolve({
-          code: 404,
-          message: '未找到该用户',
-          data: null
-        })
-      }
-    }, 500) // 模拟网络延迟
-  })
+  // 模拟从数据库中找到用户
+  const mockUsers = [
+    { id: 1, username: 'yjj', email: '3213495082@qq.com' },
+    { id: 2, username: 'yjj', email: 'yjj@qq.com' },
+    { id: 3, username: 'testuser1', email: 'testuser1@example.com' },
+    { id: 4, username: '111', email: '111@qq.com' }
+  ]
+  
+  const user = mockUsers.find(u => u.email === email)
+  
+  if (user) {
+    return {
+      code: 200,
+      message: '搜索成功',
+      data: user
+    }
+  } else {
+    return {
+      code: 404,
+      message: '未找到该用户',
+      data: null
+    }
+  }
 }
 
 // 添加好友

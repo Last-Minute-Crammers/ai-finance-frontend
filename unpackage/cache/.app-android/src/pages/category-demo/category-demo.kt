@@ -76,15 +76,15 @@ open class GenPagesCategoryDemoCategoryDemo : BasePage {
                             createElementVNode("text", utsMapOf("class" to "info-title"), "当前页面状态"),
                             createElementVNode("view", utsMapOf("class" to "info-item"), utsArrayOf(
                                 createElementVNode("text", utsMapOf("class" to "info-label"), "页面类型："),
-                                createElementVNode("text", utsMapOf("class" to "info-value"), toDisplayString(currentType.value || "未设置"), 1)
+                                createElementVNode("text", utsMapOf("class" to "info-value"), toDisplayString(currentType.value ?: "未设置"), 1)
                             )),
                             createElementVNode("view", utsMapOf("class" to "info-item"), utsArrayOf(
                                 createElementVNode("text", utsMapOf("class" to "info-label"), "income_expense："),
-                                createElementVNode("text", utsMapOf("class" to "info-value"), toDisplayString(currentIncomeExpense.value || "未设置"), 1)
+                                createElementVNode("text", utsMapOf("class" to "info-value"), toDisplayString(currentIncomeExpense.value ?: "未设置"), 1)
                             )),
                             createElementVNode("view", utsMapOf("class" to "info-item"), utsArrayOf(
                                 createElementVNode("text", utsMapOf("class" to "info-label"), "页面路径："),
-                                createElementVNode("text", utsMapOf("class" to "info-value"), toDisplayString(currentPath.value || "未设置"), 1)
+                                createElementVNode("text", utsMapOf("class" to "info-value"), toDisplayString(currentPath.value ?: "未设置"), 1)
                             ))
                         )),
                         createElementVNode("view", utsMapOf("class" to "action-card"), utsArrayOf(

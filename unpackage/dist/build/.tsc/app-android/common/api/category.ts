@@ -52,24 +52,24 @@ export const getAllIcons = (): IconDefinition[] => {
 }
 
 // 本地存储工具函数
-const saveCategoriesToLocal = (categories: Category[]) => {
+const saveCategoriesToLocal = (categories: Category[]): void => {
   try {
     uni.setStorageSync(CATEGORY_STORAGE_KEY, JSON.stringify(categories))
     console.log('分类数据已保存到本地存储:', categories.length, '个分类')
-  } catch (error) {
+  } catch (error: any) {
     console.error('保存分类到本地存储失败:', error)
   }
 }
 
 const getCategoriesFromLocal = (): Category[] => {
   try {
-    const data = uni.getStorageSync(CATEGORY_STORAGE_KEY)
+    const data: string | null = uni.getStorageSync(CATEGORY_STORAGE_KEY)
     if (data) {
-      const categories = JSON.parse(data)
+      const categories: Category[] = JSON.parse(data)
       console.log('从本地存储获取分类数据:', categories.length, '个分类')
       return categories
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('从本地存储获取分类失败:', error)
   }
   return []
@@ -93,98 +93,74 @@ export interface Category {
 }
 
 // 获取分类列表
-export const getCategoryList = async (data: {
-  income_expense: 'income' | 'expense';
-}): Promise<ApiResponse<Category[]>> => {
+export const getCategoryList = async (data: { income_expense: 'income' | 'expense' }): Promise<ApiResponse<Category[]>> => {
   try {
-    // 先尝试从本地存储获取数据
-    const localCategories = getCategoriesFromLocal()
-    const filteredCategories = filterCategoriesByType(localCategories, data.income_expense)
-    
-    // 如果有本地数据，先返回本地数据
+    const localCategories: Category[] = getCategoriesFromLocal()
+    const filteredCategories: Category[] = filterCategoriesByType(localCategories, data.income_expense)
     if (filteredCategories.length > 0) {
-      console.log('使用本地分类数据:', filteredCategories.length, '个分类')
       return {
         code: 200,
         message: 'success',
         data: filteredCategories
       }
     }
-    
-    // 本地没有数据，从服务器获取
-    console.log('本地无数据，从服务器获取分类列表...')
-    const rawResponse = await request({
+    const rawResponse: any = await request({
       url: '/api/user/category/list',
       method: 'GET',
       params: data,
       requireAuth: true
     })
-    
-    // 转换后端数据格式为前端期望的格式
-    const transformedData = (rawResponse.Data || []).map((item: any) => {
-      // 根据后端返回的icon字符串，找到对应的iconId
-      const iconInfo = item.Icon || item.icon ? getIconByEmoji(item.Icon || item.icon) : undefined
-      
-      return {
-        id: item.ID, // 后端返回 ID，转换为前端期望的 id
-        name: item.Name,
-        iconId: iconInfo?.id || 1, // 根据emoji找到对应的ID，默认使用1
-        icon: item.Icon || item.icon,       // 保留：兼容旧数据
-        color: item.Color,
-        incomeExpense: item.IncomeExpense,
-        createTime: item.CreatedAt,
-        updateTime: item.UpdatedAt
+    const transformedData: Category[] = []
+    if (rawResponse.Data && Array.isArray(rawResponse.Data)) {
+      for (let i = 0; i < rawResponse.Data.length; i++) {
+        const item: any = rawResponse.Data[i]
+        const iconInfo: IconDefinition | undefined = item.Icon || item.icon ? getIconByEmoji(item.Icon || item.icon) : undefined
+        transformedData.push({
+          id: item.ID,
+          name: item.Name,
+          iconId: iconInfo?.id || 1,
+          icon: item.Icon || item.icon,
+          color: item.Color,
+          incomeExpense: item.IncomeExpense,
+          createTime: item.CreatedAt,
+          updateTime: item.UpdatedAt
+        })
       }
-    })
-    
-    const response = {
+    }
+    const response: ApiResponse<Category[]> = {
       code: 200,
       message: rawResponse.Msg || 'success',
       data: transformedData
     }
-    
-    console.log('转换后的响应格式:', response)
-    
-    // 如果服务器请求成功，同步到本地存储
     if (response.code === 200) {
-      // 确保 response.data 是数组
-      const newCategories = response.data || []
-      
+      const newCategories: Category[] = response.data || []
       if (newCategories.length > 0) {
-        // 合并现有本地数据和新的服务器数据
-        const existingCategories = getCategoriesFromLocal()
-        
-        // 创建ID映射，避免重复
-        const existingIds = new Set(existingCategories.map(cat => cat.id))
-        const uniqueNewCategories = newCategories.filter(cat => !existingIds.has(cat.id))
-        
-        const allCategories = [...existingCategories, ...uniqueNewCategories]
+        const existingCategories: Category[] = getCategoriesFromLocal()
+        const existingIds: Set<number> = new Set<number>()
+        for (let i = 0; i < existingCategories.length; i++) {
+          existingIds.add(existingCategories[i].id)
+        }
+        const uniqueNewCategories: Category[] = []
+        for (let i = 0; i < newCategories.length; i++) {
+          if (!existingIds.has(newCategories[i].id)) {
+            uniqueNewCategories.push(newCategories[i])
+          }
+        }
+        const allCategories: Category[] = [...existingCategories, ...uniqueNewCategories]
         saveCategoriesToLocal(allCategories)
-        
-        console.log('分类数据已同步到本地存储，总计:', allCategories.length, '个分类')
-      } else {
-        console.log('服务器返回空分类列表，无需更新本地存储')
       }
     }
-    
     return response
-  } catch (error) {
-    console.error('获取分类列表失败:', error)
-    
-    // 如果网络请求失败，尝试使用本地数据
-    const localCategories = getCategoriesFromLocal()
-    const filteredCategories = filterCategoriesByType(localCategories, data.income_expense)
-    
+  } catch (error: any) {
+    const localCategories: Category[] = getCategoriesFromLocal()
+    const filteredCategories: Category[] = filterCategoriesByType(localCategories, data.income_expense)
     if (filteredCategories.length > 0) {
-      console.log('网络请求失败，使用本地缓存数据:', filteredCategories.length, '个分类')
       return {
         code: 200,
         message: 'success (cached)',
         data: filteredCategories
       }
     }
-    
-    // 本地也没有数据，抛出错误
     throw error
   }
 }

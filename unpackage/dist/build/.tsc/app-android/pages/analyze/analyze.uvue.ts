@@ -1,10 +1,10 @@
-import _easycom_qiun_data_charts from '@/uni_modules/qiun-data-charts/components/qiun-data-charts/qiun-data-charts.vue'
 import { ref, onMounted, computed } from 'vue'
 import { 
   getCategoryRanking,
   getTransactionListForCategory
 } from '../../common/api/analyze'
 import { getCategoryList } from '../../common/api/category'
+import SimpleChart from '../../components/SimpleChart.uvue'
 
 // 时间选择器
 
@@ -27,59 +27,10 @@ const isLoading = ref(false)
 const trendChartData = ref({})
 const categoryChartData = ref({})
 
-// 图表配置
-const columnOpts = {
-  color: ["#91CB74", "#EE6666"],
-  padding: [15, 15, 15, 15],
-  legend: {
-    show: true,
-    position: "bottom",
-    fontSize: 13,
-    fontColor: "#666666"
-  },
-  xAxis: {
-    disableGrid: true,
-    fontColor: "#666666",
-    fontSize: 12
-  },
-  yAxis: {
-    data: [{ min: 0 }],
-    disabled: false,
-    disableGrid: false,
-    splitNumber: 5,
-    gridType: "solid",
-    dashLength: 8,
-    gridColor: "#CCCCCC",
-    padding: 10,
-    showTitle: false
-  },
-  extra: {
-    column: {
-      type: "group",
-      width: 30,
-      seriesGap: 2,
-      categoryGap: 3
-    }
-  }
-}
-
-const pieOpts = {
-  color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"],
-  padding: [15, 15, 40, 15],
-  legend: {
-    show: false
-  },
-  extra: {
-    pie: {
-      activeOpacity: 0.5,
-      activeRadius: 10,
-      offsetAngle: 0,
-      labelWidth: 15,
-      border: true,
-      borderWidth: 3,
-      borderColor: "#FFFFFF"
-    }
-  }
+// 图表颜色配置
+const chartColors = {
+  bar: ["#91CB74", "#EE6666"],
+  pie: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"]
 }
 
 // 方法
@@ -473,8 +424,6 @@ onMounted(() => {
 
 return (): any | null => {
 
-const _component_qiun_data_charts = resolveEasyComponent("qiun-data-charts",_easycom_qiun_data_charts)
-
   return createElementVNode("view", utsMapOf({ class: "container" }), [
     createElementVNode("view", utsMapOf({ class: "header" }), [
       createElementVNode("text", utsMapOf({
@@ -502,12 +451,17 @@ const _component_qiun_data_charts = resolveEasyComponent("qiun-data-charts",_eas
       ]),
       createElementVNode("view", utsMapOf({ class: "chart-container" }), [
         isTrue(trendChartData.value.categories && trendChartData.value.categories.length > 0)
-          ? createVNode(_component_qiun_data_charts, utsMapOf({
+          ? createVNode(unref(SimpleChart), utsMapOf({
               key: 0,
-              type: "column",
-              opts: columnOpts,
-              chartData: trendChartData.value
-            }), null, 8 /* PROPS */, ["chartData"])
+              type: "bar",
+              series: trendChartData.value.series,
+              categories: trendChartData.value.categories,
+              width: 350,
+              height: 200,
+              colors: ['#91CB74', '#EE6666'],
+              showLegend: true,
+              showGrid: true
+            }), null, 8 /* PROPS */, ["series", "categories"])
           : createElementVNode("view", utsMapOf({
               key: 1,
               class: "empty-chart"
@@ -523,12 +477,17 @@ const _component_qiun_data_charts = resolveEasyComponent("qiun-data-charts",_eas
       ]),
       createElementVNode("view", utsMapOf({ class: "chart-container pie-chart-container" }), [
         isTrue(categoryChartData.value.series && categoryChartData.value.series.length > 0)
-          ? createVNode(_component_qiun_data_charts, utsMapOf({
+          ? createVNode(unref(SimpleChart), utsMapOf({
               key: 0,
               type: "pie",
-              opts: pieOpts,
-              chartData: categoryChartData.value
-            }), null, 8 /* PROPS */, ["chartData"])
+              series: categoryChartData.value.series,
+              categories: [],
+              width: 350,
+              height: 300,
+              colors: ['#1890FF', '#91CB74', '#FAC858', '#EE6666', '#73C0DE', '#3CA272', '#FC8452', '#9A60B4'],
+              showLegend: false,
+              showGrid: false
+            }), null, 8 /* PROPS */, ["series"])
           : createElementVNode("view", utsMapOf({
               key: 1,
               class: "empty-chart"
@@ -548,7 +507,7 @@ const _component_qiun_data_charts = resolveEasyComponent("qiun-data-charts",_eas
               }), [
                 createElementVNode("view", utsMapOf({
                   class: "legend-dot",
-                  style: normalizeStyle(utsMapOf({ backgroundColor: pieOpts.color[idx % pieOpts.color.length] }))
+                  style: normalizeStyle(utsMapOf({ backgroundColor: chartColors.pie[idx % chartColors.pie.length] }))
                 }), null, 4 /* STYLE */),
                 createElementVNode("text", utsMapOf({ class: "legend-text" }), toDisplayString(item.name), 1 /* TEXT */)
               ])

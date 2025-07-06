@@ -189,11 +189,11 @@ return (): any | null => {
       ]),
       createElementVNode("view", utsMapOf({ class: "info-item" }), [
         createElementVNode("text", utsMapOf({ class: "info-label" }), "昵称"),
-        createElementVNode("text", utsMapOf({ class: "info-content" }), toDisplayString(nickname.value || '未设置'), 1 /* TEXT */)
+        createElementVNode("text", utsMapOf({ class: "info-content" }), toDisplayString(nickname.value ?? '未设置'), 1 /* TEXT */)
       ]),
       createElementVNode("view", utsMapOf({ class: "info-item" }), [
         createElementVNode("text", utsMapOf({ class: "info-label" }), "用户ID"),
-        createElementVNode("text", utsMapOf({ class: "info-content" }), toDisplayString(userId.value || '未知'), 1 /* TEXT */)
+        createElementVNode("text", utsMapOf({ class: "info-content" }), toDisplayString(userId.value ?? '未知'), 1 /* TEXT */)
       ])
     ]),
     createElementVNode("view", utsMapOf({ class: "api-card" }), [

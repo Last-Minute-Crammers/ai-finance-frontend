@@ -316,12 +316,12 @@ const __sfc__ = defineComponent({
                         class: "card ai-card"
                     }), [
                         createElementVNode("text", utsMapOf({ class: "section-title" }), "AI收支总结"),
-                        createElementVNode("view", utsMapOf({ class: "summary" }), toDisplayString(summary.value || '暂无数据'), 1 /* TEXT */),
+                        createElementVNode("view", utsMapOf({ class: "summary" }), toDisplayString(summary.value ?? '暂无数据'), 1 /* TEXT */),
                         createElementVNode("text", utsMapOf({
                             class: "section-title",
                             style: normalizeStyle(utsMapOf({ "margin-top": "24rpx" }))
                         }), "AI理财建议", 4 /* STYLE */),
-                        createElementVNode("view", utsMapOf({ class: "suggestion" }), toDisplayString(suggestion.value || '暂无建议'), 1 /* TEXT */),
+                        createElementVNode("view", utsMapOf({ class: "suggestion" }), toDisplayString(suggestion.value ?? '暂无建议'), 1 /* TEXT */),
                         tags.value.length > 0
                             ? createElementVNode("view", utsMapOf({
                                 key: 0,

@@ -364,9 +364,7 @@ async function submitTransaction() {
       throw new Error(response.Msg || '保存失败')
     }
   } catch (error) {
-    const errorMessage = (error && typeof error === 'object' && 'message' in error) 
-      ? String(error.message) 
-      : String(error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
     uni.showToast({
       title: `保存失败: ${errorMessage}`,
       icon: 'none',

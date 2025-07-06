@@ -168,11 +168,11 @@ open class GenPagesSettingsSettings : BasePage {
                         )),
                         createElementVNode("view", utsMapOf("class" to "info-item"), utsArrayOf(
                             createElementVNode("text", utsMapOf("class" to "info-label"), "昵称"),
-                            createElementVNode("text", utsMapOf("class" to "info-content"), toDisplayString(nickname.value || "未设置"), 1)
+                            createElementVNode("text", utsMapOf("class" to "info-content"), toDisplayString(nickname.value ?: "未设置"), 1)
                         )),
                         createElementVNode("view", utsMapOf("class" to "info-item"), utsArrayOf(
                             createElementVNode("text", utsMapOf("class" to "info-label"), "用户ID"),
-                            createElementVNode("text", utsMapOf("class" to "info-content"), toDisplayString(userId.value || "未知"), 1)
+                            createElementVNode("text", utsMapOf("class" to "info-content"), toDisplayString(userId.value ?: "未知"), 1)
                         ))
                     )),
                     createElementVNode("view", utsMapOf("class" to "api-card"), utsArrayOf(

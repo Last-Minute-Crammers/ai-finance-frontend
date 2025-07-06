@@ -49,15 +49,15 @@ const __sfc__ = defineComponent({
                 // 这里使用一个简单的模拟搜索，实际项目中应该调用后端API
                 const response = await searchUserByEmailDirect(searchEmail.value);
                 if (response.code === 200 && response.data) {
-                    const user = response.data;
+                    const user = (response as { code: number; message: string; data: UTSJSONObject; }).data;
                     // 检查是否已经是好友
-                    const isFriend = myFriends.value.some((friend): boolean => friend.id === user.id);
+                    const isFriend = myFriends.value.some((friend): boolean => friend.id === user["id"]);
                     // 检查是否已经发送过邀请
-                    const hasPendingInvitation = pendingRequests.value.some((req): boolean => req.inviter.id === user.id && req.status === 'pending');
+                    const hasPendingInvitation = pendingRequests.value.some((req): boolean => req.inviter.id === user["id"] && req.status === 'pending');
                     searchResult.value = {
-                        id: user.id,
-                        email: user.email,
-                        username: user.username,
+                        id: user["id"],
+                        email: user["email"],
+                        username: user["username"],
                         added: isFriend,
                         pending: hasPendingInvitation
                     };
@@ -76,35 +76,31 @@ const __sfc__ = defineComponent({
             }
         }
         // 直接搜索用户（模拟API调用）
-        async function searchUserByEmailDirect(email: string): Promise<unknown> {
+        async function searchUserByEmailDirect(email: string): Promise<{ code: number; message: string; data: UTSJSONObject; } | { code: number; message: string; data: null; }> {
             // 这里应该调用后端API，但由于后端没有搜索接口，我们模拟一下
             // 实际项目中应该实现后端的搜索API
-            return new Promise((resolve, _reject) => {
-                setTimeout(() => {
-                    // 模拟从数据库中找到用户
-                    const mockUsers = [
-                        { id: 1, username: 'yjj', email: '3213495082@qq.com' },
-                        { id: 2, username: 'yjj', email: 'yjj@qq.com' },
-                        { id: 3, username: 'testuser1', email: 'testuser1@example.com' },
-                        { id: 4, username: '111', email: '111@qq.com' }
-                    ] as UTSJSONObject[];
-                    const user = mockUsers.find((u): boolean => u["email"] === email);
-                    if (user) {
-                        resolve({
-                            code: 200,
-                            message: '搜索成功',
-                            data: user
-                        });
-                    }
-                    else {
-                        resolve({
-                            code: 404,
-                            message: '未找到该用户',
-                            data: null
-                        });
-                    }
-                }, 500); // 模拟网络延迟
-            });
+            // 模拟从数据库中找到用户
+            const mockUsers = [
+                { id: 1, username: 'yjj', email: '3213495082@qq.com' },
+                { id: 2, username: 'yjj', email: 'yjj@qq.com' },
+                { id: 3, username: 'testuser1', email: 'testuser1@example.com' },
+                { id: 4, username: '111', email: '111@qq.com' }
+            ] as UTSJSONObject[];
+            const user = mockUsers.find((u): boolean => u["email"] === email);
+            if (user) {
+                return {
+                    code: 200,
+                    message: '搜索成功',
+                    data: user
+                };
+            }
+            else {
+                return {
+                    code: 404,
+                    message: '未找到该用户',
+                    data: null
+                };
+            }
         }
         // 添加好友
         async function addFriend(user: any): Promise<void> {

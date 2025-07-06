@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import io.dcloud.uniapp.extapi.getStorageSync as uni_getStorageSync
 import io.dcloud.uniapp.extapi.navigateTo as uni_navigateTo
-import io.dcloud.uniapp.extapi.removeStorageSync as uni_removeStorageSync
 import io.dcloud.uniapp.extapi.showToast as uni_showToast
 open class GenPagesIndexIndex : BasePage {
     constructor(__ins: ComponentInternalInstance, __renderer: String?) : super(__ins, __renderer) {}
@@ -35,111 +34,74 @@ open class GenPagesIndexIndex : BasePage {
             val __ins = getCurrentInstance()!!
             val _ctx = __ins.proxy as GenPagesIndexIndex
             val _cache = __ins.renderCache
-            val balance = ref(0)
-            val monthlyNet = ref(0)
-            val loading = ref(true)
-            val features = utsArrayOf<UTSJSONObject>(object : UTSJSONObject() {
-                var name = "记账"
-                var desc = "记录每一笔收支"
-                var icon = "/static/icons/book.png"
-                var path = "/pages/transaction/transaction"
-            }, object : UTSJSONObject() {
-                var name = "财务分析"
-                var desc = "可视化您的消费"
-                var icon = "/static/icons/chart.png"
-                var path = "/pages/analyze/analyze"
-            }, object : UTSJSONObject() {
-                var name = "AI理财宠物"
-                var desc = "陪伴式理财体验"
-                var icon = "/static/icons/pet.png"
-                var path = "/pages/pet/pet"
-            }, object : UTSJSONObject() {
-                var name = "财务报告"
-                var desc = "智能分析建议"
-                var icon = "/static/icons/report.png"
-                var path = "/pages/report/report"
-            }, object : UTSJSONObject() {
-                var name = "社交互动"
-                var desc = "与好友一起理财"
-                var icon = "/static/icons/social.png"
-                var path = "/pages/social/social"
-            }, object : UTSJSONObject() {
-                var name = "设置"
-                var desc = "个性化您的体验"
-                var icon = "/static/icons/settings.png"
-                var path = "/pages/settings/settings"
-            })
-            val goPage = fun(path: String){
+            val balance = ref<Number>(0)
+            val monthlyNet = ref<Number>(0)
+            val loading = ref<Boolean>(true)
+            val features = utsArrayOf(
+                Feature(name = "记账", desc = "记录每一笔收支", icon = "/static/icons/book.png", path = "/pages/transaction/transaction"),
+                Feature(name = "财务分析", desc = "可视化您的消费", icon = "/static/icons/chart.png", path = "/pages/analyze/analyze"),
+                Feature(name = "AI理财宠物", desc = "陪伴式理财体验", icon = "/static/icons/pet.png", path = "/pages/pet/pet"),
+                Feature(name = "财务报告", desc = "智能分析建议", icon = "/static/icons/report.png", path = "/pages/report/report"),
+                Feature(name = "社交互动", desc = "与好友一起理财", icon = "/static/icons/social.png", path = "/pages/social/social"),
+                Feature(name = "设置", desc = "个性化您的体验", icon = "/static/icons/settings.png", path = "/pages/settings/settings")
+            ) as UTSArray<Feature>
+            fun gen_goPage_fn(path: String): Unit {
                 uni_navigateTo(NavigateToOptions(url = path))
             }
-            val loadStatisticData = fun(): UTSPromise<Unit> {
+            val goPage = ::gen_goPage_fn
+            fun gen_loadStatisticData_fn(): UTSPromise<Unit> {
                 return wrapUTSPromise(suspend w@{
                         try {
                             loading.value = true
-                            val token = uni_getStorageSync("token")
+                            val token: String? = uni_getStorageSync("token")
                             if (!token) {
-                                console.error("没有找到token，跳转到登录页", " at pages/index/index.uvue:75")
                                 uni_navigateTo(NavigateToOptions(url = "/pages/login/login"))
                                 return@w
                             }
-                            val totalRes = await(getTotalStatistic())
-                            console.log("=== 总统计响应 ===", " at pages/index/index.uvue:82")
-                            console.log("完整响应:", JSON.stringify(totalRes, null, 2), " at pages/index/index.uvue:83")
-                            if (totalRes?.Data) {
-                                console.log("总资产字段:", totalRes.Data.total_assets, " at pages/index/index.uvue:86")
-                                console.log("收入数据:", totalRes.Data.Income, " at pages/index/index.uvue:87")
-                                console.log("支出数据:", totalRes.Data.Expense, " at pages/index/index.uvue:88")
+                            val totalRes: Any = await(getTotalStatistic())
+                            if (totalRes && totalRes.Data) {
                                 balance.value = (totalRes.Data.total_assets || 0) / 100
-                                console.log("最终设置的余额:", balance.value, " at pages/index/index.uvue:92")
                             }
-                            val now = Date()
-                            val monthStart = Date(now.getFullYear(), now.getMonth(), 1)
-                            val monthEnd = Date(now.getFullYear(), now.getMonth() + 1, 0)
-                            val monthlyRes = await(getMonthStatistic(object : UTSJSONObject() {
+                            val now: Date = Date()
+                            val monthStart: Date = Date(now.getFullYear(), now.getMonth(), 1)
+                            val monthEnd: Date = Date(now.getFullYear(), now.getMonth() + 1, 0)
+                            val monthlyRes: Any = await(getMonthStatistic(object : UTSJSONObject() {
                                 var startTime = monthStart.toISOString()
                                 var endTime = monthEnd.toISOString()
                             }))
-                            console.log("=== 月度统计响应 ===", " at pages/index/index.uvue:105")
-                            console.log("完整响应:", JSON.stringify(monthlyRes, null, 2), " at pages/index/index.uvue:106")
-                            if (monthlyRes?.Data?.List?.length > 0) {
-                                val monthData = monthlyRes.Data.List[0]
-                                console.log("月度数据:", JSON.stringify(monthData, null, 2), " at pages/index/index.uvue:110")
-                                val monthIncome = (monthData.Income?.Amount || 0) / 100
-                                val monthExpense = (monthData.Expense?.Amount || 0) / 100
+                            if (monthlyRes && monthlyRes.Data && monthlyRes.Data.List && monthlyRes.Data.List.length > 0) {
+                                val monthData: Any = monthlyRes.Data.List[0]
+                                val monthIncome: Number = (if (monthData.Income && monthData.Income.Amount) {
+                                    monthData.Income.Amount
+                                } else {
+                                    0
+                                }
+                                ) / 100
+                                val monthExpense: Number = (if (monthData.Expense && monthData.Expense.Amount) {
+                                    monthData.Expense.Amount
+                                } else {
+                                    0
+                                }
+                                ) / 100
                                 monthlyNet.value = monthIncome - monthExpense
-                                console.log("月度收支计算:", object : UTSJSONObject() {
-                                    var income = monthIncome
-                                    var expense = monthExpense
-                                    var net = monthlyNet.value
-                                }, " at pages/index/index.uvue:117")
                             }
                         }
                          catch (error: Throwable) {
-                            console.error("加载统计数据失败:", error, " at pages/index/index.uvue:125")
-                            val errorMessage = String(error)
-                            if (errorMessage.includes("Unauthorized")) {
-                                uni_removeStorageSync("token")
-                                uni_removeStorageSync("current_user")
-                                uni_showToast(ShowToastOptions(title = "登录已过期，请重新登录", icon = "none"))
-                                setTimeout(fun(){
-                                    uni_navigateTo(NavigateToOptions(url = "/pages/login/login"))
-                                }, 1500)
-                            } else {
-                                balance.value = 0
-                                monthlyNet.value = 0
-                                uni_showToast(ShowToastOptions(title = "数据加载失败", icon = "none"))
-                            }
+                            balance.value = 0
+                            monthlyNet.value = 0
+                            uni_showToast(ShowToastOptions(title = "数据加载失败", icon = "none"))
                         }
                          finally{
                             loading.value = false
                         }
                 })
             }
-            onMounted(fun(){
+            val loadStatisticData = ::gen_loadStatisticData_fn
+            onMounted(fun(): Unit {
                 loadStatisticData()
             }
             )
-            __expose(utsMapOf("onShow" to fun() {
+            __expose(utsMapOf("onShow" to fun(): Unit {
                 loadStatisticData()
             }
             ))
@@ -191,14 +153,14 @@ open class GenPagesIndexIndex : BasePage {
                     createElementVNode("view", utsMapOf("class" to "feature-grid"), utsArrayOf(
                         createElementVNode(Fragment, null, RenderHelpers.renderList(features, fun(item, index, __index, _cached): Any {
                             return createElementVNode("view", utsMapOf("class" to "feature-item", "key" to index, "onClick" to fun(){
-                                goPage(item["path"])
+                                goPage(item.path)
                             }
                             ), utsArrayOf(
-                                createElementVNode("image", utsMapOf("src" to item["icon"], "class" to "feature-icon"), null, 8, utsArrayOf(
+                                createElementVNode("image", utsMapOf("src" to item.icon, "class" to "feature-icon"), null, 8, utsArrayOf(
                                     "src"
                                 )),
-                                createElementVNode("text", utsMapOf("class" to "feature-title"), toDisplayString(item["name"]), 1),
-                                createElementVNode("text", utsMapOf("class" to "feature-sub"), toDisplayString(item["desc"]), 1)
+                                createElementVNode("text", utsMapOf("class" to "feature-title"), toDisplayString(item.name), 1),
+                                createElementVNode("text", utsMapOf("class" to "feature-sub"), toDisplayString(item.desc), 1)
                             ), 8, utsArrayOf(
                                 "onClick"
                             ))
@@ -217,7 +179,7 @@ open class GenPagesIndexIndex : BasePage {
         }
         val styles0: Map<String, Map<String, Map<String, Any>>>
             get() {
-                return utsMapOf("container" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "backgroundColor" to "#f2f3f5")), "header" to padStyleMapOf(utsMapOf("height" to "140rpx", "backgroundImage" to "linear-gradient(to right, #4e54c8, #8f94fb)", "backgroundColor" to "rgba(0,0,0,0)", "display" to "flex", "alignItems" to "center", "justifyContent" to "center")), "title" to padStyleMapOf(utsMapOf("color" to "#FFFFFF", "fontSize" to "36rpx", "fontWeight" to "bold")), "balance-card" to padStyleMapOf(utsMapOf("backgroundColor" to "#ffffff", "borderTopLeftRadius" to "20rpx", "borderTopRightRadius" to "20rpx", "borderBottomRightRadius" to "20rpx", "borderBottomLeftRadius" to "20rpx", "paddingTop" to "24rpx", "paddingRight" to 0, "paddingBottom" to "24rpx", "paddingLeft" to 0, "width" to "80%", "marginTop" to "-30rpx", "marginRight" to "auto", "marginBottom" to "20rpx", "marginLeft" to "auto", "textAlign" to "center", "boxShadow" to "0 4rpx 12rpx rgba(0, 0, 0, 0.08)", "display" to "flex", "flexDirection" to "column", "alignItems" to "center")), "summary-block" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "alignItems" to "center", "marginBottom" to "6rpx")), "balance-label" to padStyleMapOf(utsMapOf("fontSize" to "24rpx", "color" to "#666666")), "balance-value" to utsMapOf("" to utsMapOf("fontSize" to "36rpx", "color" to "#333333", "fontWeight" to "bold", "marginTop" to "4rpx"), ".expense" to utsMapOf("color" to "#ff3b30"), ".income" to utsMapOf("color" to "#34c759"), ".loading" to utsMapOf("color" to "#999999", "fontSize" to "28rpx")), "expense-row" to padStyleMapOf(utsMapOf("display" to "flex", "alignItems" to "center", "justifyContent" to "center", "marginTop" to "4rpx")), "expense-icon" to utsMapOf("" to utsMapOf("fontSize" to "30rpx", "marginRight" to "6rpx"), ".positive" to utsMapOf("color" to "#34c759"), ".negative" to utsMapOf("color" to "#ff3b30")), "divider" to padStyleMapOf(utsMapOf("width" to "60%", "height" to "1rpx", "backgroundColor" to "#eeeeee", "marginTop" to "14rpx", "marginRight" to 0, "marginBottom" to "14rpx", "marginLeft" to 0)), "feature-grid" to padStyleMapOf(utsMapOf("flex" to 1, "display" to "flex", "flexWrap" to "wrap", "justifyContent" to "space-between", "alignContent" to "space-around", "paddingTop" to 0, "paddingRight" to "24rpx", "paddingBottom" to 0, "paddingLeft" to "24rpx")), "feature-item" to padStyleMapOf(utsMapOf("width" to "48%", "height" to "30%", "backgroundColor" to "#ffffff", "borderTopLeftRadius" to "16rpx", "borderTopRightRadius" to "16rpx", "borderBottomRightRadius" to "16rpx", "borderBottomLeftRadius" to "16rpx", "paddingTop" to "20rpx", "paddingRight" to "10rpx", "paddingBottom" to "20rpx", "paddingLeft" to "10rpx", "display" to "flex", "flexDirection" to "column", "alignItems" to "center", "justifyContent" to "center", "boxShadow" to "0 4rpx 10rpx rgba(0, 0, 0, 0.04)", "marginBottom" to "20rpx")), "feature-icon" to padStyleMapOf(utsMapOf("width" to "60rpx", "height" to "60rpx", "marginBottom" to "10rpx")), "feature-title" to padStyleMapOf(utsMapOf("fontSize" to "26rpx", "color" to "#333333", "fontWeight" to "bold", "textAlign" to "center")), "feature-sub" to padStyleMapOf(utsMapOf("fontSize" to "20rpx", "color" to "#999999", "marginTop" to "4rpx", "textAlign" to "center")))
+                return utsMapOf("container" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "backgroundColor" to "#f2f3f5")), "header" to padStyleMapOf(utsMapOf("height" to "140rpx", "backgroundImage" to "linear-gradient(to right, #4e54c8, #8f94fb)", "backgroundColor" to "rgba(0,0,0,0)", "display" to "flex", "alignItems" to "center", "justifyContent" to "center")), "title" to padStyleMapOf(utsMapOf("color" to "#FFFFFF", "fontSize" to "36rpx", "fontWeight" to "bold")), "balance-card" to padStyleMapOf(utsMapOf("backgroundColor" to "#ffffff", "borderTopLeftRadius" to "20rpx", "borderTopRightRadius" to "20rpx", "borderBottomRightRadius" to "20rpx", "borderBottomLeftRadius" to "20rpx", "paddingTop" to "24rpx", "paddingRight" to 0, "paddingBottom" to "24rpx", "paddingLeft" to 0, "width" to "80%", "marginTop" to "-30rpx", "marginRight" to "auto", "marginBottom" to "20rpx", "marginLeft" to "auto", "textAlign" to "center", "boxShadow" to "0 4rpx 12rpx rgba(0, 0, 0, 0.08)", "display" to "flex", "flexDirection" to "column", "alignItems" to "center")), "summary-block" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "alignItems" to "center", "paddingTop" to "20rpx", "paddingRight" to 0, "paddingBottom" to "20rpx", "paddingLeft" to 0)), "balance-label" to padStyleMapOf(utsMapOf("fontSize" to "28rpx", "color" to "#666666", "marginBottom" to "10rpx")), "balance-value" to utsMapOf("" to utsMapOf("fontSize" to "48rpx", "fontWeight" to "bold", "color" to "#333333"), ".loading" to utsMapOf("fontSize" to "32rpx", "color" to "#999999"), ".income" to utsMapOf("color" to "#34C759"), ".expense" to utsMapOf("color" to "#FF3B30")), "divider" to padStyleMapOf(utsMapOf("width" to "80%", "height" to "1rpx", "backgroundColor" to "#eeeeee", "marginTop" to "10rpx", "marginRight" to 0, "marginBottom" to "10rpx", "marginLeft" to 0)), "expense-row" to padStyleMapOf(utsMapOf("display" to "flex", "alignItems" to "center", "gap" to "10rpx")), "expense-icon" to utsMapOf("" to utsMapOf("fontSize" to "32rpx"), ".positive" to utsMapOf("color" to "#34C759"), ".negative" to utsMapOf("color" to "#FF3B30")), "feature-grid" to padStyleMapOf(utsMapOf("flex" to 1, "gridTemplateColumns" to "repeat(2, 1fr)", "gap" to "20rpx", "paddingTop" to "20rpx", "paddingRight" to "20rpx", "paddingBottom" to "20rpx", "paddingLeft" to "20rpx", "overflowY" to "auto")), "feature-item" to padStyleMapOf(utsMapOf("backgroundColor" to "#ffffff", "borderTopLeftRadius" to "20rpx", "borderTopRightRadius" to "20rpx", "borderBottomRightRadius" to "20rpx", "borderBottomLeftRadius" to "20rpx", "paddingTop" to "40rpx", "paddingRight" to "30rpx", "paddingBottom" to "40rpx", "paddingLeft" to "30rpx", "textAlign" to "center", "boxShadow" to "0 4rpx 12rpx rgba(0, 0, 0, 0.08)", "transitionDuration" to "0.3s", "transitionTimingFunction" to "ease", "transform:active" to "scale(0.98)", "boxShadow:active" to "0 2rpx 8rpx rgba(0, 0, 0, 0.12)")), "feature-icon" to padStyleMapOf(utsMapOf("width" to "80rpx", "height" to "80rpx", "marginBottom" to "20rpx")), "feature-title" to padStyleMapOf(utsMapOf("fontSize" to "32rpx", "fontWeight" to "bold", "color" to "#333333", "marginBottom" to "10rpx")), "feature-sub" to padStyleMapOf(utsMapOf("fontSize" to "24rpx", "color" to "#666666", "lineHeight" to 1.4)), "@TRANSITION" to utsMapOf("feature-item" to utsMapOf("duration" to "0.3s", "timingFunction" to "ease")))
             }
         var inheritAttrs = true
         var inject: Map<String, Map<String, Any?>> = utsMapOf()

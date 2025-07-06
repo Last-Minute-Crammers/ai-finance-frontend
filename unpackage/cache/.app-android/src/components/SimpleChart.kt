@@ -18,35 +18,14 @@ import kotlinx.coroutines.async
 import io.dcloud.uniapp.extapi.createCanvasContext as uni_createCanvasContext
 open class GenComponentsSimpleChart : VueComponent {
     constructor(__ins: ComponentInternalInstance) : super(__ins) {
-        onMounted(fun() {
-            this.chartId = "chart_" + Math.random().toString(36).substr(2, 9)
+        onMounted(fun(): Unit {
+            this.chartId = "chart_" + Math.random().toString(36).substring(2, 9)
             this.`$nextTick`(fun(){
                 this.initChart()
             }
             )
         }
         , __ins)
-        this.`$watch`(fun(): Any? {
-            return this.data
-        }
-        , fun() {
-            this.initChart()
-        }
-        , WatchOptions(deep = true))
-        this.`$watch`(fun(): Any? {
-            return this.series
-        }
-        , fun() {
-            this.initChart()
-        }
-        , WatchOptions(deep = true))
-        this.`$watch`(fun(): Any? {
-            return this.type
-        }
-        , fun() {
-            this.initChart()
-        }
-        )
     }
     @Suppress("UNUSED_PARAMETER", "UNUSED_VARIABLE")
     override fun `$render`(): Any? {
@@ -112,14 +91,14 @@ open class GenComponentsSimpleChart : VueComponent {
                     this.loading = false
                 }
                  catch (err: Throwable) {
-                    console.error("图表初始化失败:", err, " at components/SimpleChart.uvue:99")
+                    console.error("图表初始化失败:", err, " at components/SimpleChart.uvue:109")
                     this.error = err.message || "图表加载失败"
                     this.loading = false
                 }
         })
     }
     open var processData = ::gen_processData_fn
-    open fun gen_processData_fn() {
+    open fun gen_processData_fn(): Unit {
         if (this.data && this.data.length > 0) {
             this.chartData = this.data
         } else if (this.series && this.series.length > 0) {
@@ -139,9 +118,9 @@ open class GenComponentsSimpleChart : VueComponent {
                 if (!this.ctx || !this.chartData) {
                     return@w
                 }
-                val ctx = this.ctx
-                val width = this.width
-                val height = this.height
+                val ctx: Any = this.ctx
+                val width: Number = this.width
+                val height: Number = this.height
                 ctx.clearRect(0, 0, width, height)
                 ctx.setFillStyle("#FFFFFF")
                 ctx.fillRect(0, 0, width, height)
@@ -162,142 +141,162 @@ open class GenComponentsSimpleChart : VueComponent {
         })
     }
     open var drawLineChart = ::gen_drawLineChart_fn
-    open fun gen_drawLineChart_fn(ctx, width, height) {
+    open fun gen_drawLineChart_fn(ctx: Any, width: Number, height: Number): Unit {
         val padding: Number = 40
-        val chartWidth = width - padding * 2
-        val chartHeight = height - padding * 2
+        val chartWidth: Number = width - padding * 2
+        val chartHeight: Number = height - padding * 2
         if (!this.chartData.series || this.chartData.series.length === 0) {
             return
         }
-        val series = this.chartData.series[0]
-        val data = series.data || utsArrayOf()
-        val categories = this.chartData.categories || utsArrayOf()
+        val series: Any = this.chartData.series[0]
+        val data: UTSArray<Number> = series.data || utsArrayOf()
+        val categories: UTSArray<String> = this.chartData.categories || utsArrayOf()
         if (data.length === 0) {
             return
         }
-        val minValue = Math.min(*data.toTypedArray())
-        val maxValue = Math.max(*data.toTypedArray())
-        val valueRange = maxValue - minValue || 1
+        val minValue: Number = Math.min(*data.toTypedArray())
+        val maxValue: Number = Math.max(*data.toTypedArray())
+        val valueRange: Number = maxValue - minValue || 1
         if (this.showGrid) {
             this.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue)
         }
         ctx.setStrokeStyle(this.colors[0])
         ctx.setLineWidth(2)
         ctx.beginPath()
-        data.forEach(fun(value, index){
-            val x = padding + (index / (data.length - 1)) * chartWidth
-            val y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
-            if (index === 0) {
-                ctx.moveTo(x, y)
-            } else {
-                ctx.lineTo(x, y)
+        run {
+            var i: Number = 0
+            while(i < data.length){
+                val value: Number = data[i]
+                val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                if (i === 0) {
+                    ctx.moveTo(x, y)
+                } else {
+                    ctx.lineTo(x, y)
+                }
+                i++
             }
         }
-        )
         ctx.stroke()
         ctx.setFillStyle(this.colors[0])
-        data.forEach(fun(value, index){
-            val x = padding + (index / (data.length - 1)) * chartWidth
-            val y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
-            ctx.beginPath()
-            ctx.arc(x, y, 3, 0, 2 * Math.PI)
-            ctx.fill()
+        run {
+            var i: Number = 0
+            while(i < data.length){
+                val value: Number = data[i]
+                val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                ctx.beginPath()
+                ctx.arc(x, y, 4, 0, 2 * Math.PI)
+                ctx.fill()
+                i++
+            }
         }
-        )
     }
     open var drawBarChart = ::gen_drawBarChart_fn
-    open fun gen_drawBarChart_fn(ctx, width, height) {
+    open fun gen_drawBarChart_fn(ctx: Any, width: Number, height: Number): Unit {
         val padding: Number = 40
-        val chartWidth = width - padding * 2
-        val chartHeight = height - padding * 2
+        val chartWidth: Number = width - padding * 2
+        val chartHeight: Number = height - padding * 2
         if (!this.chartData.series || this.chartData.series.length === 0) {
             return
         }
-        val series = this.chartData.series[0]
-        val data = series.data || utsArrayOf()
-        val categories = this.chartData.categories || utsArrayOf()
+        val series: Any = this.chartData.series[0]
+        val data: UTSArray<Number> = series.data || utsArrayOf()
+        val categories: UTSArray<String> = this.chartData.categories || utsArrayOf()
         if (data.length === 0) {
             return
         }
-        val minValue = Math.min(*data.toTypedArray())
-        val maxValue = Math.max(*data.toTypedArray())
-        val valueRange = maxValue - minValue || 1
+        val minValue: Number = Math.min(*data.toTypedArray())
+        val maxValue: Number = Math.max(*data.toTypedArray())
+        val valueRange: Number = maxValue - minValue || 1
         if (this.showGrid) {
             this.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue)
         }
-        val barWidth = chartWidth / data.length * 0.8
-        val barSpacing = chartWidth / data.length * 0.2
-        ctx.setFillStyle(this.colors[0])
-        data.forEach(fun(value, index){
-            val x = padding + index * (barWidth + barSpacing) + barSpacing / 2
-            val barHeight = ((value - minValue) / valueRange) * chartHeight
-            val y = padding + chartHeight - barHeight
-            ctx.fillRect(x, y, barWidth, barHeight)
+        val barWidth: Number = chartWidth / data.length * 0.8
+        val barSpacing: Number = chartWidth / data.length * 0.2
+        run {
+            var i: Number = 0
+            while(i < data.length){
+                val value: Number = data[i]
+                val barHeight: Number = ((value - minValue) / valueRange) * chartHeight
+                val x: Number = padding + i * (barWidth + barSpacing) + barSpacing / 2
+                val y: Number = padding + chartHeight - barHeight
+                ctx.setFillStyle(this.colors[i % this.colors.length])
+                ctx.fillRect(x, y, barWidth, barHeight)
+                i++
+            }
         }
-        )
     }
     open var drawPieChart = ::gen_drawPieChart_fn
-    open fun gen_drawPieChart_fn(ctx, width, height) {
-        val centerX = width / 2
-        val centerY = height / 2
-        val radius = Math.min(width, height) / 2 - 40
+    open fun gen_drawPieChart_fn(ctx: Any, width: Number, height: Number): Unit {
+        val centerX: Number = width / 2
+        val centerY: Number = height / 2
+        val radius: Number = Math.min(width, height) / 2 - 40
         if (!this.chartData.series || this.chartData.series.length === 0) {
             return
         }
-        val series = this.chartData.series[0]
-        val data = series.data || utsArrayOf()
+        val series: Any = this.chartData.series[0]
+        val data: UTSArray<Number> = series.data || utsArrayOf()
         if (data.length === 0) {
             return
         }
-        val total = data.reduce(fun(sum, value){
+        val total: Number = data.reduce(fun(sum: Number, value: Number): Number {
             return sum + value
         }
         , 0)
-        var currentAngle = -Math.PI / 2
-        data.forEach(fun(value, index){
-            val sliceAngle = (value / total) * 2 * Math.PI
-            val color = this.colors[index % this.colors.length]
-            ctx.setFillStyle(color)
-            ctx.beginPath()
-            ctx.moveTo(centerX, centerY)
-            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle)
-            ctx.closePath()
-            ctx.fill()
-            currentAngle += sliceAngle
+        var currentAngle: Number = 0
+        run {
+            var i: Number = 0
+            while(i < data.length){
+                val value: Number = data[i]
+                val sliceAngle: Number = (value / total) * 2 * Math.PI
+                ctx.setFillStyle(this.colors[i % this.colors.length])
+                ctx.beginPath()
+                ctx.moveTo(centerX, centerY)
+                ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle)
+                ctx.closePath()
+                ctx.fill()
+                currentAngle += sliceAngle
+                i++
+            }
         }
-        )
     }
     open var drawAreaChart = ::gen_drawAreaChart_fn
-    open fun gen_drawAreaChart_fn(ctx, width, height) {
+    open fun gen_drawAreaChart_fn(ctx: Any, width: Number, height: Number): Unit {
         val padding: Number = 40
-        val chartWidth = width - padding * 2
-        val chartHeight = height - padding * 2
+        val chartWidth: Number = width - padding * 2
+        val chartHeight: Number = height - padding * 2
         if (!this.chartData.series || this.chartData.series.length === 0) {
             return
         }
-        val series = this.chartData.series[0]
-        val data = series.data || utsArrayOf()
+        val series: Any = this.chartData.series[0]
+        val data: UTSArray<Number> = series.data || utsArrayOf()
+        val categories: UTSArray<String> = this.chartData.categories || utsArrayOf()
         if (data.length === 0) {
             return
         }
-        val minValue = Math.min(*data.toTypedArray())
-        val maxValue = Math.max(*data.toTypedArray())
-        val valueRange = maxValue - minValue || 1
+        val minValue: Number = Math.min(*data.toTypedArray())
+        val maxValue: Number = Math.max(*data.toTypedArray())
+        val valueRange: Number = maxValue - minValue || 1
         if (this.showGrid) {
-            this.drawGrid(ctx, padding, chartWidth, chartHeight, data.length, minValue, maxValue)
+            this.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue)
         }
         ctx.setFillStyle(this.colors[0] + "40")
         ctx.beginPath()
-        data.forEach(fun(value, index){
-            val x = padding + (index / (data.length - 1)) * chartWidth
-            val y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
-            if (index === 0) {
-                ctx.moveTo(x, y)
-            } else {
-                ctx.lineTo(x, y)
+        run {
+            var i: Number = 0
+            while(i < data.length){
+                val value: Number = data[i]
+                val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                if (i === 0) {
+                    ctx.moveTo(x, y)
+                } else {
+                    ctx.lineTo(x, y)
+                }
+                i++
             }
         }
-        )
         ctx.lineTo(padding + chartWidth, padding + chartHeight)
         ctx.lineTo(padding, padding + chartHeight)
         ctx.closePath()
@@ -305,38 +304,30 @@ open class GenComponentsSimpleChart : VueComponent {
         ctx.setStrokeStyle(this.colors[0])
         ctx.setLineWidth(2)
         ctx.beginPath()
-        data.forEach(fun(value, index){
-            val x = padding + (index / (data.length - 1)) * chartWidth
-            val y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
-            if (index === 0) {
-                ctx.moveTo(x, y)
-            } else {
-                ctx.lineTo(x, y)
-            }
-        }
-        )
-        ctx.stroke()
-    }
-    open var drawGrid = ::gen_drawGrid_fn
-    open fun gen_drawGrid_fn(ctx, padding, chartWidth, chartHeight, dataCount, minValue, maxValue) {
-        ctx.setStrokeStyle("#E5E5E5")
-        ctx.setLineWidth(1)
-        val gridLines: Number = 5
         run {
             var i: Number = 0
-            while(i <= gridLines){
-                val y = padding + (i / gridLines) * chartHeight
-                ctx.beginPath()
-                ctx.moveTo(padding, y)
-                ctx.lineTo(padding + chartWidth, y)
-                ctx.stroke()
+            while(i < data.length){
+                val value: Number = data[i]
+                val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                if (i === 0) {
+                    ctx.moveTo(x, y)
+                } else {
+                    ctx.lineTo(x, y)
+                }
                 i++
             }
         }
+        ctx.stroke()
+    }
+    open var drawGrid = ::gen_drawGrid_fn
+    open fun gen_drawGrid_fn(ctx: Any, padding: Number, chartWidth: Number, chartHeight: Number, dataCount: Number, minValue: Number, maxValue: Number): Unit {
+        ctx.setStrokeStyle("#E0E0E0")
+        ctx.setLineWidth(1)
         run {
             var i: Number = 0
             while(i <= dataCount){
-                val x = padding + (i / dataCount) * chartWidth
+                val x: Number = padding + (i / dataCount) * chartWidth
                 ctx.beginPath()
                 ctx.moveTo(x, padding)
                 ctx.lineTo(x, padding + chartHeight)
@@ -344,51 +335,60 @@ open class GenComponentsSimpleChart : VueComponent {
                 i++
             }
         }
+        val gridLines: Number = 5
+        run {
+            var i: Number = 0
+            while(i <= gridLines){
+                val y: Number = padding + (i / gridLines) * chartHeight
+                ctx.beginPath()
+                ctx.moveTo(padding, y)
+                ctx.lineTo(padding + chartWidth, y)
+                ctx.stroke()
+                i++
+            }
+        }
     }
     open var drawLegend = ::gen_drawLegend_fn
-    open fun gen_drawLegend_fn(ctx, width, height) {
+    open fun gen_drawLegend_fn(ctx: Any, width: Number, height: Number): Unit {
         if (!this.chartData.series || this.chartData.series.length === 0) {
             return
         }
-        val series = this.chartData.series
-        val legendY = height - 30
-        val legendItemWidth: Number = 80
-        val legendItemHeight: Number = 20
-        series.forEach(fun(item, index){
-            val x = 10 + index * legendItemWidth
-            val color = this.colors[index % this.colors.length]
-            ctx.setFillStyle(color)
-            ctx.fillRect(x, legendY, 15, legendItemHeight)
-            ctx.setFillStyle("#333333")
-            ctx.setFontSize(12)
-            val text = item.name || "\u7CFB\u5217" + (index + 1)
-            ctx.fillText(text, x + 20, legendY + 15)
+        val legendY: Number = height - 30
+        val itemWidth: Number = 80
+        val itemHeight: Number = 20
+        run {
+            var i: Number = 0
+            while(i < this.chartData.series.length){
+                val series: Any = this.chartData.series[i]
+                val x: Number = 10 + i * itemWidth
+                ctx.setFillStyle(this.colors[i % this.colors.length])
+                ctx.fillRect(x, legendY, 15, itemHeight)
+                ctx.setFillStyle("#333333")
+                ctx.setFontSize(12)
+                ctx.fillText(series.name || "\u7CFB\u5217" + (i + 1), x + 20, legendY + 15)
+                i++
+            }
         }
-        )
     }
     open var onError = ::gen_onError_fn
-    open fun gen_onError_fn(e) {
-        console.error("Canvas错误:", e, " at components/SimpleChart.uvue:391")
-        this.error = "Canvas渲染错误"
+    open fun gen_onError_fn(event: Any): Unit {
+        console.error("Canvas错误:", event, " at components/SimpleChart.uvue:403")
+        this.error = "图表渲染失败"
     }
     open var onTouchStart = ::gen_onTouchStart_fn
-    open fun gen_onTouchStart_fn(e) {}
+    open fun gen_onTouchStart_fn(event: Any): Unit {
+        console.log("触摸开始:", event, " at components/SimpleChart.uvue:409")
+    }
     open var onTouchMove = ::gen_onTouchMove_fn
-    open fun gen_onTouchMove_fn(e) {}
+    open fun gen_onTouchMove_fn(event: Any): Unit {
+        console.log("触摸移动:", event, " at components/SimpleChart.uvue:414")
+    }
     open var onTouchEnd = ::gen_onTouchEnd_fn
-    open fun gen_onTouchEnd_fn(e) {}
+    open fun gen_onTouchEnd_fn(event: Any): Unit {
+        console.log("触摸结束:", event, " at components/SimpleChart.uvue:419")
+    }
     open var retry = ::gen_retry_fn
-    open fun gen_retry_fn() {
-        this.initChart()
-    }
-    open var updateData = ::gen_updateData_fn
-    open fun gen_updateData_fn(newData) {
-        this.data = newData
-        this.initChart()
-    }
-    open var updateConfig = ::gen_updateConfig_fn
-    open fun gen_updateConfig_fn(newConfig) {
-        Object.assign(this.`$props`, newConfig)
+    open fun gen_retry_fn(): Unit {
         this.initChart()
     }
     companion object {
@@ -400,12 +400,12 @@ open class GenComponentsSimpleChart : VueComponent {
         }
         val styles0: Map<String, Map<String, Map<String, Any>>>
             get() {
-                return utsMapOf("chart-container" to padStyleMapOf(utsMapOf("position" to "relative", "width" to "100%", "height" to "100%")), "loading-container" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "justifyContent" to "center", "alignItems" to "center", "height" to "100%")), "loading-spinner" to padStyleMapOf(utsMapOf("width" to 40, "height" to 40, "borderTopWidth" to 4, "borderRightWidth" to 4, "borderBottomWidth" to 4, "borderLeftWidth" to 4, "borderTopStyle" to "solid", "borderRightStyle" to "solid", "borderBottomStyle" to "solid", "borderLeftStyle" to "solid", "borderTopColor" to "#007AFF", "borderRightColor" to "#f3f3f3", "borderBottomColor" to "#f3f3f3", "borderLeftColor" to "#f3f3f3", "animation" to "spin 1s linear infinite")), "loading-text" to padStyleMapOf(utsMapOf("marginTop" to 10, "fontSize" to 14, "color" to "#666666")), "error-container" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "justifyContent" to "center", "alignItems" to "center", "height" to "100%")), "error-icon" to padStyleMapOf(utsMapOf("width" to 60, "height" to 60, "backgroundColor" to "#FF3B30", "color" to "#FFFFFF", "display" to "flex", "justifyContent" to "center", "alignItems" to "center", "fontSize" to 24, "fontWeight" to "bold")), "error-text" to padStyleMapOf(utsMapOf("marginTop" to 10, "fontSize" to 14, "color" to "#666666", "textAlign" to "center")), "retry-text" to padStyleMapOf(utsMapOf("marginTop" to 5, "fontSize" to 12, "color" to "#007AFF")), "@FONT-FACE" to utsMapOf("0" to utsMapOf()))
+                return utsMapOf("chart-container" to padStyleMapOf(utsMapOf("position" to "relative", "width" to "100%", "height" to "100%", "display" to "flex", "alignItems" to "center", "justifyContent" to "center")), "loading-container" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "alignItems" to "center", "justifyContent" to "center", "height" to "100%")), "loading-spinner" to padStyleMapOf(utsMapOf("width" to "40rpx", "height" to "40rpx", "borderTopWidth" to "4rpx", "borderRightWidth" to "4rpx", "borderBottomWidth" to "4rpx", "borderLeftWidth" to "4rpx", "borderTopStyle" to "solid", "borderRightStyle" to "solid", "borderBottomStyle" to "solid", "borderLeftStyle" to "solid", "borderTopColor" to "#4e54c8", "borderRightColor" to "#f3f3f3", "borderBottomColor" to "#f3f3f3", "borderLeftColor" to "#f3f3f3", "animation" to "spin 1s linear infinite", "marginBottom" to "20rpx")), "loading-text" to padStyleMapOf(utsMapOf("fontSize" to "28rpx", "color" to "#666666")), "error-container" to padStyleMapOf(utsMapOf("display" to "flex", "flexDirection" to "column", "alignItems" to "center", "justifyContent" to "center", "height" to "100%", "paddingTop" to "40rpx", "paddingRight" to "40rpx", "paddingBottom" to "40rpx", "paddingLeft" to "40rpx")), "error-icon" to padStyleMapOf(utsMapOf("width" to "80rpx", "height" to "80rpx", "backgroundColor" to "#ff3b30", "color" to "#FFFFFF", "display" to "flex", "alignItems" to "center", "justifyContent" to "center", "fontSize" to "40rpx", "fontWeight" to "bold", "marginBottom" to "20rpx")), "error-text" to padStyleMapOf(utsMapOf("fontSize" to "28rpx", "color" to "#666666", "textAlign" to "center", "marginBottom" to "20rpx")), "retry-text" to padStyleMapOf(utsMapOf("fontSize" to "24rpx", "color" to "#4e54c8", "textDecoration" to "underline")), "@FONT-FACE" to utsMapOf("0" to utsMapOf()))
             }
         var inheritAttrs = true
         var inject: Map<String, Map<String, Any?>> = utsMapOf()
         var emits: Map<String, Any?> = utsMapOf()
-        var props = normalizePropsOptions(utsMapOf("type" to utsMapOf("type" to "String", "default" to "line", "validator" to fun(value): Boolean {
+        var props = normalizePropsOptions(utsMapOf("type" to utsMapOf("type" to "String", "default" to "line", "validator" to fun(value: String): Boolean {
             return utsArrayOf(
                 "line",
                 "bar",
@@ -413,13 +413,13 @@ open class GenComponentsSimpleChart : VueComponent {
                 "area"
             ).includes(value)
         }
-        ), "data" to utsMapOf("type" to "Array", "default" to fun(): UTSArray<Any?> {
+        ), "data" to utsMapOf("type" to "Array", "default" to fun(): UTSArray<Any> {
             return utsArrayOf()
         }
-        ), "categories" to utsMapOf("type" to "Array", "default" to fun(): UTSArray<Any?> {
+        ), "categories" to utsMapOf("type" to "Array", "default" to fun(): UTSArray<Any> {
             return utsArrayOf()
         }
-        ), "series" to utsMapOf("type" to "Array", "default" to fun(): UTSArray<Any?> {
+        ), "series" to utsMapOf("type" to "Array", "default" to fun(): UTSArray<Any> {
             return utsArrayOf()
         }
         ), "width" to utsMapOf("type" to "Number", "default" to 300), "height" to utsMapOf("type" to "Number", "default" to 200), "colors" to utsMapOf("type" to "Array", "default" to fun(): UTSArray<String> {

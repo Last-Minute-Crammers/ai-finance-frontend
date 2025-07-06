@@ -47,11 +47,17 @@
 import { ref, onMounted } from 'vue'
 import { getTotalStatistic, getMonthStatistic } from '../../common/api/transaction'
 
-const balance = ref(0)
-const monthlyNet = ref(0)
-const loading = ref(true)
+const balance = ref<number>(0)
+const monthlyNet = ref<number>(0)
+const loading = ref<boolean>(true)
 
-const features = [
+interface Feature {
+  name: string
+  desc: string
+  icon: string
+  path: string
+}
+const features: Feature[] = [
   { name: '记账', desc: '记录每一笔收支', icon: '/static/icons/book.png', path: '/pages/transaction/transaction' },
   { name: '财务分析', desc: '可视化您的消费', icon: '/static/icons/chart.png', path: '/pages/analyze/analyze' },
   { name: 'AI理财宠物', desc: '陪伴式理财体验', icon: '/static/icons/pet.png', path: '/pages/pet/pet' },
@@ -60,101 +66,53 @@ const features = [
   { name: '设置', desc: '个性化您的体验', icon: '/static/icons/settings.png', path: '/pages/settings/settings' }
 ]
 
-const goPage = (path: string) => {
+function goPage(path: string): void {
   uni.navigateTo({ url: path })
 }
 
-// 加载统计数据
-const loadStatisticData = async () => {
+async function loadStatisticData(): Promise<void> {
   try {
     loading.value = true
-    
-    // 检查token是否存在
-    const token = uni.getStorageSync('token')
+    const token: string | null = uni.getStorageSync('token')
     if (!token) {
-      console.error('没有找到token，跳转到登录页')
       uni.navigateTo({ url: '/pages/login/login' })
       return
     }
-    
-    // 获取总资产统计
-    const totalRes = await getTotalStatistic()
-    console.log('=== 总统计响应 ===')
-    console.log('完整响应:', JSON.stringify(totalRes, null, 2))
-    
-    if (totalRes?.Data) {
-      console.log('总资产字段:', totalRes.Data.total_assets)
-      console.log('收入数据:', totalRes.Data.Income)
-      console.log('支出数据:', totalRes.Data.Expense)
-      
-      // 使用正确的字段名
-      balance.value = (totalRes.Data.total_assets || 0) / 100 // 转换为元
-      console.log('最终设置的余额:', balance.value)
+    const totalRes: any = await getTotalStatistic()
+    if (totalRes && totalRes.Data) {
+      balance.value = (totalRes.Data.total_assets || 0) / 100
     }
-    
-    // 获取本月统计
-    const now = new Date()
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    
-    const monthlyRes = await getMonthStatistic({
+    const now: Date = new Date()
+    const monthStart: Date = new Date(now.getFullYear(), now.getMonth(), 1)
+    const monthEnd: Date = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    const monthlyRes: any = await getMonthStatistic({
       startTime: monthStart.toISOString(),
       endTime: monthEnd.toISOString()
     })
-    
-    console.log('=== 月度统计响应 ===')
-    console.log('完整响应:', JSON.stringify(monthlyRes, null, 2))
-    
-    if (monthlyRes?.Data?.List?.length > 0) {
-      const monthData = monthlyRes.Data.List[0]
-      console.log('月度数据:', JSON.stringify(monthData, null, 2))
-      
-      // 使用正确的字段名
-      const monthIncome = (monthData.Income?.Amount || 0) / 100
-      const monthExpense = (monthData.Expense?.Amount || 0) / 100
+    if (monthlyRes && monthlyRes.Data && monthlyRes.Data.List && monthlyRes.Data.List.length > 0) {
+      const monthData: any = monthlyRes.Data.List[0]
+      const monthIncome: number = (monthData.Income && monthData.Income.Amount ? monthData.Income.Amount : 0) / 100
+      const monthExpense: number = (monthData.Expense && monthData.Expense.Amount ? monthData.Expense.Amount : 0) / 100
       monthlyNet.value = monthIncome - monthExpense
-      
-      console.log('月度收支计算:', {
-        income: monthIncome,
-        expense: monthExpense,
-        net: monthlyNet.value
-      })
     }
-    
-  } catch (error) {
-    console.error('加载统计数据失败:', error)
-    
-    const errorMessage = String(error)
-    if (errorMessage.includes('Unauthorized')) {
-      uni.removeStorageSync('token')
-      uni.removeStorageSync('current_user')
-      uni.showToast({
-        title: '登录已过期，请重新登录',
-        icon: 'none'
-      })
-      setTimeout(() => {
-        uni.navigateTo({ url: '/pages/login/login' })
-      }, 1500)
-    } else {
-      balance.value = 0
-      monthlyNet.value = 0
-      uni.showToast({
-        title: '数据加载失败',
-        icon: 'none'
-      })
-    }
+  } catch (error: any) {
+    balance.value = 0
+    monthlyNet.value = 0
+    uni.showToast({
+      title: '数据加载失败',
+      icon: 'none'
+    })
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
+onMounted(function(): void {
   loadStatisticData()
 })
 
-// 使用uni-app的生命周期钩子
 defineExpose({
-  onShow() {
+  onShow: function(): void {
     loadStatisticData()
   }
 })
@@ -199,91 +157,86 @@ defineExpose({
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 6rpx;
+  padding: 20rpx 0;
 }
 .balance-label {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #666;
+  margin-bottom: 10rpx;
 }
 .balance-value {
-  font-size: 36rpx;
-  color: #333;
+  font-size: 48rpx;
   font-weight: bold;
-  margin-top: 4rpx;
-}
-.balance-value.expense {
-  color: #ff3b30;
-}
-.balance-value.income {
-  color: #34c759; /* 绿色表示正收支 */
+  color: #333;
 }
 .balance-value.loading {
+  font-size: 32rpx;
   color: #999;
-  font-size: 28rpx;
+}
+.balance-value.income {
+  color: #34C759;
+}
+.balance-value.expense {
+  color: #FF3B30;
+}
+.divider {
+  width: 80%;
+  height: 1rpx;
+  background-color: #eee;
+  margin: 10rpx 0;
 }
 .expense-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-top: 4rpx;
+  gap: 10rpx;
 }
 .expense-icon {
-  font-size: 30rpx;
-  margin-right: 6rpx;
+  font-size: 32rpx;
 }
 .expense-icon.positive {
-  color: #34c759; /* 绿色向上箭头 */
+  color: #34C759;
 }
 .expense-icon.negative {
-  color: #ff3b30; /* 红色向下箭头 */
-}
-.divider {
-  width: 60%;
-  height: 1rpx;
-  background-color: #eee;
-  margin: 14rpx 0;
+  color: #FF3B30;
 }
 
-/* 功能区：3行2列 */
+/* 功能区 */
 .feature-grid {
   flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-content: space-around;
-  padding: 0 24rpx;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  padding: 20rpx;
+  overflow-y: auto;
 }
 .feature-item {
-  width: 48%;
-  height: 30%;
   background-color: #fff;
-  border-radius: 16rpx;
-  padding: 20rpx 10rpx;
-  display: flex;
-  flex-direction: column;    /* 垂直布局 */
-  align-items: center;       /* 横向居中 */
-  justify-content: center;   /* 垂直居中整个内容块 */
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.04);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+.feature-item:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
+}
+.feature-icon {
+  width: 80rpx;
+  height: 80rpx;
   margin-bottom: 20rpx;
 }
-
-.feature-icon {
-  width: 60rpx;
-  height: 60rpx;
-  margin-bottom: 10rpx;
-}
-
 .feature-title {
-  font-size: 26rpx;
-  color: #333;
+  font-size: 32rpx;
   font-weight: bold;
-  text-align: center;
+  color: #333;
+  margin-bottom: 10rpx;
+  display: block;
 }
-
 .feature-sub {
-  font-size: 20rpx;
-  color: #999;
-  margin-top: 4rpx;
-  text-align: center;
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.4;
+  display: block;
 }
 </style>

@@ -67,15 +67,15 @@ return (): any | null => {
         createElementVNode("text", utsMapOf({ class: "info-title" }), "当前页面状态"),
         createElementVNode("view", utsMapOf({ class: "info-item" }), [
           createElementVNode("text", utsMapOf({ class: "info-label" }), "页面类型："),
-          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentType.value || '未设置'), 1 /* TEXT */)
+          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentType.value ?? '未设置'), 1 /* TEXT */)
         ]),
         createElementVNode("view", utsMapOf({ class: "info-item" }), [
           createElementVNode("text", utsMapOf({ class: "info-label" }), "income_expense："),
-          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentIncomeExpense.value || '未设置'), 1 /* TEXT */)
+          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentIncomeExpense.value ?? '未设置'), 1 /* TEXT */)
         ]),
         createElementVNode("view", utsMapOf({ class: "info-item" }), [
           createElementVNode("text", utsMapOf({ class: "info-label" }), "页面路径："),
-          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentPath.value || '未设置'), 1 /* TEXT */)
+          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentPath.value ?? '未设置'), 1 /* TEXT */)
         ])
       ]),
       createElementVNode("view", utsMapOf({ class: "action-card" }), [

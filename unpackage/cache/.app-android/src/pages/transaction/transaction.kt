@@ -232,8 +232,8 @@ open class GenPagesTransactionTransaction : BasePage {
                             }
                         }
                          catch (error: Throwable) {
-                            val errorMessage = if ((error && UTSAndroid.`typeof`(error) === "object" && resolveInOperator(error, "message"))) {
-                                String(error.message)
+                            val errorMessage = if (error is UTSError) {
+                                (error as UTSError).message
                             } else {
                                 String(error)
                             }

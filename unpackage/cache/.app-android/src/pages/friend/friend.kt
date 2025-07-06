@@ -66,17 +66,21 @@ open class GenPagesFriendFriend : BasePage {
                         try {
                             val response = await(searchUserByEmailDirect(searchEmail.value))
                             if (response.code === 200 && response.data) {
-                                val user = response.data
+                                val user = (response as {
+                                    var code: Number
+                                    var message: String
+                                    var data: UTSJSONObject
+                                }).data
                                 val isFriend = myFriends.value.some(fun(friend): Boolean {
-                                    return friend.id === user.id
+                                    return friend.id === user["id"]
                                 })
                                 val hasPendingInvitation = pendingRequests.value.some(fun(req): Boolean {
-                                    return req.inviter.id === user.id && req.status === "pending"
+                                    return req.inviter.id === user["id"] && req.status === "pending"
                                 })
                                 searchResult.value = object : UTSJSONObject() {
-                                    var id = user.id
-                                    var email = user.email
-                                    var username = user.username
+                                    var id = user["id"]
+                                    var email = user["email"]
+                                    var username = user["username"]
                                     var added = isFriend
                                     var pending = hasPendingInvitation
                                 }
@@ -95,48 +99,42 @@ open class GenPagesFriendFriend : BasePage {
                 })
             }
             val searchUser = ::gen_searchUser_fn
-            fun gen_searchUserByEmailDirect_fn(email: String): UTSPromise<*> {
+            fun gen_searchUserByEmailDirect_fn(email: String): UTSPromise<Any> {
                 return wrapUTSPromise(suspend w@{
-                        return@w UTSPromise(fun(resolve, _reject){
-                            setTimeout(fun(){
-                                val mockUsers = utsArrayOf<UTSJSONObject>(object : UTSJSONObject() {
-                                    var id: Number = 1
-                                    var username = "yjj"
-                                    var email = "3213495082@qq.com"
-                                }, object : UTSJSONObject() {
-                                    var id: Number = 2
-                                    var username = "yjj"
-                                    var email = "yjj@qq.com"
-                                }, object : UTSJSONObject() {
-                                    var id: Number = 3
-                                    var username = "testuser1"
-                                    var email = "testuser1@example.com"
-                                }, object : UTSJSONObject() {
-                                    var id: Number = 4
-                                    var username = "111"
-                                    var email = "111@qq.com"
-                                })
-                                val user = mockUsers.find(fun(u): Boolean {
-                                    return u["email"] === email
-                                }
-                                )
-                                if (user) {
-                                    resolve(object : UTSJSONObject() {
-                                        var code: Number = 200
-                                        var message = "搜索成功"
-                                        var data = user
-                                    })
-                                } else {
-                                    resolve(object : UTSJSONObject() {
-                                        var code: Number = 404
-                                        var message = "未找到该用户"
-                                        var data = null
-                                    })
-                                }
-                            }
-                            , 500)
+                        val mockUsers = utsArrayOf<UTSJSONObject>(object : UTSJSONObject() {
+                            var id: Number = 1
+                            var username = "yjj"
+                            var email = "3213495082@qq.com"
+                        }, object : UTSJSONObject() {
+                            var id: Number = 2
+                            var username = "yjj"
+                            var email = "yjj@qq.com"
+                        }, object : UTSJSONObject() {
+                            var id: Number = 3
+                            var username = "testuser1"
+                            var email = "testuser1@example.com"
+                        }, object : UTSJSONObject() {
+                            var id: Number = 4
+                            var username = "111"
+                            var email = "111@qq.com"
+                        })
+                        val user = mockUsers.find(fun(u): Boolean {
+                            return u["email"] === email
                         }
                         )
+                        if (user) {
+                            return@w object : UTSJSONObject() {
+                                var code: Number = 200
+                                var message = "搜索成功"
+                                var data = user
+                            }
+                        } else {
+                            return@w object : UTSJSONObject() {
+                                var code: Number = 404
+                                var message = "未找到该用户"
+                                var data = null
+                            }
+                        }
                 })
             }
             val searchUserByEmailDirect = ::gen_searchUserByEmailDirect_fn

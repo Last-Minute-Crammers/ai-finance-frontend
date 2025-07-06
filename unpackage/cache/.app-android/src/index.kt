@@ -16,6 +16,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import io.dcloud.uniapp.extapi.connectSocket as uni_connectSocket
+import io.dcloud.uniapp.extapi.createCanvasContext as uni_createCanvasContext
 import io.dcloud.uniapp.extapi.getStorageSync as uni_getStorageSync
 import io.dcloud.uniapp.extapi.request as uni_request
 import io.dcloud.uniapp.extapi.setStorageSync as uni_setStorageSync
@@ -137,19 +138,13 @@ val GenAppClass = CreateVueAppComponent(GenApp::class.java, fun(): VueComponentO
     return GenApp(instance)
 }
 )
-val BACKEND_URLS: UTSJSONObject = object : UTSJSONObject(UTSSourceMapPosition("BACKEND_URLS", "utils/request.uts", 3, 7)) {
-    var production = "http://47.109.194.39/api"
-    var local = "http://localhost:8080"
-    var dockerHost = "http://host.docker.internal:8080"
-    var ip = "http://127.0.0.1:8080"
-    var external = "http://192.168.1.100:8080"
-}
-val DEFAULT_URL = BACKEND_URLS["production"]
+val BACKEND_URLS = Record(production = "http://47.109.194.39/api", local = "http://localhost:8080", dockerHost = "http://host.docker.internal:8080", ip = "http://127.0.0.1:8080", external = "http://192.168.1.100:8080")
+val DEFAULT_URL: String = BACKEND_URLS.production
 val getBackendUrl = fun(): String {
-    val configuredUrl = uni_getStorageSync("backend_url")
+    val configuredUrl: String? = uni_getStorageSync("backend_url")
     return configuredUrl || DEFAULT_URL
 }
-val BASE_URL = getBackendUrl()
+val BASE_URL: String = getBackendUrl()
 interface RequestOptions {
     var url: String
     var method: String?
@@ -158,41 +153,45 @@ interface RequestOptions {
     var requireAuth: Boolean?
     var timeout: Number?
     var retries: Number?
-    var headers: Any?
+    var headers: Record<String, String>?
+}
+interface UniRequestError {
+    var errMsg: String?
+    var message: String?
 }
 val getToken = fun(): String {
-    val token = uni_getStorageSync("token") || ""
+    val token: String = uni_getStorageSync("token") || ""
     console.log("Retrieved token:", if (token) {
         "" + token.substring(0, 20) + "..."
     } else {
         "No token found"
     }
-    , " at utils/request.ts:45")
+    , " at utils/request.ts:44")
     return token
 }
 val uni: Any
 val setBackendUrl = fun(url: String): Unit {
     uni_setStorageSync("backend_url", url)
-    console.log("Backend URL set to:", url, " at utils/request.ts:55")
+    console.log("Backend URL set to:", url, " at utils/request.ts:54")
 }
 val setBackendEnvironment = fun(envKey: String): String? {
     if (BACKEND_URLS[envKey]) {
-        val url = BACKEND_URLS[envKey]
+        val url: String = BACKEND_URLS[envKey]
         setBackendUrl(url)
         return url
     }
     return null
 }
-val getAvailableBackendUrls = fun(): Any {
+val getAvailableBackendUrls = fun(): Record<String, String> {
     return BACKEND_URLS
 }
 val checkBackendConnection = fun(customUrl: String?): UTSPromise<Any> {
     return wrapUTSPromise(suspend w@{
-            val targetUrl = customUrl || BASE_URL
+            val targetUrl: String = customUrl || BASE_URL
             try {
-                console.log("检查后端连接状态...", targetUrl, " at utils/request.ts:96")
-                val startTime = Date.now()
-                val requestPromise = UTSPromise(fun(resolve, reject){
+                console.log("检查后端连接状态...", targetUrl, " at utils/request.ts:95")
+                val startTime: Number = Date.now()
+                val requestPromise: UTSPromise<Any> = UTSPromise(fun(resolve, reject){
                     uni_request<Any>(RequestOptions(url = targetUrl + "/api/test", method = "GET", timeout = 10000, success = fun(response: Any){
                         if (!response) {
                             reject(UTSError("未收到后端响应"))
@@ -206,7 +205,7 @@ val checkBackendConnection = fun(customUrl: String?): UTSPromise<Any> {
                     ))
                 }
                 )
-                val timeoutPromise = UTSPromise(fun(_, reject){
+                val timeoutPromise: UTSPromise<Any> = UTSPromise(fun(_, reject){
                     setTimeout(fun(){
                         return reject(UTSError("请求超时(10秒)"))
                     }
@@ -217,11 +216,11 @@ val checkBackendConnection = fun(customUrl: String?): UTSPromise<Any> {
                     requestPromise,
                     timeoutPromise
                 )))
-                val endTime = Date.now()
+                val endTime: Number = Date.now()
                 if (!response || response.statusCode === undefined) {
                     throw UTSError("无效的响应格式")
                 }
-                console.log("后端连接检查结果:", response, "\u54CD\u5E94\u65F6\u95F4: " + (endTime - startTime) + "ms", " at utils/request.ts:131")
+                console.log("后端连接检查结果:", response, "\u54CD\u5E94\u65F6\u95F4: " + (endTime - startTime) + "ms", " at utils/request.ts:130")
                 return@w object : UTSJSONObject() {
                     var connected = response.statusCode === 200
                     var statusCode = response.statusCode
@@ -230,19 +229,21 @@ val checkBackendConnection = fun(customUrl: String?): UTSPromise<Any> {
                 }
             }
              catch (error: Throwable) {
-                console.error("后端连接检查失败:", error, " at utils/request.ts:140")
-                val errMsg = if (UTSAndroid.`typeof`(error) === "object" && error != null && resolveInOperator(error, "message")) {
+                console.error("后端连接检查失败:", error, " at utils/request.ts:139")
+                val errMsg: String = if (UTSAndroid.`typeof`(error) === "object" && error != null && resolveInOperator(error, "message")) {
                     String((error as Any).message || (error as Any).errMsg)
                 } else {
                     "未知错误"
                 }
-                val isConnectionRefused = UTSAndroid.`typeof`(errMsg) === "string" && errMsg.indexOf("CONNECTION_REFUSED") !== -1
-                val isTimeout = UTSAndroid.`typeof`(errMsg) === "string" && (errMsg.indexOf("timeout") !== -1 || errMsg.indexOf("超时") !== -1)
-                val diagnostics: UTSJSONObject = UTSJSONObject(Map<String, Any?>(utsArrayOf(
-                    utsArrayOf(
-                        "__\$originalPosition",
-                        UTSSourceMapPosition("diagnostics", "utils/request.uts", 130, 15)
-                    ),
+                val isConnectionRefused: Boolean = UTSAndroid.`typeof`(errMsg) === "string" && errMsg.indexOf("CONNECTION_REFUSED") !== -1
+                val isTimeout: Boolean = UTSAndroid.`typeof`(errMsg) === "string" && (errMsg.indexOf("timeout") !== -1 || errMsg.indexOf("超时") !== -1)
+                val diagnostics: {
+                    var serverUrl: String
+                    var errorType: String
+                    var isConnectionRefused: Boolean
+                    var isTimeout: Boolean
+                    var possibleCauses: UTSArray<String>
+                } = UTSJSONObject(Map<String, Any?>(utsArrayOf(
                     utsArrayOf(
                         "serverUrl",
                         targetUrl
@@ -261,17 +262,17 @@ val checkBackendConnection = fun(customUrl: String?): UTSPromise<Any> {
                     ),
                     utsArrayOf(
                         "possibleCauses",
-                        utsArrayOf<String>()
+                        utsArrayOf()
                     )
                 )))
                 if (isConnectionRefused) {
-                    diagnostics["possibleCauses"] = utsArrayOf(
+                    diagnostics.possibleCauses = utsArrayOf(
                         "后端服务器未启动",
                         "端口8080可能被其他应用占用",
                         "检查防火墙设置是否允许连接"
                     )
                 } else if (isTimeout) {
-                    diagnostics["possibleCauses"] = utsArrayOf(
+                    diagnostics.possibleCauses = utsArrayOf(
                         "Docker容器端口映射不正确 - 检查docker-compose.yml",
                         "Docker网络配置问题 - 尝试使用127.0.0.1而不是localhost",
                         "防火墙阻止了连接 - 检查防火墙设置",
@@ -279,14 +280,14 @@ val checkBackendConnection = fun(customUrl: String?): UTSPromise<Any> {
                         "后端服务未正确监听端口 - 检查后端日志"
                     )
                 } else {
-                    diagnostics["possibleCauses"] = utsArrayOf(
+                    diagnostics.possibleCauses = utsArrayOf(
                         "后端服务未正确启动",
                         "API端点路径可能不正确",
                         "请求处理过程中出现错误",
                         "网络连接问题"
                     )
                 }
-                console.log("连接诊断:", diagnostics, " at utils/request.ts:184")
+                console.log("连接诊断:", diagnostics, " at utils/request.ts:189")
                 return@w UTSJSONObject(Map<String, Any?>(utsArrayOf(
                     utsArrayOf(
                         "connected",
@@ -306,46 +307,70 @@ val checkBackendConnection = fun(customUrl: String?): UTSPromise<Any> {
 }
 val request = fun<T>(options: RequestOptions): UTSPromise<T> {
     return wrapUTSPromise(suspend w@{
-            val token = getToken()
-            val headers: Any = UTSJSONObject.assign(UTSJSONObject(), (options.headers || UTSJSONObject()), object : UTSJSONObject() {
-                var `Content-Type` = "application/json"
-            })
-            if (options.requireAuth !== false && token) {
-                headers["Authorization"] = "Bearer " + token
+            val url = options.url
+            val _options_method = options.method
+            val method = if (_options_method == null) {
+                "GET"
+            } else {
+                _options_method
             }
-            var url = BASE_URL + options.url
-            if (options.method === "GET" && options.params) {
-                val params = options.params
-                val queryArr: UTSArray<String> = utsArrayOf()
-                for(key in resolveUTSKeyIterator(params)){
-                    if (params[key] !== undefined && params[key] != null) {
-                        queryArr.push(UTSAndroid.consoleDebugError(encodeURIComponent(key), " at utils/request.uts:293") + "=" + UTSAndroid.consoleDebugError(encodeURIComponent(String(params[key])), " at utils/request.uts:293"))
-                    }
+            val data = options.data
+            val params = options.params
+            val _options_requireAuth = options.requireAuth
+            val requireAuth = if (_options_requireAuth == null) {
+                true
+            } else {
+                _options_requireAuth
+            }
+            val _options_timeout = options.timeout
+            val timeout = if (_options_timeout == null) {
+                10000
+            } else {
+                _options_timeout
+            }
+            val _options_headers = options.headers
+            val headers = if (_options_headers == null) {
+                UTSJSONObject()
+            } else {
+                _options_headers
+            }
+            var fullUrl: String = BASE_URL + url
+            if (params) {
+                val queryString: String = Object.keys(params).map(fun(key): String {
+                    return "" + UTSAndroid.consoleDebugError(encodeURIComponent(key), " at utils/request.uts:215") + "=" + UTSAndroid.consoleDebugError(encodeURIComponent(params[key]), " at utils/request.uts:215")
                 }
-                val queryString = queryArr.join("&")
-                if (queryString) {
-                    url += (if (url.indexOf("?") !== -1) {
-                        "&"
-                    } else {
-                        "?"
-                    }
-                    ) + queryString
+                ).join("&")
+                fullUrl += (if (fullUrl.includes("?")) {
+                    "&"
+                } else {
+                    "?"
+                }
+                ) + queryString
+            }
+            val requestHeaders: Record<String, String> = UTSJSONObject.assign(object : UTSJSONObject() {
+                var `Content-Type` = "application/json"
+            }, headers)
+            if (requireAuth) {
+                val token: String = getToken()
+                if (token) {
+                    requestHeaders["Authorization"] = "Bearer " + token
                 }
             }
             return@w UTSPromise<T>(fun(resolve, reject){
-                uni_request<Any>(RequestOptions(url = url, method = options.method || "GET", data = options.data, header = headers, timeout = options.timeout || 30000, success = fun(res: Any){
-                    if (!res) {
-                        reject(UTSError("未收到响应数据"))
-                        return
+                uni_request<Any>(RequestOptions(url = fullUrl, method = method, data = data, header = requestHeaders, timeout = timeout, success = fun(response: Any){
+                    console.log("\u8BF7\u6C42\u6210\u529F [" + method + "] " + fullUrl + ":", response, " at utils/request.ts:278")
+                    if (response.statusCode >= 200 && response.statusCode < 300) {
+                        resolve(response.data)
+                    } else {
+                        val error = UniRequestError(message = "HTTP " + response.statusCode + ": " + (response.data?.message || "请求失败"))
+                        reject(error)
                     }
-                    if (!res.statusCode || res.statusCode !== 200) {
-                        reject(UTSError("\u8BF7\u6C42\u5931\u8D25 (" + res.statusCode + ")"))
-                        return
-                    }
-                    resolve(res.data as T)
                 }
-                , fail = fun(err: Any){
-                    reject(err || UTSError("请求失败"))
+                , fail = fun(error: Any){
+                    console.error("\u8BF7\u6C42\u5931\u8D25 [" + method + "] " + fullUrl + ":", error, " at utils/request.ts:291")
+                    val errorMessage: String = error.errMsg || error.message || "网络请求失败"
+                    val uniError = UniRequestError(errMsg = errorMessage, message = errorMessage)
+                    reject(uniError)
                 }
                 ))
             }
@@ -659,7 +684,7 @@ val getIconByEmoji = fun(emoji: String): Any {
 val getAllIcons = fun(): UTSArray<IconDefinition> {
     return STANDARD_ICONS.slice()
 }
-val saveCategoriesToLocal = fun(categories: UTSArray<Category>){
+val saveCategoriesToLocal = fun(categories: UTSArray<Category>): Unit {
     try {
         uni_setStorageSync(CATEGORY_STORAGE_KEY, JSON.stringify(categories))
         console.log("分类数据已保存到本地存储:", categories.length, "个分类", " at common/api/category.ts:58")
@@ -670,9 +695,9 @@ val saveCategoriesToLocal = fun(categories: UTSArray<Category>){
 }
 val getCategoriesFromLocal = fun(): UTSArray<Category> {
     try {
-        val data = uni_getStorageSync(CATEGORY_STORAGE_KEY)
+        val data: String? = uni_getStorageSync(CATEGORY_STORAGE_KEY)
         if (data) {
-            val categories = UTSAndroid.consoleDebugError(JSON.parse(data), " at common/api/category.uts:61")
+            val categories: UTSArray<Category> = UTSAndroid.consoleDebugError(JSON.parse(data), " at common/api/category.uts:61")
             console.log("从本地存储获取分类数据:", categories.length, "个分类", " at common/api/category.ts:69")
             return categories
         }
@@ -703,72 +728,79 @@ val getCategoryList = fun(data: {
 }): UTSPromise<ApiResponse<UTSArray<Category>>> {
     return wrapUTSPromise(suspend w@{
             try {
-                val localCategories = getCategoriesFromLocal()
-                val filteredCategories = filterCategoriesByType(localCategories, data.income_expense)
+                val localCategories: UTSArray<Category> = getCategoriesFromLocal()
+                val filteredCategories: UTSArray<Category> = filterCategoriesByType(localCategories, data.income_expense)
                 if (filteredCategories.length > 0) {
-                    console.log("使用本地分类数据:", filteredCategories.length, "个分类", " at common/api/category.ts:106")
                     return@w object : UTSJSONObject() {
                         var code: Number = 200
                         var message = "success"
                         var data = filteredCategories
                     }
                 }
-                console.log("本地无数据，从服务器获取分类列表...", " at common/api/category.ts:115")
-                val rawResponse = await(request(object : UTSJSONObject() {
+                val rawResponse: Any = await(request(object : UTSJSONObject() {
                     var url = "/api/user/category/list"
                     var method = "GET"
                     var params = data
                     var requireAuth = true
                 }))
-                val transformedData = (rawResponse.Data || utsArrayOf()).map(fun(item: Any){
-                    val iconInfo = if (item.Icon || item.icon) {
-                        getIconByEmoji(item.Icon || item.icon)
-                    } else {
-                        undefined
-                    }
-                    return object : UTSJSONObject() {
-                        var id = item.ID
-                        var name = item.Name
-                        var iconId = iconInfo?.id || 1
-                        var icon = item.Icon || item.icon
-                        var color = item.Color
-                        var incomeExpense = item.IncomeExpense
-                        var createTime = item.CreatedAt
-                        var updateTime = item.UpdatedAt
+                val transformedData: UTSArray<Category> = utsArrayOf()
+                if (rawResponse.Data && UTSArray.isArray(rawResponse.Data)) {
+                    run {
+                        var i: Number = 0
+                        while(i < rawResponse.Data.length){
+                            val item: Any = rawResponse.Data[i]
+                            val iconInfo: Any = if (item.Icon || item.icon) {
+                                getIconByEmoji(item.Icon || item.icon)
+                            } else {
+                                undefined
+                            }
+                            transformedData.push(object : UTSJSONObject() {
+                                var id = item.ID
+                                var name = item.Name
+                                var iconId = iconInfo?.id || 1
+                                var icon = item.Icon || item.icon
+                                var color = item.Color
+                                var incomeExpense = item.IncomeExpense
+                                var createTime = item.CreatedAt
+                                var updateTime = item.UpdatedAt
+                            })
+                            i++
+                        }
                     }
                 }
-                )
-                val response: UTSJSONObject = object : UTSJSONObject(UTSSourceMapPosition("response", "common/api/category.uts", 126, 15)) {
-                    var code: Number = 200
-                    var message = rawResponse.Msg || "success"
-                    var data = transformedData
-                }
-                console.log("转换后的响应格式:", response, " at common/api/category.ts:146")
-                if (response["code"] === 200) {
-                    val newCategories = response["data"] || utsArrayOf()
+                val response = ApiResponse(code = 200, message = rawResponse.Msg || "success", data = transformedData)
+                if (response.code === 200) {
+                    val newCategories: UTSArray<Category> = response.data || utsArrayOf()
                     if (newCategories.length > 0) {
-                        val existingCategories = getCategoriesFromLocal()
-                        val existingIds = Set(existingCategories.map(fun(cat): Number {
-                            return cat.id
-                        }))
-                        val uniqueNewCategories = newCategories.filter(fun(cat){
-                            return !existingIds.has(cat.id)
-                        })
-                        val allCategories = existingCategories.concat(uniqueNewCategories)
+                        val existingCategories: UTSArray<Category> = getCategoriesFromLocal()
+                        val existingIds: Set<Number> = Set<Number>()
+                        run {
+                            var i: Number = 0
+                            while(i < existingCategories.length){
+                                existingIds.add(existingCategories[i].id)
+                                i++
+                            }
+                        }
+                        val uniqueNewCategories: UTSArray<Category> = utsArrayOf()
+                        run {
+                            var i: Number = 0
+                            while(i < newCategories.length){
+                                if (!existingIds.has(newCategories[i].id)) {
+                                    uniqueNewCategories.push(newCategories[i])
+                                }
+                                i++
+                            }
+                        }
+                        val allCategories: UTSArray<Category> = existingCategories.concat(uniqueNewCategories)
                         saveCategoriesToLocal(allCategories)
-                        console.log("分类数据已同步到本地存储，总计:", allCategories.length, "个分类", " at common/api/category.ts:164")
-                    } else {
-                        console.log("服务器返回空分类列表，无需更新本地存储", " at common/api/category.ts:166")
                     }
                 }
                 return@w response
             }
              catch (error: Throwable) {
-                console.error("获取分类列表失败:", error, " at common/api/category.ts:172")
-                val localCategories = getCategoriesFromLocal()
-                val filteredCategories = filterCategoriesByType(localCategories, data.income_expense)
+                val localCategories: UTSArray<Category> = getCategoriesFromLocal()
+                val filteredCategories: UTSArray<Category> = filterCategoriesByType(localCategories, data.income_expense)
                 if (filteredCategories.length > 0) {
-                    console.log("网络请求失败，使用本地缓存数据:", filteredCategories.length, "个分类", " at common/api/category.ts:179")
                     return@w object : UTSJSONObject() {
                         var code: Number = 200
                         var message = "success (cached)"
@@ -792,13 +824,13 @@ val createCategory = fun(data: {
             } else {
                 undefined
             }
-            val requestData: UTSJSONObject = object : UTSJSONObject(UTSSourceMapPosition("requestData", "common/api/category.uts", 180, 11)) {
+            val requestData: UTSJSONObject = object : UTSJSONObject(UTSSourceMapPosition("requestData", "common/api/category.uts", 172, 11)) {
                 var name = data.name
                 var icon = iconInfo?.emoji || data.icon || "📁"
                 var color = data.color
                 var income_expense = data.incomeExpense
             }
-            console.log("发送创建分类请求:", requestData, " at common/api/category.ts:211")
+            console.log("发送创建分类请求:", requestData, " at common/api/category.ts:187")
             val rawResponse = await(request(object : UTSJSONObject() {
                 var url = "/api/user/category"
                 var method = "POST"
@@ -817,7 +849,7 @@ val createCategoryWithCurrentType = fun(name: String, iconId: Number?, color: St
             val getCurrentIncomeExpense = (await(import("../../utils/pageState"))).getCurrentIncomeExpense
             val currentIncomeExpense = getCurrentIncomeExpense()
             if (!currentIncomeExpense) {
-                console.error("无法获取当前页面类型，请确保在记账页面中", " at common/api/category.ts:235")
+                console.error("无法获取当前页面类型，请确保在记账页面中", " at common/api/category.ts:211")
                 uni_showToast(ShowToastOptions(title = "请先在记账页面选择类型", icon = "none"))
                 return@w null
             }
@@ -833,7 +865,7 @@ val createCategoryWithCurrentType = fun(name: String, iconId: Number?, color: St
                     tempCategory
                 ))
                 saveCategoriesToLocal(allCategories)
-                console.log("分类已保存到本地:", tempCategory, " at common/api/category.ts:263")
+                console.log("分类已保存到本地:", tempCategory, " at common/api/category.ts:239")
                 try {
                     val response = await(createCategory(UTSJSONObject(Map<String, Any?>(utsArrayOf(
                         utsArrayOf(
@@ -864,7 +896,7 @@ val createCategoryWithCurrentType = fun(name: String, iconId: Number?, color: St
                             return cat !== undefined
                         })
                         saveCategoriesToLocal(updatedCategories)
-                        console.log("分类已同步到后端:", response.data, " at common/api/category.ts:280")
+                        console.log("分类已同步到后端:", response.data, " at common/api/category.ts:256")
                         return@w object : UTSJSONObject() {
                             var code: Number = 200
                             var message = "分类创建成功"
@@ -875,7 +907,7 @@ val createCategoryWithCurrentType = fun(name: String, iconId: Number?, color: St
                     }
                 }
                  catch (serverError: Throwable) {
-                    console.error("后端同步失败，但本地已保存:", serverError, " at common/api/category.ts:291")
+                    console.error("后端同步失败，但本地已保存:", serverError, " at common/api/category.ts:267")
                     uni_showToast(ShowToastOptions(title = "分类已保存到本地，网络同步失败", icon = "none", duration = 3000))
                     return@w object : UTSJSONObject() {
                         var code: Number = 200
@@ -885,7 +917,7 @@ val createCategoryWithCurrentType = fun(name: String, iconId: Number?, color: St
                 }
             }
              catch (localError: Throwable) {
-                console.error("本地保存失败:", localError, " at common/api/category.ts:307")
+                console.error("本地保存失败:", localError, " at common/api/category.ts:283")
                 uni_showToast(ShowToastOptions(title = "保存失败，请重试", icon = "none"))
                 throw localError
             }
@@ -896,7 +928,7 @@ val refreshCategoryList = fun(data: {
 }): UTSPromise<ApiResponse<UTSArray<Category>>> {
     return wrapUTSPromise(suspend w@{
             try {
-                console.log("强制从服务器刷新分类列表...", " at common/api/category.ts:349")
+                console.log("强制从服务器刷新分类列表...", " at common/api/category.ts:325")
                 val rawResponse = await(request(object : UTSJSONObject() {
                     var url = "/api/user/category/list"
                     var method = "GET"
@@ -921,12 +953,12 @@ val refreshCategoryList = fun(data: {
                     }
                 }
                 )
-                val response: UTSJSONObject = object : UTSJSONObject(UTSSourceMapPosition("response", "common/api/category.uts", 330, 15)) {
+                val response: UTSJSONObject = object : UTSJSONObject(UTSSourceMapPosition("response", "common/api/category.uts", 322, 15)) {
                     var code: Number = 200
                     var message = rawResponse.Msg || "success"
                     var data = transformedData
                 }
-                console.log("转换后的响应格式:", response, " at common/api/category.ts:380")
+                console.log("转换后的响应格式:", response, " at common/api/category.ts:356")
                 if (response["code"] === 200) {
                     val newCategories = response["data"] || utsArrayOf()
                     val existingCategories = getCategoriesFromLocal()
@@ -936,12 +968,12 @@ val refreshCategoryList = fun(data: {
                     )
                     val allCategories = otherTypeCategories.concat(newCategories)
                     saveCategoriesToLocal(allCategories)
-                    console.log("分类数据已强制刷新并保存到本地存储，总计:", allCategories.length, "个分类", " at common/api/category.ts:397")
+                    console.log("分类数据已强制刷新并保存到本地存储，总计:", allCategories.length, "个分类", " at common/api/category.ts:373")
                 }
                 return@w response
             }
              catch (error: Throwable) {
-                console.error("强制刷新分类列表失败:", error, " at common/api/category.ts:402")
+                console.error("强制刷新分类列表失败:", error, " at common/api/category.ts:378")
                 throw error
             }
     })
@@ -1012,6 +1044,12 @@ val GenPagesLoginLoginClass = CreateVueComponent(GenPagesLoginLogin::class.java,
     return GenPagesLoginLogin(instance, renderer)
 }
 )
+interface Feature {
+    var name: String
+    var desc: String
+    var icon: String
+    var path: String
+}
 val GenPagesIndexIndexClass = CreateVueComponent(GenPagesIndexIndex::class.java, fun(): VueComponentOptions {
     return VueComponentOptions(type = "page", name = "", inheritAttrs = GenPagesIndexIndex.inheritAttrs, inject = GenPagesIndexIndex.inject, props = GenPagesIndexIndex.props, propsNeedCastKeys = GenPagesIndexIndex.propsNeedCastKeys, emits = GenPagesIndexIndex.emits, components = GenPagesIndexIndex.components, styles = GenPagesIndexIndex.styles, setup = fun(props: ComponentPublicInstance, ctx: SetupContext): Any? {
         return GenPagesIndexIndex.setup(props as GenPagesIndexIndex, ctx)
@@ -1028,7 +1066,7 @@ interface PageState {
     var pagePath: String?
 }
 var pageState = PageState(currentType = null, incomeExpense = null, pagePath = null)
-val setPageType = fun(type: String){
+val setPageType = fun(type: String): Unit {
     pageState.currentType = type
     pageState.incomeExpense = if (type === "支出") {
         "expense"
@@ -1043,14 +1081,14 @@ val getCurrentType = fun(): String? {
 val getCurrentIncomeExpense = fun(): String? {
     return pageState.incomeExpense
 }
-val setPagePath = fun(path: String){
+val setPagePath = fun(path: String): Unit {
     pageState.pagePath = path
     console.log("页面路径已设置:", path, " at utils/pageState.ts:35")
 }
 val getPagePath = fun(): String? {
     return pageState.pagePath
 }
-val resetPageState = fun(){
+val resetPageState = fun(): Unit {
     pageState = object : UTSJSONObject() {
         var currentType = null
         var incomeExpense = null
@@ -1505,13 +1543,395 @@ fun getTimeRange1(type: String): {
         var endTime = endTime.toISOString()
     }
 }
-val GenComponentsSimpleChartClass = CreateVueComponent(GenComponentsSimpleChart::class.java, fun(): VueComponentOptions {
-    return VueComponentOptions(type = "component", name = GenComponentsSimpleChart.name, inheritAttrs = GenComponentsSimpleChart.inheritAttrs, inject = GenComponentsSimpleChart.inject, props = GenComponentsSimpleChart.props, propsNeedCastKeys = GenComponentsSimpleChart.propsNeedCastKeys, emits = GenComponentsSimpleChart.emits, components = GenComponentsSimpleChart.components, styles = GenComponentsSimpleChart.styles)
-}
-, fun(instance, renderer): GenComponentsSimpleChart {
-    return GenComponentsSimpleChart(instance)
-}
-)
+val __sfc__ = defineComponent(defineComponent(let {
+    object : UTSJSONObject() {
+        var name = "SimpleChart"
+        var props = object : UTSJSONObject() {
+            var type = object : UTSJSONObject() {
+                var type = String as PropType<String>
+                var `default` = "line"
+                var validator = fun(value: String): Boolean {
+                    return utsArrayOf(
+                        "line",
+                        "bar",
+                        "pie",
+                        "area"
+                    ).indexOf(value) !== -1
+                }
+            }
+            var data = object : UTSJSONObject() {
+                var type = UTSArray as PropType<UTSArray<Any>>
+                var `default` = fun(): UTSArray<Any> {
+                    return utsArrayOf()
+                }
+            }
+            var categories = object : UTSJSONObject() {
+                var type = UTSArray as PropType<UTSArray<String>>
+                var `default` = fun(): UTSArray<String> {
+                    return utsArrayOf()
+                }
+            }
+            var series = object : UTSJSONObject() {
+                var type = UTSArray as PropType<UTSArray<Any>>
+                var `default` = fun(): UTSArray<Any> {
+                    return utsArrayOf()
+                }
+            }
+            var width = object : UTSJSONObject() {
+                var type = Number
+                var `default`: Number = 300
+            }
+            var height = object : UTSJSONObject() {
+                var type = Number
+                var `default`: Number = 200
+            }
+            var colors = object : UTSJSONObject() {
+                var type = UTSArray as PropType<UTSArray<String>>
+                var `default` = fun(): UTSArray<String> {
+                    return utsArrayOf(
+                        "#007AFF",
+                        "#34C759",
+                        "#FF9500",
+                        "#FF3B30",
+                        "#AF52DE"
+                    )
+                }
+            }
+            var showLegend = object : UTSJSONObject() {
+                var type = Boolean
+                var `default` = true
+            }
+            var showGrid = object : UTSJSONObject() {
+                var type = Boolean
+                var `default` = true
+            }
+        }
+        var data = fun(): {
+            var chartId: String
+            var loading: Boolean
+            var error: String?
+            var ctx: Any
+            var chartData: Any
+        } {
+            return object : UTSJSONObject() {
+                var chartId = ""
+                var loading = false
+                var error = null
+                var ctx = null
+                var chartData = null
+            }
+        }
+        var mounted = fun(): Unit {
+            it.chartId = "chart_" + Math.random().toString(36).substring(2, 9)
+            it.`$nextTick`(fun(){
+                it.initChart()
+            }
+            )
+        }
+        var methods = let {
+            object : UTSJSONObject() {
+                var initChart = fun(): UTSPromise<Unit> {
+                    return wrapUTSPromise(suspend {
+                            try {
+                                it.loading = true
+                                it.error = null
+                                it.ctx = uni_createCanvasContext(it.chartId, it)
+                                it.processData()
+                                await(it.drawChart())
+                                it.loading = false
+                            }
+                             catch (err: Throwable) {
+                                it.error = if (err && err.message) {
+                                    err.message
+                                } else {
+                                    "图表加载失败"
+                                }
+                                it.loading = false
+                            }
+                    })
+                }
+                var processData = fun(): Unit {
+                    if (it.data && it.data.length > 0) {
+                        it.chartData = it.data
+                    } else if (it.series && it.series.length > 0) {
+                        it.chartData = let {
+                            object : UTSJSONObject() {
+                                var categories = it.categories
+                                var series = it.series
+                            }
+                        }
+                    } else {
+                        throw UTSError("请提供有效的图表数据")
+                    }
+                }
+                var drawChart = fun(): UTSPromise<Unit> {
+                    return wrapUTSPromise(suspend w@{
+                            if (!it.ctx || !it.chartData) {
+                                return@w
+                            }
+                            val ctx: Any = it.ctx
+                            val width: Number = it.width
+                            val height: Number = it.height
+                            ctx.clearRect(0, 0, width, height)
+                            ctx.setFillStyle("#FFFFFF")
+                            ctx.fillRect(0, 0, width, height)
+                            when (it.type) {
+                                "line" -> 
+                                    it.drawLineChart(ctx, width, height)
+                                "bar" -> 
+                                    it.drawBarChart(ctx, width, height)
+                                "pie" -> 
+                                    it.drawPieChart(ctx, width, height)
+                                "area" -> 
+                                    it.drawAreaChart(ctx, width, height)
+                            }
+                            if (it.showLegend) {
+                                it.drawLegend(ctx, width, height)
+                            }
+                            ctx.draw()
+                    })
+                }
+                var drawLineChart = fun(ctx: Any, width: Number, height: Number): Unit {
+                    val padding: Number = 40
+                    val chartWidth: Number = width - padding * 2
+                    val chartHeight: Number = height - padding * 2
+                    if (!it.chartData.series || it.chartData.series.length === 0) {
+                        return
+                    }
+                    val series: Any = it.chartData.series[0]
+                    val data: UTSArray<Number> = series.data || utsArrayOf()
+                    val categories: UTSArray<String> = it.chartData.categories || utsArrayOf()
+                    if (data.length === 0) {
+                        return
+                    }
+                    val minValue: Number = Math.min(*data.toTypedArray())
+                    val maxValue: Number = Math.max(*data.toTypedArray())
+                    val valueRange: Number = maxValue - minValue || 1
+                    if (it.showGrid) {
+                        it.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue)
+                    }
+                    ctx.setStrokeStyle(it.colors[0])
+                    ctx.setLineWidth(2)
+                    ctx.beginPath()
+                    run {
+                        var i: Number = 0
+                        while(i < data.length){
+                            val value: Number = data[i]
+                            val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                            val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                            if (i === 0) {
+                                ctx.moveTo(x, y)
+                            } else {
+                                ctx.lineTo(x, y)
+                            }
+                            i++
+                        }
+                    }
+                    ctx.stroke()
+                    ctx.setFillStyle(it.colors[0])
+                    run {
+                        var i: Number = 0
+                        while(i < data.length){
+                            val value: Number = data[i]
+                            val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                            val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                            ctx.beginPath()
+                            ctx.arc(x, y, 4, 0, 2 * Math.PI)
+                            ctx.fill()
+                            i++
+                        }
+                    }
+                }
+                var drawBarChart = fun(ctx: Any, width: Number, height: Number): Unit {
+                    val padding: Number = 40
+                    val chartWidth: Number = width - padding * 2
+                    val chartHeight: Number = height - padding * 2
+                    if (!it.chartData.series || it.chartData.series.length === 0) {
+                        return
+                    }
+                    val series: Any = it.chartData.series[0]
+                    val data: UTSArray<Number> = series.data || utsArrayOf()
+                    val categories: UTSArray<String> = it.chartData.categories || utsArrayOf()
+                    if (data.length === 0) {
+                        return
+                    }
+                    val minValue: Number = Math.min(*data.toTypedArray())
+                    val maxValue: Number = Math.max(*data.toTypedArray())
+                    val valueRange: Number = maxValue - minValue || 1
+                    if (it.showGrid) {
+                        it.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue)
+                    }
+                    val barWidth: Number = chartWidth / data.length * 0.8
+                    val barSpacing: Number = chartWidth / data.length * 0.2
+                    run {
+                        var i: Number = 0
+                        while(i < data.length){
+                            val value: Number = data[i]
+                            val barHeight: Number = ((value - minValue) / valueRange) * chartHeight
+                            val x: Number = padding + i * (barWidth + barSpacing) + barSpacing / 2
+                            val y: Number = padding + chartHeight - barHeight
+                            ctx.setFillStyle(it.colors[i % it.colors.length])
+                            ctx.fillRect(x, y, barWidth, barHeight)
+                            i++
+                        }
+                    }
+                }
+                var drawPieChart = fun(ctx: Any, width: Number, height: Number): Unit {
+                    val centerX: Number = width / 2
+                    val centerY: Number = height / 2
+                    val radius: Number = Math.min(width, height) / 2 - 40
+                    if (!it.chartData.series || it.chartData.series.length === 0) {
+                        return
+                    }
+                    val series: Any = it.chartData.series[0]
+                    val data: UTSArray<Number> = series.data || utsArrayOf()
+                    if (data.length === 0) {
+                        return
+                    }
+                    val total: Number = data.reduce(fun(sum: Number, value: Number): Number {
+                        return sum + value
+                    }
+                    , 0)
+                    var currentAngle: Number = 0
+                    run {
+                        var i: Number = 0
+                        while(i < data.length){
+                            val value: Number = data[i]
+                            val sliceAngle: Number = (value / total) * 2 * Math.PI
+                            ctx.setFillStyle(it.colors[i % it.colors.length])
+                            ctx.beginPath()
+                            ctx.moveTo(centerX, centerY)
+                            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle)
+                            ctx.closePath()
+                            ctx.fill()
+                            currentAngle += sliceAngle
+                            i++
+                        }
+                    }
+                }
+                var drawAreaChart = fun(ctx: Any, width: Number, height: Number): Unit {
+                    val padding: Number = 40
+                    val chartWidth: Number = width - padding * 2
+                    val chartHeight: Number = height - padding * 2
+                    if (!it.chartData.series || it.chartData.series.length === 0) {
+                        return
+                    }
+                    val series: Any = it.chartData.series[0]
+                    val data: UTSArray<Number> = series.data || utsArrayOf()
+                    val categories: UTSArray<String> = it.chartData.categories || utsArrayOf()
+                    if (data.length === 0) {
+                        return
+                    }
+                    val minValue: Number = Math.min(*data.toTypedArray())
+                    val maxValue: Number = Math.max(*data.toTypedArray())
+                    val valueRange: Number = maxValue - minValue || 1
+                    if (it.showGrid) {
+                        it.drawGrid(ctx, padding, chartWidth, chartHeight, categories.length, minValue, maxValue)
+                    }
+                    ctx.setFillStyle(it.colors[0] + "40")
+                    ctx.beginPath()
+                    run {
+                        var i: Number = 0
+                        while(i < data.length){
+                            val value: Number = data[i]
+                            val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                            val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                            if (i === 0) {
+                                ctx.moveTo(x, y)
+                            } else {
+                                ctx.lineTo(x, y)
+                            }
+                            i++
+                        }
+                    }
+                    ctx.lineTo(padding + chartWidth, padding + chartHeight)
+                    ctx.lineTo(padding, padding + chartHeight)
+                    ctx.closePath()
+                    ctx.fill()
+                    ctx.setStrokeStyle(it.colors[0])
+                    ctx.setLineWidth(2)
+                    ctx.beginPath()
+                    run {
+                        var i: Number = 0
+                        while(i < data.length){
+                            val value: Number = data[i]
+                            val x: Number = padding + (i / (data.length - 1)) * chartWidth
+                            val y: Number = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight
+                            if (i === 0) {
+                                ctx.moveTo(x, y)
+                            } else {
+                                ctx.lineTo(x, y)
+                            }
+                            i++
+                        }
+                    }
+                    ctx.stroke()
+                }
+                var drawLegend = fun(ctx: Any, width: Number, height: Number): Unit {
+                    if (!it.chartData.series || it.chartData.series.length === 0) {
+                        return
+                    }
+                    val legendY: Number = height - 30
+                    val itemWidth: Number = 80
+                    val itemHeight: Number = 20
+                    run {
+                        var i: Number = 0
+                        while(i < it.chartData.series.length){
+                            val series: Any = it.chartData.series[i]
+                            val x: Number = 10 + i * itemWidth
+                            ctx.setFillStyle(it.colors[i % it.colors.length])
+                            ctx.fillRect(x, legendY, 15, itemHeight)
+                            ctx.setFillStyle("#333333")
+                            ctx.setFontSize(12)
+                            ctx.fillText(series.name || "\u7CFB\u5217" + (i + 1), x + 20, legendY + 15)
+                            i++
+                        }
+                    }
+                }
+                var drawGrid = fun(ctx: Any, padding: Number, chartWidth: Number, chartHeight: Number, count: Number, minValue: Number, maxValue: Number): Unit {
+                    ctx.setStrokeStyle("#E0E0E0")
+                    ctx.setLineWidth(1)
+                    run {
+                        var i: Number = 0
+                        while(i <= count){
+                            val x: Number = padding + (i / count) * chartWidth
+                            ctx.beginPath()
+                            ctx.moveTo(x, padding)
+                            ctx.lineTo(x, padding + chartHeight)
+                            ctx.stroke()
+                            i++
+                        }
+                    }
+                    val gridLines: Number = 5
+                    run {
+                        var i: Number = 0
+                        while(i <= gridLines){
+                            val y: Number = padding + (i / gridLines) * chartHeight
+                            ctx.beginPath()
+                            ctx.moveTo(padding, y)
+                            ctx.lineTo(padding + chartWidth, y)
+                            ctx.stroke()
+                            i++
+                        }
+                    }
+                }
+                var onError = fun(e: Any): Unit {
+                    it.error = if (e && e.message) {
+                        e.message
+                    } else {
+                        "Canvas错误"
+                    }
+                }
+                var retry = fun(): Unit {
+                    it.initChart()
+                }
+                var onTouchStart = fun(e: Any): Unit {}
+                var onTouchMove = fun(e: Any): Unit {}
+                var onTouchEnd = fun(e: Any): Unit {}
+            }
+        }
+    }
+}))
 val GenPagesAnalyzeAnalyzeClass = CreateVueComponent(GenPagesAnalyzeAnalyze::class.java, fun(): VueComponentOptions {
     return VueComponentOptions(type = "page", name = "", inheritAttrs = GenPagesAnalyzeAnalyze.inheritAttrs, inject = GenPagesAnalyzeAnalyze.inject, props = GenPagesAnalyzeAnalyze.props, propsNeedCastKeys = GenPagesAnalyzeAnalyze.propsNeedCastKeys, emits = GenPagesAnalyzeAnalyze.emits, components = GenPagesAnalyzeAnalyze.components, styles = GenPagesAnalyzeAnalyze.styles, setup = fun(props: ComponentPublicInstance): Any? {
         return GenPagesAnalyzeAnalyze.setup(props as GenPagesAnalyzeAnalyze)
