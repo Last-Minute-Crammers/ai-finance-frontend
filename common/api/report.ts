@@ -209,8 +209,8 @@ export async function getAIReport(data: {
   type: 'week' | 'month' | 'year',
   stats?: any
 }) {
-  // 获取完整的统计数据
-  const completeStats = await getCompleteStatistics(data.type)
+  // 如果传入了统计数据，使用传入的；否则获取完整的统计数据
+  const completeStats = data.stats || await getCompleteStatistics(data.type)
   
   return request({
     url: '/api/user/report/ai',
@@ -261,7 +261,7 @@ export function getTotalStatistics() {
   })
 }
 
-// 根据类型获取时间范围
+// 根据类型获取时间范围（与财务报告界面一致）
 function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, endTime: string } {
   const now = new Date()
   let startTime: Date
@@ -269,20 +269,18 @@ function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, end
   
   switch (type) {
     case 'week':
-      // 获取最近一周（从7天前到今天）
-      startTime = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000)
+      // 本周（星期一到现在）
+      const day = now.getDay()
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1) // 如果是周日，则减6天；否则减(day-1)天
+      startTime = new Date(now.getFullYear(), now.getMonth(), diff)
       break
     case 'month':
-      // 获取本月开始
+      // 本月（1号到现在）
       startTime = new Date(now.getFullYear(), now.getMonth(), 1)
       break
     case 'year':
-      // 获取近12个月（从12个月前到今天）
-      startTime = new Date(now.getFullYear(), now.getMonth() - 11, 1)
-      // 确保时间范围正确
-      if (startTime > endTime) {
-        startTime = new Date(now.getFullYear() - 1, now.getMonth(), 1)
-      }
+      // 本年（1.1号到现在）
+      startTime = new Date(now.getFullYear(), 0, 1)
       break
     default:
       startTime = new Date(now.getFullYear(), now.getMonth(), 1)

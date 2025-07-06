@@ -122,10 +122,10 @@ export const getCategoryList = async (data: {
     
     // 转换后端数据格式为前端期望的格式
     const transformedData = (rawResponse.Data || []).map((item: any) => {
+      console.log('转换后端数据项:', item)
       // 根据后端返回的icon字符串，找到对应的iconId
       const iconInfo = item.Icon || item.icon ? getIconByEmoji(item.Icon || item.icon) : undefined
-      
-      return {
+      const transformedItem = {
         id: item.ID, // 后端返回 ID，转换为前端期望的 id
         name: item.Name,
         iconId: iconInfo?.id || 1, // 根据emoji找到对应的ID，默认使用1
@@ -135,6 +135,8 @@ export const getCategoryList = async (data: {
         createTime: item.CreatedAt,
         updateTime: item.UpdatedAt
       }
+      console.log('转换后的数据项:', transformedItem)
+      return transformedItem
     })
     
     const response = {
@@ -333,12 +335,57 @@ export const updateCategory = (id: number, data: {
 }
 
 // 删除分类
-export const deleteCategory = (id: number): Promise<ApiResponse<null>> => {
-  return request({
-    url: `/api/user/category/${id}`,
-    method: 'DELETE',
-    requireAuth: true
-  });
+export const deleteCategory = async (id: number): Promise<ApiResponse<null>> => {
+  try {
+    console.log('开始删除分类，ID:', id)
+    
+    // 先尝试从后端删除
+    const rawResponse = await request({
+      url: `/api/user/category/${id}`,
+      method: 'DELETE',
+      requireAuth: true
+    })
+    
+    console.log('后端删除原始响应:', rawResponse)
+    
+    // 转换后端响应格式为前端期望的格式
+    const response = {
+      code: 200,
+      message: rawResponse.Msg || '删除成功',
+      data: null
+    }
+    
+    console.log('转换后的响应:', response)
+    
+    // 如果后端删除成功，也从本地存储中删除
+    if (response.code === 200) {
+      const localCategories = getCategoriesFromLocal()
+      const updatedCategories = localCategories.filter(cat => cat.id !== id)
+      saveCategoriesToLocal(updatedCategories)
+      console.log('分类已从本地存储中删除，ID:', id)
+    }
+    
+    return response
+  } catch (error) {
+    console.error('删除分类失败:', error)
+    
+    // 如果后端删除失败，尝试从本地存储中删除（本地优先策略）
+    try {
+      const localCategories = getCategoriesFromLocal()
+      const updatedCategories = localCategories.filter(cat => cat.id !== id)
+      saveCategoriesToLocal(updatedCategories)
+      console.log('分类已从本地存储中删除（后端删除失败），ID:', id)
+      
+      return {
+        code: 200,
+        message: 'success (local only)',
+        data: null
+      }
+    } catch (localError) {
+      console.error('本地删除也失败:', localError)
+      throw error
+    }
+  }
 }
 
 // 强制刷新分类列表（从服务器获取最新数据）

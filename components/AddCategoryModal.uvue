@@ -15,6 +15,7 @@
             v-model="categoryName" 
             placeholder="请输入分类名称"
             maxlength="20"
+            @input="onNameInput"
           />
         </view>
         
@@ -75,6 +76,9 @@ const selectedIconId = ref(1) // 默认选择第一个图标
 const loading = ref(false)
 const currentPageType = ref<'支出' | '收入' | null>(null)
 
+// 新增：标记用户是否手动编辑过分类名称
+const isNameEdited = ref(false)
+
 // 可用图标列表
 const availableIcons = getAllIcons()
 
@@ -96,6 +100,10 @@ const canSubmit = computed(() => {
 })
 
 // 方法
+const onNameInput = () => {
+  isNameEdited.value = true
+}
+
 const updateCurrentType = () => {
   currentPageType.value = getCurrentType()
   console.log('AddCategoryModal - 当前页面类型已更新:', currentPageType.value)
@@ -103,6 +111,10 @@ const updateCurrentType = () => {
 
 const selectIcon = (icon: IconDefinition) => {
   selectedIconId.value = icon.id
+  // 只有未手动编辑过名称时才自动填充
+  if (!isNameEdited.value) {
+    categoryName.value = icon.name
+  }
   console.log('选择图标:', icon.name, 'ID:', icon.id)
 }
 
@@ -115,6 +127,7 @@ const resetForm = () => {
   categoryName.value = ''
   selectedIconId.value = 1
   loading.value = false
+  isNameEdited.value = false // 重置编辑标记
 }
 
 const createCategory = async () => {

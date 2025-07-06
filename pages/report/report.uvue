@@ -67,9 +67,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getAIReport, getUserStatistics, getTotalStatistics } from '../../common/api/report'
+import { getAIReport, getUserStatistics } from '../../common/api/report'
+import { getTransactionListForCategory } from '../../common/api/analyze'
 
-// 根据类型获取时间范围
+// 根据类型获取时间范围（与后端一致）
 function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, endTime: string } {
   const now = new Date()
   let startTime: Date
@@ -77,17 +78,17 @@ function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, end
   
   switch (type) {
     case 'week':
-      // 获取本周开始（周一）
+      // 本周（星期一到现在）
       const day = now.getDay()
       const diff = now.getDate() - day + (day === 0 ? -6 : 1) // 如果是周日，则减6天；否则减(day-1)天
       startTime = new Date(now.getFullYear(), now.getMonth(), diff)
       break
     case 'month':
-      // 获取本月开始
+      // 本月（1号到现在）
       startTime = new Date(now.getFullYear(), now.getMonth(), 1)
       break
     case 'year':
-      // 获取本年开始
+      // 本年（1.1号到现在）
       startTime = new Date(now.getFullYear(), 0, 1)
       break
     default:
@@ -127,6 +128,8 @@ function switchTab(tab: string) {
   suggestion.value = ''
   tags.value = []
   resetReportData()
+  // 加载新时间范围的统计数据
+  loadTimeRangeStatistics()
 }
 
 function resetReportData() {
@@ -194,8 +197,11 @@ async function generateReport() {
     
     console.log('开始生成AI报告，类型:', type)
     
-    // 调用AI报告API，它会自动获取所有需要的数据
-    const aiResponse = await getAIReport({ type })
+    // 先获取当前时间范围的统计数据
+    const currentStats = await getCurrentTimeRangeStats(type)
+    
+    // 调用AI报告API，传递当前统计数据
+    const aiResponse = await getAIReport({ type, stats: currentStats })
     
     console.log('AI报告生成响应:', aiResponse)
     
@@ -210,34 +216,9 @@ async function generateReport() {
       throw new Error('AI返回数据格式错误')
     }
     
-    // 获取总统计数据用于显示基础信息
+    // 获取特定时间范围的统计数据用于显示基础信息
     try {
-      const statsResponse = await getTotalStatistics()
-      console.log('总统计数据响应:', statsResponse)
-      
-      if (statsResponse) {
-        let totalStats = null
-        
-        if (statsResponse.Data) {
-          totalStats = statsResponse.Data
-        } else if (statsResponse.data) {
-          totalStats = statsResponse.data
-        } else {
-          totalStats = statsResponse
-        }
-        
-        console.log('总统计数据:', totalStats)
-        
-        if (totalStats && (totalStats.Income || totalStats.Expense)) {
-          updateReportDataWithTotalStats(totalStats)
-        } else {
-          console.log('没有找到有效的统计数据')
-          updateReportDataWithNoData()
-        }
-      } else {
-        console.log('没有找到统计数据，显示默认信息')
-        updateReportDataWithNoData()
-      }
+      await loadTimeRangeStatistics()
     } catch (statsError) {
       console.error('获取统计数据失败:', statsError)
       updateReportDataWithNoData()
@@ -264,60 +245,181 @@ async function generateReport() {
   }
 }
 
-function updateReportDataWithTotalStats(totalStats: any) {
-  console.log('开始处理总统计数据:', totalStats)
-  console.log('totalStats类型:', typeof totalStats)
-  console.log('totalStats.Income:', totalStats.Income)
-  console.log('totalStats.Expense:', totalStats.Expense)
+
+
+// 获取当前时间范围的统计数据（用于AI报告）
+async function getCurrentTimeRangeStats(type: 'week' | 'month' | 'year') {
+  console.log('获取当前时间范围统计数据，类型:', type)
   
-  const income = totalStats.Income || { Amount: 0, Count: 0 }
-  const expense = totalStats.Expense || { Amount: 0, Count: 0 }
-  
-  console.log('收入数据:', income)
-  console.log('支出数据:', expense)
-  console.log('收入Amount:', income.Amount)
-  console.log('支出Amount:', expense.Amount)
-  
-  const incomeAmount = income.Amount / 100 // 转换为元
-  const expenseAmount = expense.Amount / 100 // 转换为元
-  const savings = incomeAmount - expenseAmount
-  const savingsRate = incomeAmount > 0 ? (savings / incomeAmount * 100) : 0
-  
-  console.log('计算后的金额:', {
-    incomeAmount,
-    expenseAmount,
-    savings,
-    savingsRate
-  })
-  
-  reportData.value = [
-    { 
-      label: '总收入', 
-      value: `¥${incomeAmount.toFixed(2)}`, 
-      trend: `${income.Count}笔交易`, 
-      trendType: 'green' 
-    },
-    { 
-      label: '总支出', 
-      value: `¥${expenseAmount.toFixed(2)}`, 
-      trend: `${expense.Count}笔交易`, 
-      trendType: 'red' 
-    },
-    { 
-      label: '储蓄率', 
-      value: `${savingsRate.toFixed(1)}%`, 
-      trend: savings >= 0 ? '正储蓄' : '负储蓄', 
-      trendType: savings >= 0 ? 'green' : 'red' 
-    },
-    { 
-      label: '净收入', 
-      value: `¥${savings.toFixed(2)}`, 
-      trend: savings >= 0 ? '收入大于支出' : '支出大于收入', 
-      trendType: savings >= 0 ? 'green' : 'red' 
+  try {
+    // 获取收入交易数据
+    const incomeResponse = await getTransactionListForCategory({
+      type: type,
+      income_expense: 'income'
+    })
+    
+    // 获取支出交易数据
+    const expenseResponse = await getTransactionListForCategory({
+      type: type,
+      income_expense: 'expense'
+    })
+    
+    // 提取交易列表
+    let incomeTransactions = []
+    let expenseTransactions = []
+    
+    if (incomeResponse.Data?.List) {
+      incomeTransactions = incomeResponse.Data.List
     }
-  ]
+    
+    if (expenseResponse.Data?.List) {
+      expenseTransactions = expenseResponse.Data.List
+    }
+    
+    // 计算统计数据
+    const totalIncome = incomeTransactions.reduce((sum, transaction) => {
+      return sum + (transaction.Amount || 0)
+    }, 0)
+    
+    const totalExpense = expenseTransactions.reduce((sum, transaction) => {
+      return sum + (transaction.Amount || 0)
+    }, 0)
+    
+    const savings = totalIncome - totalExpense
+    const savingsRate = totalIncome > 0 ? (savings / totalIncome * 100) : 0
+    
+    // 构建统计数据对象
+    const stats = {
+      base_statistics: {
+        Income: {
+          Amount: totalIncome / 100, // 转换为元
+          Count: incomeTransactions.length
+        },
+        Expense: {
+          Amount: totalExpense / 100, // 转换为元
+          Count: expenseTransactions.length
+        }
+      },
+      income_category_stats: [],
+      expense_category_stats: [],
+      income_daily_stats: [],
+      expense_daily_stats: [],
+      weekly_stats: [],
+      monthly_stats: []
+    }
+    
+    console.log('构建的统计数据:', stats)
+    return stats
+    
+  } catch (error) {
+    console.error('获取当前时间范围统计数据失败:', error)
+    return {
+      base_statistics: {
+        Income: { Amount: 0, Count: 0 },
+        Expense: { Amount: 0, Count: 0 }
+      },
+      income_category_stats: [],
+      expense_category_stats: [],
+      income_daily_stats: [],
+      expense_daily_stats: [],
+      weekly_stats: [],
+      monthly_stats: []
+    }
+  }
+}
+
+// 加载特定时间范围的统计数据
+async function loadTimeRangeStatistics() {
+  const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
   
-  console.log('更新后的报告数据:', reportData.value)
+  console.log('开始加载时间范围统计数据，类型:', type)
+  
+  try {
+    // 获取收入交易数据
+    const incomeResponse = await getTransactionListForCategory({
+      type: type,
+      income_expense: 'income'
+    })
+    
+    // 获取支出交易数据
+    const expenseResponse = await getTransactionListForCategory({
+      type: type,
+      income_expense: 'expense'
+    })
+    
+    console.log('收入交易响应:', incomeResponse)
+    console.log('支出交易响应:', expenseResponse)
+    
+    // 提取交易列表
+    let incomeTransactions = []
+    let expenseTransactions = []
+    
+    if (incomeResponse.Data?.List) {
+      incomeTransactions = incomeResponse.Data.List
+    }
+    
+    if (expenseResponse.Data?.List) {
+      expenseTransactions = expenseResponse.Data.List
+    }
+    
+    console.log('收入交易数量:', incomeTransactions.length)
+    console.log('支出交易数量:', expenseTransactions.length)
+    
+    // 计算统计数据
+    const totalIncome = incomeTransactions.reduce((sum, transaction) => {
+      return sum + (transaction.Amount || 0)
+    }, 0)
+    
+    const totalExpense = expenseTransactions.reduce((sum, transaction) => {
+      return sum + (transaction.Amount || 0)
+    }, 0)
+    
+    const savings = totalIncome - totalExpense
+    const savingsRate = totalIncome > 0 ? (savings / totalIncome * 100) : 0
+    
+    console.log('计算后的统计数据:', {
+      totalIncome,
+      totalExpense,
+      savings,
+      savingsRate,
+      incomeCount: incomeTransactions.length,
+      expenseCount: expenseTransactions.length
+    })
+    
+    // 更新报告数据
+    reportData.value = [
+      { 
+        label: '总收入', 
+        value: `¥${(totalIncome / 100).toFixed(2)}`, 
+        trend: `${incomeTransactions.length}笔交易`, 
+        trendType: 'green' 
+      },
+      { 
+        label: '总支出', 
+        value: `¥${(totalExpense / 100).toFixed(2)}`, 
+        trend: `${expenseTransactions.length}笔交易`, 
+        trendType: 'red' 
+      },
+      { 
+        label: '储蓄率', 
+        value: `${savingsRate.toFixed(1)}%`, 
+        trend: savings >= 0 ? '正储蓄' : '负储蓄', 
+        trendType: savings >= 0 ? 'green' : 'red' 
+      },
+      { 
+        label: '净收入', 
+        value: `¥${(savings / 100).toFixed(2)}`, 
+        trend: savings >= 0 ? '收入大于支出' : '支出大于收入', 
+        trendType: savings >= 0 ? 'green' : 'red' 
+      }
+    ]
+    
+    console.log('更新后的报告数据:', reportData.value)
+    
+  } catch (error) {
+    console.error('加载时间范围统计数据失败:', error)
+    updateReportDataWithNoData()
+  }
 }
 
 function updateReportDataWithNoData() {
@@ -330,7 +432,8 @@ function updateReportDataWithNoData() {
 }
 
 onMounted(() => {
-  // 页面加载时不自动生成报告，等待用户点击按钮
+  // 页面加载时加载默认时间范围的统计数据
+  loadTimeRangeStatistics()
   
   // 调试信息：验证时间计算
   console.log('周报时间范围:', getTimeRange('week'))
