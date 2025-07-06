@@ -5,12 +5,20 @@ export function getUserStatistics(type: 'week' | 'month' | 'year') {
   const { startTime, endTime } = getTimeRange(type)
   
   const requestData = {
-    start_time: startTime,
-    end_time: endTime,
+    StartTime: startTime,
+    EndTime: endTime,
     income_expense: null // null表示查询收入和支出
   }
   
   const endpoint = type === 'week' ? 'week' : type === 'month' ? 'month' : 'year'
+  
+  console.log('统计数据请求参数:', {
+    type,
+    endpoint,
+    startTime,
+    endTime,
+    requestData
+  })
   
   return request({
     url: `/api/user/transaction/statistic/${endpoint}`,
@@ -38,11 +46,20 @@ export function getCategoryRanking(data: {
   const { startTime, endTime } = getTimeRange(data.type)
   
   const requestData = {
-    start_time: startTime,
-    end_time: endTime,
-    income_expense: data.income_expense,
-    limit: data.limit
+    StartTime: startTime,
+    EndTime: endTime,
+    IncomeExpense: data.income_expense,
+    Limit: data.limit
   }
+  
+  console.log('分类排行榜请求参数:', {
+    type: data.type,
+    income_expense: data.income_expense,
+    limit: data.limit,
+    startTime,
+    endTime,
+    requestData
+  })
   
   return request({
     url: '/api/user/transaction/statistic/category_rank',
@@ -67,18 +84,49 @@ export function getTransactionRanking(data: {
   })
 }
 
+// 获取交易列表用于分类统计
+export function getTransactionListForCategory(data: {
+  type: 'week' | 'month' | 'year',
+  income_expense: 'income' | 'expense'
+}) {
+  const { startTime, endTime } = getTimeRange(data.type)
+  
+  const requestData = {
+    StartTime: startTime,
+    EndTime: endTime,
+    IncomeExpense: data.income_expense,
+    Offset: 0,
+    Limit: 1000 // 获取足够多的数据来进行分类统计
+  }
+  
+  console.log('交易列表请求参数:', {
+    type: data.type,
+    income_expense: data.income_expense,
+    startTime,
+    endTime,
+    requestData
+  })
+  
+  return request({
+    url: '/api/user/transaction/list',
+    method: 'POST',
+    data: requestData,
+    requireAuth: true
+  })
+}
+
 // 根据类型获取时间范围
 function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, endTime: string } {
   const now = new Date()
   let startTime: Date
-  let endTime: Date = now
+  let endTime: Date = new Date(now) // 创建新的Date对象，避免修改原始对象
   
   switch (type) {
     case 'week':
       // 获取本周开始（周一）
       const day = now.getDay()
       const diff = now.getDate() - day + (day === 0 ? -6 : 1)
-      startTime = new Date(now.setDate(diff))
+      startTime = new Date(now.getFullYear(), now.getMonth(), diff)
       break
     case 'month':
       // 获取本月开始
@@ -92,8 +140,17 @@ function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, end
       startTime = new Date(now.getFullYear(), now.getMonth(), 1)
   }
   
+  console.log('时间范围计算:', {
+    type,
+    now: now.toISOString(),
+    startTime: startTime.toISOString(),
+    endTime: endTime.toISOString(),
+    startTimeDate: startTime,
+    endTimeDate: endTime
+  })
+  
   return {
-    startTime: startTime.toISOString().split('T')[0],
-    endTime: endTime.toISOString().split('T')[0]
+    startTime: startTime.toISOString(),
+    endTime: endTime.toISOString()
   }
 } 
