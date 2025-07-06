@@ -1,222 +1,682 @@
 <template>
-  <view class="charts-box">
-    <qiun-data-charts 
-      type="column"
-      :opts="opts"
-      :chartData="chartData"
-    />
-  </view>
-  <view class="charts-box">
-    <qiun-data-charts 
-      type="pie"
-      :opts="pieOpts"
-      :chartData="pieChartData"
-    />
+  <view class="container">
+    <!-- 顶部标题栏 -->
+    <view class="header">
+      <text class="back" @click="goBack">←</text>
+      <text class="title">财务分析</text>
+      <text class="subtitle">深度分析您的财务状况</text>
+    </view>
+
+    <!-- 时间选择器 -->
+    <view class="time-selector">
+      <view class="tabs">
+        <view
+          v-for="tab in timeTabs"
+          :key="tab.value"
+          :class="['tab', activeTimeTab === tab.value ? 'active' : '']"
+          @click="switchTimeTab(tab.value)"
+        >
+          {{ tab.label }}
+        </view>
+      </view>
+    </view>
+
+    <!-- 收支趋势图 -->
+    <view class="chart-card">
+      <view class="chart-header">
+        <text class="chart-title">收支趋势</text>
+        <text class="chart-subtitle">{{ getPeriodText() }}收支变化</text>
+      </view>
+      <view class="chart-container">
+        <qiun-data-charts 
+          v-if="trendChartData.categories && trendChartData.categories.length > 0"
+          type="column"
+          :opts="columnOpts"
+          :chartData="trendChartData"
+        />
+        <view v-else class="empty-chart">
+          <text class="empty-text">暂无数据</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 支出分类饼图 -->
+    <view class="chart-card">
+      <view class="chart-header">
+        <text class="chart-title">支出分类</text>
+        <text class="chart-subtitle">按分类统计支出</text>
+      </view>
+      <view class="chart-container pie-chart-container">
+        <qiun-data-charts 
+          v-if="categoryChartData.series && categoryChartData.series.length > 0"
+          type="pie"
+          :opts="pieOpts"
+          :chartData="categoryChartData"
+        />
+        <view v-else class="empty-chart">
+          <text class="empty-text">暂无数据</text>
+        </view>
+      </view>
+      <view class="custom-legend" v-if="categoryChartData.series && categoryChartData.series.length > 0">
+        <view class="legend-item" v-for="(item, idx) in categoryChartData.series" :key="item.name">
+          <view class="legend-dot" :style="{ backgroundColor: pieOpts.color[idx % pieOpts.color.length] }"></view>
+          <text class="legend-text">{{ item.name }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view v-if="isLoading" class="loading-overlay">
+      <text class="loading-text">加载中...</text>
+    </view>
   </view>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      chartData: {},
-      //这里的 opts 是图表类型 type="column" 的全部配置参数，您可以将此配置复制到 config-ucharts.js 文件中下标为 ['column'] 的节点中来覆盖全局默认参数。实际应用过程中 opts 只需传入与全局默认参数中不一致的【某一个属性】即可实现同类型的图表显示不同的样式，达到页面简洁的需求。
-      opts: {
-        timing: "easeOut",
-        duration: 1000,
-        rotate: false,
-        rotateLock: false,
-        color: ["#1890FF","#91CB74","#FAC858","#EE6666","#73C0DE","#3CA272","#FC8452","#9A60B4","#ea7ccc"],
-        padding: [13,10,20,5],
-        fontSize: 13,
-        fontColor: "#666666",
-        dataLabel: true,
-        dataPointShape: true,
-        dataPointShapeType: "solid",
-        touchMoveLimit: 60,
-        enableScroll: false,
-        enableMarkLine: false,
-        legend: {
-          show: true,
-          position: "bottom",
-          float: "center",
-          padding: 5,
-          margin: 5,
-          backgroundColor: "rgba(0,0,0,0)",
-          borderColor: "rgba(0,0,0,0)",
-          borderWidth: 0,
-          fontSize: 13,
-          fontColor: "#666666",
-          lineHeight: 11,
-          hiddenColor: "#CECECE",
-          itemGap: 10
-        },
-        xAxis: {
-          disableGrid: true,
-          disabled: false,
-          axisLine: true,
-          axisLineColor: "#CCCCCC",
-          calibration: false,
-          fontColor: "#666666",
-          fontSize: 13,
-          lineHeight: 20,
-          marginTop: 0,
-          rotateLabel: false,
-          rotateAngle: 45,
-          itemCount: 5,
-          boundaryGap: "center",
-          splitNumber: 5,
-          gridColor: "#CCCCCC",
-          gridType: "solid",
-          dashLength: 4,
-          gridEval: 1,
-          scrollShow: false,
-          scrollAlign: "left",
-          scrollColor: "#A6A6A6",
-          scrollBackgroundColor: "#EFEBEF",
-          title: "",
-          titleFontSize: 13,
-          titleOffsetY: 0,
-          titleOffsetX: 0,
-          titleFontColor: "#666666",
-          format: ""
-        },
-        yAxis: {
-          data: [
-            {
-              min: 0
-            }
-          ],
-          disabled: false,
-          disableGrid: false,
-          splitNumber: 5,
-          gridType: "solid",
-          dashLength: 8,
-          gridColor: "#CCCCCC",
-          padding: 10,
-          showTitle: false
-        },
-        extra: {
-          column: {
-            type: "group",
-            width: 30,
-            activeBgColor: "#000000",
-            activeBgOpacity: 0.08,
-            seriesGap: 2,
-            categoryGap: 3,
-            barBorderCircle: false,
-            linearType: "none",
-            linearOpacity: 1,
-            colorStop: 0,
-            meterBorder: 1,
-            meterFillColor: "#FFFFFF",
-            labelPosition: "outside"
-          },
-          tooltip: {
-            showBox: true,
-            showArrow: true,
-            showCategory: false,
-            borderWidth: 0,
-            borderRadius: 0,
-            borderColor: "#000000",
-            borderOpacity: 0.7,
-            bgColor: "#000000",
-            bgOpacity: 0.7,
-            gridType: "solid",
-            dashLength: 4,
-            gridColor: "#CCCCCC",
-            boxPadding: 3,
-            fontSize: 13,
-            lineHeight: 20,
-            fontColor: "#FFFFFF",
-            legendShow: true,
-            legendShape: "auto",
-            splitLine: true,
-            horizentalLine: false,
-            xAxisLabel: false,
-            yAxisLabel: false,
-            labelBgColor: "#FFFFFF",
-            labelBgOpacity: 0.7,
-            labelFontColor: "#666666"
-          },
-          markLine: {
-            type: "solid",
-            dashLength: 4,
-            data: []
-          }
-        }
-      },
-      pieChartData: {},
-      pieOpts: {
-        color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4", "#ea7ccc"],
-        padding: [15, 15, 15, 15],
-        legend: {
-          show: true,
-          position: "bottom",
-          fontSize: 13,
-          fontColor: "#666666"
-        },
-        extra: {
-          pie: {
-            activeOpacity: 0.5,
-            activeRadius: 10,
-            offsetAngle: 0,
-            labelWidth: 15,
-            border: true,
-            borderWidth: 3,
-            borderColor: "#FFFFFF"
-          }
-        }
-      }
-    };
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { 
+  getUserStatistics, 
+  getCategoryRanking,
+  getTransactionListForCategory
+} from '../../common/api/analyze'
+import { getCategoryList } from '../../common/api/category'
+
+// 时间选择器
+const timeTabs = [
+  { label: '本周', value: 'week' },
+  { label: '本月', value: 'month' },
+  { label: '本年', value: 'year' }
+]
+const activeTimeTab = ref('month')
+
+// 数据状态
+const isLoading = ref(false)
+const trendChartData = ref({})
+const categoryChartData = ref({})
+
+// 图表配置
+const columnOpts = {
+  color: ["#91CB74", "#EE6666"],
+  padding: [15, 15, 15, 15],
+  legend: {
+    show: true,
+    position: "bottom",
+    fontSize: 13,
+    fontColor: "#666666"
   },
-  onReady() {
-    this.getServerData();
-    this.getPieData();
+  xAxis: {
+    disableGrid: true,
+    fontColor: "#666666",
+    fontSize: 12
   },
-  methods: {
-    getServerData() {
-      //模拟从服务器获取数据时的延时
-      setTimeout(() => {
-        //模拟服务器返回数据，如果数据格式和标准格式不同，需自行按下面的格式拼接
-        let res = {
-            categories: ["2018","2019","2020","2021","2022","2023"],
-            series: [
-              {
-                name: "目标值",
-                data: [35,36,31,33,13,34]
-              },
-              {
-                name: "完成量",
-                data: [18,27,21,24,6,28]
-              }
-            ]
-          };
-        this.chartData = JSON.parse(JSON.stringify(res));
-      }, 500);
-    },
-    getPieData() {
-      // 示例饼图数据
-      let res = {
-        series: [
-          { name: "餐饮", data: 30 },
-          { name: "购物", data: 20 },
-          { name: "交通", data: 15 },
-          { name: "娱乐", data: 35 },
-    
-        ]
-      };
-      this.pieChartData = JSON.parse(JSON.stringify(res));
+  yAxis: {
+    data: [{ min: 0 }],
+    disabled: false,
+    disableGrid: false,
+    splitNumber: 5,
+    gridType: "solid",
+    dashLength: 8,
+    gridColor: "#CCCCCC",
+    padding: 10,
+    showTitle: false
+  },
+  extra: {
+    column: {
+      type: "group",
+      width: 30,
+      seriesGap: 2,
+      categoryGap: 3
     }
   }
-};
+}
+
+const pieOpts = {
+  color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"],
+  padding: [15, 15, 40, 15],
+  legend: {
+    show: false
+  },
+  extra: {
+    pie: {
+      activeOpacity: 0.5,
+      activeRadius: 10,
+      offsetAngle: 0,
+      labelWidth: 15,
+      border: true,
+      borderWidth: 3,
+      borderColor: "#FFFFFF"
+    }
+  }
+}
+
+// 方法
+function goBack() {
+  uni.navigateBack()
+}
+
+function switchTimeTab(tab: string) {
+  activeTimeTab.value = tab
+  loadData()
+}
+
+function getPeriodText() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  
+  switch (activeTimeTab.value) {
+    case 'week':
+      return `${year}年第${Math.ceil((now.getTime() - new Date(year, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) + 1)}周`
+    case 'month':
+      return `${year}年${month}月`
+    case 'year':
+      return `${year}年`
+    default:
+      return ''
+  }
+}
+
+function formatAmount(amount: number): string {
+  return (amount / 100).toFixed(2)
+}
+
+async function loadData() {
+  if (isLoading.value) return
+  
+  isLoading.value = true
+  
+  try {
+    // 加载统计数据
+    const statsResponse = await getUserStatistics(activeTimeTab.value)
+    
+    console.log('统计数据响应:', statsResponse)
+    console.log('统计数据响应类型:', typeof statsResponse)
+    console.log('统计数据响应所有属性:', Object.keys(statsResponse))
+    
+    // 尝试不同的数据访问方式
+    console.log('statsResponse.Data:', statsResponse.Data)
+    console.log('statsResponse.data:', statsResponse.data)
+    console.log('statsResponse.Msg:', statsResponse.Msg)
+    
+    // 检查 Data 字段的结构
+    if (statsResponse.Data) {
+      console.log('Data 字段类型:', typeof statsResponse.Data)
+      console.log('Data 字段所有属性:', Object.keys(statsResponse.Data))
+      console.log('Data.List:', statsResponse.Data.List)
+      console.log('Data.list:', statsResponse.Data.list)
+    }
+    
+    // 处理统计数据 - 尝试不同的数据访问方式
+    let statsList = null
+    if (statsResponse.Data?.List && statsResponse.Data.List.length > 0) {
+      statsList = statsResponse.Data.List
+      console.log('使用 statsResponse.Data.List')
+    } else if (statsResponse.Data?.list && statsResponse.Data.list.length > 0) {
+      statsList = statsResponse.Data.list
+      console.log('使用 statsResponse.Data.list')
+    } else if (statsResponse.data?.List && statsResponse.data.List.length > 0) {
+      statsList = statsResponse.data.List
+      console.log('使用 statsResponse.data.List')
+    } else if (statsResponse.data?.list && statsResponse.data.list.length > 0) {
+      statsList = statsResponse.data.list
+      console.log('使用 statsResponse.data.list')
+    }
+    
+    if (statsList && statsList.length > 0) {
+      console.log('开始处理统计数据，数据条数:', statsList.length)
+      processTrendData(statsList)
+    } else {
+      // 如果没有数据，显示空图表
+      console.log('没有统计数据，显示空图表')
+      trendChartData.value = {
+        categories: [],
+        series: [
+          { name: "收入", data: [] },
+          { name: "支出", data: [] }
+        ]
+      }
+    }
+    
+    // 加载分类数据用于饼图
+    await loadCategoryData()
+    
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    uni.showToast({
+      title: '加载失败，请重试',
+      icon: 'none'
+    })
+    
+    // 显示空图表
+    trendChartData.value = {
+      categories: [],
+      series: [
+        { name: "收入", data: [] },
+        { name: "支出", data: [] }
+      ]
+    }
+    categoryChartData.value = { series: [] }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function processTrendData(statsList: any[]) {
+  console.log('处理趋势数据，原始数据:', statsList)
+  
+  const categories = []
+  const incomeData = []
+  const expenseData = []
+  
+  // 按时间排序
+  const sortedStats = statsList.sort((a, b) => 
+    new Date(a.StartTime).getTime() - new Date(b.StartTime).getTime()
+  )
+  
+  console.log('排序后的数据:', sortedStats)
+  
+  sortedStats.forEach((stat, index) => {
+    console.log(`处理第${index + 1}条数据:`, stat)
+    console.log(`第${index + 1}条数据的属性:`, Object.keys(stat))
+    
+    const date = new Date(stat.StartTime)
+    let label = ''
+    
+    switch (activeTimeTab.value) {
+      case 'week':
+        // 显示周数
+        const weekStart = new Date(date)
+        const weekEnd = new Date(date)
+        weekEnd.setDate(weekEnd.getDate() + 6)
+        label = `${weekStart.getMonth() + 1}/${weekStart.getDate()}-${weekEnd.getMonth() + 1}/${weekEnd.getDate()}`
+        break
+      case 'month':
+        // 显示月份
+        label = `${date.getMonth() + 1}月`
+        break
+      case 'year':
+        // 显示年份
+        label = `${date.getFullYear()}年`
+        break
+    }
+    
+    categories.push(label)
+    
+    // 尝试不同的数据访问方式
+    let incomeAmount = 0
+    let expenseAmount = 0
+    
+    // 检查 Income 字段
+    if (stat.Income) {
+      console.log(`第${index + 1}条数据的Income字段:`, stat.Income)
+      console.log(`第${index + 1}条数据的Income字段属性:`, Object.keys(stat.Income))
+      incomeAmount = stat.Income.Amount || stat.Income.amount || 0
+    }
+    
+    // 检查 Expense 字段
+    if (stat.Expense) {
+      console.log(`第${index + 1}条数据的Expense字段:`, stat.Expense)
+      console.log(`第${index + 1}条数据的Expense字段属性:`, Object.keys(stat.Expense))
+      expenseAmount = stat.Expense.Amount || stat.Expense.amount || 0
+    }
+    
+    // 检查 IEStatistic 字段
+    if (stat.IEStatistic) {
+      console.log(`第${index + 1}条数据的IEStatistic字段:`, stat.IEStatistic)
+      console.log(`第${index + 1}条数据的IEStatistic字段属性:`, Object.keys(stat.IEStatistic))
+      if (stat.IEStatistic.Income) {
+        incomeAmount = stat.IEStatistic.Income.Amount || stat.IEStatistic.Income.amount || incomeAmount
+      }
+      if (stat.IEStatistic.Expense) {
+        expenseAmount = stat.IEStatistic.Expense.Amount || stat.IEStatistic.Expense.amount || expenseAmount
+      }
+    }
+    
+    console.log(`数据${index + 1} - 收入: ${incomeAmount}, 支出: ${expenseAmount}`)
+    
+    incomeData.push(incomeAmount / 100)
+    expenseData.push(expenseAmount / 100)
+  })
+  
+  trendChartData.value = {
+    categories,
+    series: [
+      {
+        name: "收入",
+        data: incomeData
+      },
+      {
+        name: "支出",
+        data: expenseData
+      }
+    ]
+  }
+  
+  console.log('最终趋势图数据:', trendChartData.value)
+}
+
+async function loadCategoryData() {
+  try {
+    console.log('开始加载分类数据，参数:', {
+      type: activeTimeTab.value,
+      income_expense: 'expense'
+    })
+    
+    // 1. 先获取分类列表
+    console.log('获取分类列表...')
+    const categoryResponse = await getCategoryList({
+      income_expense: 'expense'
+    })
+    
+    console.log('分类列表响应:', categoryResponse)
+    
+    // 创建分类ID到分类名称的映射
+    const categoryMap = new Map()
+    if (categoryResponse.data && categoryResponse.data.length > 0) {
+      categoryResponse.data.forEach(category => {
+        categoryMap.set(category.id, category.name)
+      })
+      console.log('分类映射:', Object.fromEntries(categoryMap))
+    }
+    
+    // 2. 获取交易列表
+    const response = await getTransactionListForCategory({
+      type: activeTimeTab.value,
+      income_expense: 'expense'
+    })
+    
+    console.log('交易列表响应:', response)
+    console.log('交易列表响应类型:', typeof response)
+    console.log('交易列表响应所有属性:', Object.keys(response))
+    
+    // 尝试不同的数据访问方式
+    console.log('response.Data:', response.Data)
+    console.log('response.data:', response.data)
+    console.log('response.Msg:', response.Msg)
+    
+    // 检查 Data 字段的结构
+    if (response.Data) {
+      console.log('Data 字段类型:', typeof response.Data)
+      console.log('Data 字段所有属性:', Object.keys(response.Data))
+      console.log('Data.List:', response.Data.List)
+      console.log('Data.list:', response.Data.list)
+    }
+    
+    // 尝试不同的数据访问方式
+    let transactionList = null
+    if (response.Data?.List && response.Data.List.length > 0) {
+      transactionList = response.Data.List
+      console.log('使用 response.Data.List')
+    } else if (response.Data?.list && response.Data.list.length > 0) {
+      transactionList = response.Data.list
+      console.log('使用 response.Data.list')
+    } else if (response.data?.List && response.data.List.length > 0) {
+      transactionList = response.data.List
+      console.log('使用 response.data.List')
+    } else if (response.data?.list && response.data.list.length > 0) {
+      transactionList = response.data.list
+      console.log('使用 response.data.list')
+    }
+    
+    if (transactionList && transactionList.length > 0) {
+      console.log('开始处理交易数据，数据条数:', transactionList.length)
+      // 从交易数据生成分类统计，传入分类映射
+      const categoryStats = generateCategoryStatsFromTransactions(transactionList, categoryMap)
+      updateCategoryChart(categoryStats)
+    } else {
+      console.log('没有交易数据，显示空饼图')
+      categoryChartData.value = { series: [] }
+    }
+  } catch (error) {
+    console.error('加载分类数据失败:', error)
+    // 分类数据加载失败时，不显示饼图，但不影响整体功能
+    categoryChartData.value = { series: [] }
+  }
+}
+
+// 从交易列表生成分类统计
+function generateCategoryStatsFromTransactions(transactions: any[], categoryMap: Map<number, string>) {
+  console.log('从交易数据生成分类统计，原始交易数据:', transactions)
+  
+  // 按分类ID分组统计
+  const categoryMapForStats = new Map()
+  
+  transactions.forEach((transaction, index) => {
+    console.log(`处理第${index + 1}条交易:`, transaction)
+    console.log(`第${index + 1}条交易的属性:`, Object.keys(transaction))
+    
+    // 尝试不同的字段访问方式
+    const categoryId = transaction.CategoryId || transaction.categoryId || transaction.Category?.Id || 0
+    let categoryName = '未知分类'
+    const amount = transaction.Amount || transaction.amount || 0
+    
+    // 尝试获取分类名称
+    if (transaction.CategoryName) {
+      categoryName = transaction.CategoryName
+    } else if (transaction.categoryName) {
+      categoryName = transaction.categoryName
+    } else if (transaction.Category?.Name) {
+      categoryName = transaction.Category.Name
+    } else if (transaction.Category?.name) {
+      categoryName = transaction.Category.name
+    }
+
+    // 使用分类映射获取名称
+    if (categoryMap.has(categoryId)) {
+      categoryName = categoryMap.get(categoryId) || categoryName
+    }
+    
+    console.log(`第${index + 1}条交易 - 分类ID: ${categoryId}, 分类名称: ${categoryName}, 金额: ${amount}`)
+    
+    if (categoryMapForStats.has(categoryId)) {
+      const existing = categoryMapForStats.get(categoryId)
+      existing.Amount += amount
+      existing.Count += 1
+    } else {
+      categoryMapForStats.set(categoryId, {
+        Category: { Name: categoryName },
+        Amount: amount,
+        Count: 1
+      })
+    }
+  })
+  
+  // 转换为数组并按金额排序
+  const categoryStats = Array.from(categoryMapForStats.values())
+    .sort((a, b) => b.Amount - a.Amount)
+    .slice(0, 8) // 只取前8个分类
+  
+  console.log('生成的分类统计:', categoryStats)
+  return categoryStats
+}
+
+function updateCategoryChart(categoryList: any[]) {
+  console.log('更新分类图表，原始数据:', categoryList)
+  
+  if (categoryList.length > 0) {
+    const series = categoryList.map((item, index) => {
+      const name = item.Category?.Name || '未知分类'
+      const data = (item.Amount || 0) / 100
+      console.log(`分类${index + 1}: ${name} - ${data}`)
+      return { name, data }
+    })
+    
+    categoryChartData.value = { series }
+    console.log('最终分类饼图数据:', categoryChartData.value)
+  } else {
+    console.log('分类列表为空，显示空饼图')
+    categoryChartData.value = { series: [] }
+  }
+}
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>
-  /* 请根据实际需求修改父元素尺寸，组件自动识别宽高 */
-  .charts-box {
-    width: 100%;
-    height: 300px;
-    margin-bottom: 20px;
-  }
+.container {
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 10%;
+}
+
+/* 顶部栏 */
+.header {
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 80rpx 30rpx 40rpx;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.2);
+}
+
+.back {
+  position: absolute;
+  left: 30rpx;
+  top: 80rpx;
+  font-size: 36rpx;
+  color: white;
+  font-weight: bold;
+}
+
+.title, .subtitle {
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8rpx;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 时间选择器 */
+.time-selector {
+  margin: 30rpx;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20rpx;
+  padding: 6rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.tab {
+  font-size: 26rpx;
+  color: #666;
+  padding: 16rpx 32rpx;
+  border-radius: 16rpx;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: bold;
+}
+
+/* 图表卡片 */
+.chart-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 30rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+  margin-bottom: 20rpx;
+}
+
+.chart-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.chart-subtitle {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.chart-container {
+  height: 400rpx;
+}
+
+.pie-chart-container {
+  height: 600rpx;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-text {
+  color: white;
+  font-size: 28rpx;
+}
+
+/* 空数据状态 */
+.empty-chart {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+  border-radius: 10rpx;
+  margin-top: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  font-weight: bold;
+}
+
+.custom-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20rpx;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 0 16rpx 12rpx 0;
+}
+.legend-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+}
+.legend-text {
+  font-size: 24rpx;
+  color: #666;
+}
 </style>
