@@ -37,7 +37,7 @@
           :class="{ selected: selectedCategoryId === item.id }"
           @click="selectCategory(item)"
         >
-          <text class="emoji">{{ item.icon || '📁' }}</text>
+          <text class="emoji">{{ getCategoryIcon(item) }}</text>
           <text class="name">{{ item.name }}</text>
         </view>
       </view>
@@ -110,9 +110,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue'
 import { createTransaction } from '../../common/api/transaction'
-import { getCategoryList, refreshCategoryList, type Category } from '../../common/api/category'
+import { getCategoryList, refreshCategoryList, type Category, getIconById } from '../../common/api/category'
 import { setPageType, setPagePath, resetPageState } from '../../utils/pageState'
 import AddCategoryModal from '../../components/AddCategoryModal.uvue'
 
@@ -196,6 +196,25 @@ const fetchCategoryList = async (forceRefresh = false) => {
   } finally {
     categoryLoading.value = false
   }
+}
+
+// 获取分类图标
+const getCategoryIcon = (category: Category): string => {
+  // 优先使用iconId获取图标
+  if (category.iconId) {
+    const iconInfo = getIconById(category.iconId)
+    if (iconInfo) {
+      return iconInfo.emoji
+    }
+  }
+  
+  // 兼容旧数据：直接使用icon字段
+  if (category.icon) {
+    return category.icon
+  }
+  
+  // 默认图标
+  return '📁'
 }
 
 // 选择分类

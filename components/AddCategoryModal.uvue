@@ -24,12 +24,13 @@
           <view class="icon-grid">
             <view 
               v-for="icon in availableIcons" 
-              :key="icon"
+              :key="icon.id"
               class="icon-item"
-              :class="{ selected: selectedIcon === icon }"
+              :class="{ selected: selectedIconId === icon.id }"
               @click="selectIcon(icon)"
             >
-              <text class="icon-text">{{ icon }}</text>
+              <text class="icon-text">{{ icon.emoji }}</text>
+              <text class="icon-name">{{ icon.name }}</text>
             </view>
           </view>
         </view>
@@ -51,8 +52,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { createCategoryWithCurrentType } from '../common/api/category'
+import { ref, computed, watch, onUnmounted } from 'vue'
+import { createCategoryWithCurrentType, getAllIcons, type IconDefinition } from '../common/api/category'
 import { getCurrentType, hasValidPageType } from '../utils/pageState'
 
 // Props
@@ -70,19 +71,16 @@ const emit = defineEmits<{
 
 // 响应式数据
 const categoryName = ref('')
-const selectedIcon = ref('📁')
+const selectedIconId = ref(1) // 默认选择第一个图标
 const loading = ref(false)
+const currentPageType = ref<'支出' | '收入' | null>(null)
 
 // 可用图标列表
-const availableIcons = [
-  '📁', '🍔', '🚗', '🏠', '👕', '📱', '💊', '🎬', '📚', '🎮',
-  '💼', '💰', '🎁', '✈️', '🏥', '🎓', '💍', '🏖️', '🎯', '🎨'
-]
+const availableIcons = getAllIcons()
 
 // 计算属性
 const currentTypeDisplay = computed(() => {
-  const currentType = getCurrentType()
-  return currentType || '未设置'
+  return currentPageType.value || '未设置'
 })
 
 const canSubmit = computed(() => {
@@ -92,14 +90,20 @@ const canSubmit = computed(() => {
     hasName, 
     hasType, 
     categoryName: categoryName.value,
-    currentType: getCurrentType()
+    currentType: currentPageType.value
   })
   return hasName && hasType
 })
 
 // 方法
-const selectIcon = (icon: string) => {
-  selectedIcon.value = icon
+const updateCurrentType = () => {
+  currentPageType.value = getCurrentType()
+  console.log('AddCategoryModal - 当前页面类型已更新:', currentPageType.value)
+}
+
+const selectIcon = (icon: IconDefinition) => {
+  selectedIconId.value = icon.id
+  console.log('选择图标:', icon.name, 'ID:', icon.id)
 }
 
 const closeModal = () => {
@@ -109,7 +113,7 @@ const closeModal = () => {
 
 const resetForm = () => {
   categoryName.value = ''
-  selectedIcon.value = '📁'
+  selectedIconId.value = 1
   loading.value = false
 }
 
@@ -132,7 +136,7 @@ const createCategory = async () => {
     
     const responsePromise = createCategoryWithCurrentType(
       categoryName.value.trim(),
-      selectedIcon.value
+      selectedIconId.value
     )
     
     const response = await Promise.race([responsePromise, timeoutPromise]) as any
@@ -190,12 +194,44 @@ const createCategory = async () => {
 
 // 监听visible变化
 watch(() => props.visible, (newVal) => {
-  if (newVal && !hasValidPageType()) {
-    uni.showToast({
-      title: '请先在记账页面选择类型',
-      icon: 'none'
-    })
-    closeModal()
+  if (newVal) {
+    updateCurrentType()
+    if (!hasValidPageType()) {
+      uni.showToast({
+        title: '请先在记账页面选择类型',
+        icon: 'none'
+      })
+      closeModal()
+    }
+  }
+})
+
+// 定期检查页面类型变化（因为全局状态变化不会自动触发组件更新）
+let typeCheckInterval: number | null = null
+
+watch(() => props.visible, (newVal) => {
+  if (newVal) {
+    // 模态框打开时，开始定期检查类型变化
+    typeCheckInterval = setInterval(() => {
+      const newType = getCurrentType()
+      if (newType !== currentPageType.value) {
+        updateCurrentType()
+      }
+    }, 500) // 每500ms检查一次
+  } else {
+    // 模态框关闭时，清除定时器
+    if (typeCheckInterval) {
+      clearInterval(typeCheckInterval)
+      typeCheckInterval = null
+    }
+  }
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (typeCheckInterval) {
+    clearInterval(typeCheckInterval)
+    typeCheckInterval = null
   }
 })
 </script>
@@ -298,20 +334,22 @@ watch(() => props.visible, (newVal) => {
 
 .icon-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 15rpx;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
   margin-top: 15rpx;
 }
 
 .icon-item {
-  width: 60rpx;
-  height: 60rpx;
+  width: 120rpx;
+  height: 80rpx;
   border: 2rpx solid #e0e0e0;
   border-radius: 10rpx;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background: #f9f9f9;
+  padding: 10rpx;
 }
 
 .icon-item.selected {
@@ -321,6 +359,14 @@ watch(() => props.visible, (newVal) => {
 
 .icon-text {
   font-size: 32rpx;
+  margin-bottom: 4rpx;
+}
+
+.icon-name {
+  font-size: 20rpx;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .type-info {

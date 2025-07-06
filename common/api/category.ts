@@ -4,6 +4,53 @@ import { ApiResponse } from './types'
 // 本地存储键名
 const CATEGORY_STORAGE_KEY = 'local_categories'
 
+// 标准图标定义
+export interface IconDefinition {
+  id: number;
+  emoji: string;
+  name: string;
+  category: 'general' | 'food' | 'transport' | 'home' | 'clothing' | 'entertainment' | 'business' | 'health' | 'education' | 'travel';
+}
+
+// 标准图标列表
+export const STANDARD_ICONS: IconDefinition[] = [
+  { id: 1, emoji: '📁', name: '文件夹', category: 'general' },
+  { id: 2, emoji: '🍔', name: '餐饮', category: 'food' },
+  { id: 3, emoji: '🚗', name: '交通', category: 'transport' },
+  { id: 4, emoji: '🏠', name: '住房', category: 'home' },
+  { id: 5, emoji: '👕', name: '服装', category: 'clothing' },
+  { id: 6, emoji: '📱', name: '数码', category: 'entertainment' },
+  { id: 7, emoji: '💊', name: '医疗', category: 'health' },
+  { id: 8, emoji: '🎬', name: '娱乐', category: 'entertainment' },
+  { id: 9, emoji: '📚', name: '教育', category: 'education' },
+  { id: 10, emoji: '🎮', name: '游戏', category: 'entertainment' },
+  { id: 11, emoji: '💼', name: '工作', category: 'business' },
+  { id: 12, emoji: '💰', name: '收入', category: 'business' },
+  { id: 13, emoji: '🎁', name: '礼物', category: 'general' },
+  { id: 14, emoji: '✈️', name: '旅行', category: 'travel' },
+  { id: 15, emoji: '🏥', name: '医院', category: 'health' },
+  { id: 16, emoji: '🎓', name: '学习', category: 'education' },
+  { id: 17, emoji: '💍', name: '珠宝', category: 'clothing' },
+  { id: 18, emoji: '🏖️', name: '度假', category: 'travel' },
+  { id: 19, emoji: '🎯', name: '运动', category: 'entertainment' },
+  { id: 20, emoji: '🎨', name: '艺术', category: 'entertainment' }
+]
+
+// 根据ID获取图标
+export const getIconById = (id: number): IconDefinition | undefined => {
+  return STANDARD_ICONS.find(icon => icon.id === id)
+}
+
+// 根据emoji获取图标
+export const getIconByEmoji = (emoji: string): IconDefinition | undefined => {
+  return STANDARD_ICONS.find(icon => icon.emoji === emoji)
+}
+
+// 获取所有图标
+export const getAllIcons = (): IconDefinition[] => {
+  return [...STANDARD_ICONS]
+}
+
 // 本地存储工具函数
 const saveCategoriesToLocal = (categories: Category[]) => {
   try {
@@ -37,7 +84,8 @@ const filterCategoriesByType = (categories: Category[], type: 'income' | 'expens
 export interface Category {
   id: number;
   name: string;
-  icon?: string;
+  iconId?: number;        // 新增：图标ID
+  icon?: string;          // 保留：兼容旧数据
   color?: string;
   incomeExpense: 'income' | 'expense';
   createTime: string;
@@ -73,15 +121,21 @@ export const getCategoryList = async (data: {
     })
     
     // 转换后端数据格式为前端期望的格式
-    const transformedData = (rawResponse.Data || []).map((item: any) => ({
-      id: item.ID, // 后端返回 ID，转换为前端期望的 id
-      name: item.Name,
-      icon: item.Icon,
-      color: item.Color,
-      incomeExpense: item.IncomeExpense,
-      createTime: item.CreatedAt,
-      updateTime: item.UpdatedAt
-    }))
+    const transformedData = (rawResponse.Data || []).map((item: any) => {
+      // 根据后端返回的icon字符串，找到对应的iconId
+      const iconInfo = item.Icon || item.icon ? getIconByEmoji(item.Icon || item.icon) : undefined
+      
+      return {
+        id: item.ID, // 后端返回 ID，转换为前端期望的 id
+        name: item.Name,
+        iconId: iconInfo?.id || 1, // 根据emoji找到对应的ID，默认使用1
+        icon: item.Icon || item.icon,       // 保留：兼容旧数据
+        color: item.Color,
+        incomeExpense: item.IncomeExpense,
+        createTime: item.CreatedAt,
+        updateTime: item.UpdatedAt
+      }
+    })
     
     const response = {
       code: 200,
@@ -138,14 +192,18 @@ export const getCategoryList = async (data: {
 // 创建分类
 export const createCategory = async (data: {
   name: string;
-  icon?: string;
+  iconId?: number;        // 新增：图标ID
+  icon?: string;          // 保留：兼容旧数据
   color?: string;
   incomeExpense: 'income' | 'expense';
 }): Promise<ApiResponse<Category>> => {
+  // 获取图标信息
+  const iconInfo = data.iconId ? getIconById(data.iconId) : undefined
+  
   // 转换字段名以匹配后端API
   const requestData = {
     name: data.name,
-    icon: data.icon,
+    icon: iconInfo?.emoji || data.icon || '📁',  // 发送emoji字符串给后端
     color: data.color,
     income_expense: data.incomeExpense  // 转换为后端期望的字段名
   }
@@ -168,7 +226,7 @@ export const createCategory = async (data: {
 }
 
 // 快速创建分类（使用当前页面类型）- 本地优先策略
-export const createCategoryWithCurrentType = async (name: string, icon?: string, color?: string): Promise<ApiResponse<Category> | null> => {
+export const createCategoryWithCurrentType = async (name: string, iconId?: number, color?: string): Promise<ApiResponse<Category> | null> => {
   // 从页面状态获取当前类型
   const { getCurrentIncomeExpense } = await import('../../utils/pageState')
   const currentIncomeExpense = getCurrentIncomeExpense()
@@ -182,11 +240,15 @@ export const createCategoryWithCurrentType = async (name: string, icon?: string,
     return null
   }
   
+  // 获取图标信息
+  const iconInfo = iconId ? getIconById(iconId) : getIconById(1) // 默认使用第一个图标
+  
   // 1. 先创建本地临时分类
   const tempCategory: Category = {
     id: Date.now(), // 临时ID
     name,
-    icon: icon || '📁',
+    iconId: iconId || 1, // 使用图标ID
+    icon: iconInfo?.emoji || '📁', // 兼容性：保留emoji
     color: color || '#4e54c8',
     incomeExpense: currentIncomeExpense,
     createTime: new Date().toISOString(),
@@ -204,7 +266,7 @@ export const createCategoryWithCurrentType = async (name: string, icon?: string,
     try {
       const response = await createCategory({
         name,
-        icon,
+        iconId,
         color,
         incomeExpense: currentIncomeExpense
       })
@@ -257,6 +319,7 @@ export const createCategoryWithCurrentType = async (name: string, icon?: string,
 // 更新分类
 export const updateCategory = (id: number, data: {
   name?: string;
+  iconId?: number;
   icon?: string;
   color?: string;
   incomeExpense?: 'income' | 'expense';
@@ -292,15 +355,21 @@ export const refreshCategoryList = async (data: {
     })
     
     // 转换后端数据格式为前端期望的格式
-    const transformedData = (rawResponse.Data || []).map((item: any) => ({
-      id: item.ID, // 后端返回 ID，转换为前端期望的 id
-      name: item.Name,
-      icon: item.Icon,
-      color: item.Color,
-      incomeExpense: item.IncomeExpense,
-      createTime: item.CreatedAt,
-      updateTime: item.UpdatedAt
-    }))
+    const transformedData = (rawResponse.Data || []).map((item: any) => {
+      // 根据后端返回的icon字符串，找到对应的iconId
+      const iconInfo = item.Icon || item.icon ? getIconByEmoji(item.Icon || item.icon) : undefined
+      
+      return {
+        id: item.ID, // 后端返回 ID，转换为前端期望的 id
+        name: item.Name,
+        iconId: iconInfo?.id || 1, // 根据emoji找到对应的ID，默认使用1
+        icon: item.Icon || item.icon,       // 保留：兼容旧数据
+        color: item.Color,
+        incomeExpense: item.IncomeExpense,
+        createTime: item.CreatedAt,
+        updateTime: item.UpdatedAt
+      }
+    })
     
     const response = {
       code: 200,
