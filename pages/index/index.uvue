@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { getTotalStatistic, getMonthStatistic } from '../../common/api/transaction'
 
 const balance = ref(0)
@@ -150,6 +150,12 @@ const loadStatisticData = async () => {
 
 onMounted(() => {
   loadStatisticData()
+  
+  // 监听交易保存事件，自动刷新数据
+  uni.$on('transactionSaved', () => {
+    console.log('收到交易保存事件，刷新主页数据')
+    loadStatisticData()
+  })
 })
 
 // 使用uni-app的生命周期钩子
@@ -157,6 +163,11 @@ defineExpose({
   onShow() {
     loadStatisticData()
   }
+})
+
+// 页面卸载时移除事件监听
+onUnmounted(() => {
+  uni.$off('transactionSaved')
 })
 </script>
 

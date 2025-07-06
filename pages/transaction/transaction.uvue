@@ -470,6 +470,10 @@ async function submitTransaction() {
         mask: true,
         duration: 1500
       })
+      
+      // 触发全局事件，通知主页刷新数据
+      uni.$emit('transactionSaved')
+      
       setTimeout(() => {
         uni.navigateBack()
       }, 1500)
