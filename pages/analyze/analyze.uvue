@@ -46,7 +46,7 @@
         <text class="chart-title">支出分类</text>
         <text class="chart-subtitle">按分类统计支出</text>
       </view>
-      <view class="chart-container">
+      <view class="chart-container pie-chart-container">
         <qiun-data-charts 
           v-if="categoryChartData.series && categoryChartData.series.length > 0"
           type="pie"
@@ -55,6 +55,12 @@
         />
         <view v-else class="empty-chart">
           <text class="empty-text">暂无数据</text>
+        </view>
+      </view>
+      <view class="custom-legend" v-if="categoryChartData.series && categoryChartData.series.length > 0">
+        <view class="legend-item" v-for="(item, idx) in categoryChartData.series" :key="item.name">
+          <view class="legend-dot" :style="{ backgroundColor: pieOpts.color[idx % pieOpts.color.length] }"></view>
+          <text class="legend-text">{{ item.name }}</text>
         </view>
       </view>
     </view>
@@ -126,14 +132,9 @@ const columnOpts = {
 
 const pieOpts = {
   color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"],
-  padding: [15, 15, 15, 15],
+  padding: [15, 15, 40, 15],
   legend: {
-    show: true,
-    position: "bottom",
-    fontSize: 12,
-    fontColor: "#666666",
-    itemGap: 8,
-    lineHeight: 16
+    show: false
   },
   extra: {
     pie: {
@@ -617,10 +618,8 @@ onMounted(() => {
   height: 400rpx;
 }
 
-/* 饼图容器特殊样式 */
-.chart-card:nth-child(4) .chart-container {
+.pie-chart-container {
   height: 600rpx;
-  min-height: 600rpx;
 }
 
 /* 加载状态 */
@@ -657,5 +656,27 @@ onMounted(() => {
   font-size: 28rpx;
   color: #999;
   font-weight: bold;
+}
+
+.custom-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20rpx;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 0 16rpx 12rpx 0;
+}
+.legend-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+}
+.legend-text {
+  font-size: 24rpx;
+  color: #666;
 }
 </style>
