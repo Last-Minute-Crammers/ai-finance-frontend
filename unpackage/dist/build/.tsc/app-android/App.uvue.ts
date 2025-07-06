@@ -1,0 +1,15 @@
+
+const __sfc__ = defineApp({
+  onLaunch() {
+    console.log('App 启动');
+  },
+  onShow() {
+    console.log('App 显示');
+  },
+  onHide() {
+    console.log('App 隐藏');
+  }
+})
+
+export default __sfc__
+const GenAppStyles = [utsMapOf([["app-container", padStyleMapOf(utsMapOf([["backgroundColor", "#f4f4f4"], ["fontFamily", "Arial, sans-serif"], ["color", "#333333"]]))]])]

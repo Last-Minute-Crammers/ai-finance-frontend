@@ -1,0 +1,381 @@
+import { ref, onMounted } from 'vue'
+import { getAIReport, getUserStatistics, getTotalStatistics } from '../../common/api/report'
+
+// 根据类型获取时间范围
+
+const __sfc__ = defineComponent({
+  __name: 'report',
+  setup(__props): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, endTime: string } {
+  const now = new Date()
+  let startTime: Date
+  let endTime: Date = now
+  
+  switch (type) {
+    case 'week':
+      // 获取本周开始（周一）
+      const day = now.getDay()
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1) // 如果是周日，则减6天；否则减(day-1)天
+      startTime = new Date(now.getFullYear(), now.getMonth(), diff)
+      break
+    case 'month':
+      // 获取本月开始
+      startTime = new Date(now.getFullYear(), now.getMonth(), 1)
+      break
+    case 'year':
+      // 获取本年开始
+      startTime = new Date(now.getFullYear(), 0, 1)
+      break
+    default:
+      startTime = new Date(now.getFullYear(), now.getMonth(), 1)
+  }
+  
+  return {
+    startTime: startTime.toISOString().split('T')[0],
+    endTime: endTime.toISOString().split('T')[0]
+  }
+}
+
+const tabs = ['周报', '月报', '年报']
+const activeTab = ref('月报')
+
+const summary = ref('')
+const suggestion = ref('')
+const tags = ref<string[]>([])
+const isGenerating = ref(false)
+
+// 报告数据
+const reportData = ref([
+  { label: '总收入', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+  { label: '总支出', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+  { label: '储蓄率', value: '0%', trend: '暂无数据', trendType: 'gray' },
+  { label: '净收入', value: '¥0', trend: '暂无数据', trendType: 'gray' }
+])
+
+function goBack() {
+  uni.navigateBack()
+}
+
+function switchTab(tab: string) {
+  activeTab.value = tab
+  // 切换tab时清空之前的数据
+  summary.value = ''
+  suggestion.value = ''
+  tags.value = []
+  resetReportData()
+}
+
+function resetReportData() {
+  reportData.value = [
+    { label: '总收入', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+    { label: '总支出', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+    { label: '储蓄率', value: '0%', trend: '暂无数据', trendType: 'gray' },
+    { label: '净收入', value: '¥0', trend: '暂无数据', trendType: 'gray' }
+  ]
+}
+
+function getReportTitle() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  
+  if (activeTab.value === '周报') {
+    // 计算本周是第几周
+    const startOfYear = new Date(year, 0, 1)
+    const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+    const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7)
+    return `${year}年第${weekNumber}周财务报告`
+  } else if (activeTab.value === '月报') {
+    return `${year}年${month}月财务报告`
+  } else {
+    return `${year}年财务报告`
+  }
+}
+
+function getCurrentDate() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+function getTimeRangeText() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const date = now.getDate()
+  
+  if (activeTab.value === '周报') {
+    // 计算本周开始时间（周一）
+    const day = now.getDay()
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1)
+    const weekStart = new Date(year, now.getMonth(), diff)
+    const weekStartMonth = weekStart.getMonth() + 1
+    const weekStartDate = weekStart.getDate()
+    
+    return `${year}年${weekStartMonth}月${weekStartDate}日 - ${year}年${month}月${date}日`
+  } else if (activeTab.value === '月报') {
+    return `${year}年${month}月1日 - ${year}年${month}月${date}日`
+  } else {
+    return `${year}年1月1日 - ${year}年${month}月${date}日`
+  }
+}
+
+async function generateReport() {
+  if (isGenerating.value) return
+  
+  isGenerating.value = true
+  
+  try {
+    // 根据后端API，传递type
+    const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
+    
+    console.log('开始生成AI报告，类型:', type)
+    
+    // 调用AI报告API，它会自动获取所有需要的数据
+    const aiResponse = await getAIReport({ type })
+    
+    console.log('AI报告生成响应:', aiResponse)
+    
+    // 处理AI报告数据
+    if (aiResponse && (aiResponse.summary || aiResponse.suggestion || aiResponse.tags)) {
+      summary.value = aiResponse.summary || ''
+      suggestion.value = aiResponse.suggestion || ''
+      tags.value = aiResponse.tags || []
+      console.log('AI报告数据处理成功:', { summary: summary.value, suggestion: suggestion.value, tags: tags.value })
+    } else {
+      console.log('AI报告数据格式错误:', aiResponse)
+      throw new Error('AI返回数据格式错误')
+    }
+    
+    // 获取总统计数据用于显示基础信息
+    try {
+      const statsResponse = await getTotalStatistics()
+      console.log('总统计数据响应:', statsResponse)
+      
+      if (statsResponse) {
+        let totalStats = null
+        
+        if (statsResponse.Data) {
+          totalStats = statsResponse.Data
+        } else if (statsResponse.data) {
+          totalStats = statsResponse.data
+        } else {
+          totalStats = statsResponse
+        }
+        
+        console.log('总统计数据:', totalStats)
+        
+        if (totalStats && (totalStats.Income || totalStats.Expense)) {
+          updateReportDataWithTotalStats(totalStats)
+        } else {
+          console.log('没有找到有效的统计数据')
+          updateReportDataWithNoData()
+        }
+      } else {
+        console.log('没有找到统计数据，显示默认信息')
+        updateReportDataWithNoData()
+      }
+    } catch (statsError) {
+      console.error('获取统计数据失败:', statsError)
+      updateReportDataWithNoData()
+    }
+    
+    uni.showToast({
+      title: '报告生成成功',
+      icon: 'success'
+    })
+  } catch (error) {
+    console.error('生成报告失败:', error)
+    uni.showToast({
+      title: '生成失败，请重试',
+      icon: 'none'
+    })
+    
+    // 显示默认信息
+    summary.value = '生成报告时出现错误，请检查网络连接或稍后重试。'
+    suggestion.value = '建议检查您的网络连接，确保能够正常访问服务器。'
+    tags.value = ['网络错误', '请重试', '稍后再来']
+    updateReportDataWithNoData()
+  } finally {
+    isGenerating.value = false
+  }
+}
+
+function updateReportDataWithTotalStats(totalStats: any) {
+  console.log('开始处理总统计数据:', totalStats)
+  console.log('totalStats类型:', typeof totalStats)
+  console.log('totalStats.Income:', totalStats.Income)
+  console.log('totalStats.Expense:', totalStats.Expense)
+  
+  const income = totalStats.Income || { Amount: 0, Count: 0 }
+  const expense = totalStats.Expense || { Amount: 0, Count: 0 }
+  
+  console.log('收入数据:', income)
+  console.log('支出数据:', expense)
+  console.log('收入Amount:', income.Amount)
+  console.log('支出Amount:', expense.Amount)
+  
+  const incomeAmount = income.Amount / 100 // 转换为元
+  const expenseAmount = expense.Amount / 100 // 转换为元
+  const savings = incomeAmount - expenseAmount
+  const savingsRate = incomeAmount > 0 ? (savings / incomeAmount * 100) : 0
+  
+  console.log('计算后的金额:', {
+    incomeAmount,
+    expenseAmount,
+    savings,
+    savingsRate
+  })
+  
+  reportData.value = [
+    { 
+      label: '总收入', 
+      value: `¥${incomeAmount.toFixed(2)}`, 
+      trend: `${income.Count}笔交易`, 
+      trendType: 'green' 
+    },
+    { 
+      label: '总支出', 
+      value: `¥${expenseAmount.toFixed(2)}`, 
+      trend: `${expense.Count}笔交易`, 
+      trendType: 'red' 
+    },
+    { 
+      label: '储蓄率', 
+      value: `${savingsRate.toFixed(1)}%`, 
+      trend: savings >= 0 ? '正储蓄' : '负储蓄', 
+      trendType: savings >= 0 ? 'green' : 'red' 
+    },
+    { 
+      label: '净收入', 
+      value: `¥${savings.toFixed(2)}`, 
+      trend: savings >= 0 ? '收入大于支出' : '支出大于收入', 
+      trendType: savings >= 0 ? 'green' : 'red' 
+    }
+  ]
+  
+  console.log('更新后的报告数据:', reportData.value)
+}
+
+function updateReportDataWithNoData() {
+  reportData.value = [
+    { label: '总收入', value: '¥0.00', trend: '暂无交易记录', trendType: 'gray' },
+    { label: '总支出', value: '¥0.00', trend: '暂无交易记录', trendType: 'gray' },
+    { label: '储蓄率', value: '0.0%', trend: '暂无数据', trendType: 'gray' },
+    { label: '净收入', value: '¥0.00', trend: '暂无数据', trendType: 'gray' }
+  ]
+}
+
+onMounted(() => {
+  // 页面加载时不自动生成报告，等待用户点击按钮
+  
+  // 调试信息：验证时间计算
+  console.log('周报时间范围:', getTimeRange('week'))
+  console.log('月报时间范围:', getTimeRange('month'))
+  console.log('年报时间范围:', getTimeRange('year'))
+})
+
+return (): any | null => {
+
+  return createElementVNode("view", utsMapOf({ class: "container" }), [
+    createElementVNode("view", utsMapOf({ class: "header" }), [
+      createElementVNode("text", utsMapOf({
+        class: "back",
+        onClick: goBack
+      }), "←"),
+      createElementVNode("text", utsMapOf({ class: "title" }), "财务报告"),
+      createElementVNode("text", utsMapOf({ class: "subtitle" }), "智能分析您的财务状况"),
+      createElementVNode("view", utsMapOf({ class: "tabs" }), [
+        createElementVNode(Fragment, null, RenderHelpers.renderList(tabs, (tab, __key, __index, _cached): any => {
+          return createElementVNode("view", utsMapOf({
+            key: tab,
+            class: normalizeClass(['tab', activeTab.value === tab ? 'active' : '']),
+            onClick: () => {switchTab(tab)}
+          }), toDisplayString(tab), 11 /* TEXT, CLASS, PROPS */, ["onClick"])
+        }), 64 /* STABLE_FRAGMENT */)
+      ])
+    ]),
+    createElementVNode("view", utsMapOf({ class: "generate-section" }), [
+      createElementVNode("button", utsMapOf({
+        class: "generate-btn",
+        onClick: generateReport,
+        disabled: isGenerating.value
+      }), [
+        isTrue(isGenerating.value)
+          ? createElementVNode("text", utsMapOf({ key: 0 }), "生成中...")
+          : createElementVNode("text", utsMapOf({ key: 1 }), "生成" + toDisplayString(activeTab.value), 1 /* TEXT */)
+      ], 8 /* PROPS */, ["disabled"])
+    ]),
+    reportData.value.length > 0
+      ? createElementVNode("view", utsMapOf({
+          key: 0,
+          class: "card report-card"
+        }), [
+          createElementVNode("view", utsMapOf({ class: "report-header" }), [
+            createElementVNode("text", utsMapOf({ class: "report-title" }), toDisplayString(getReportTitle()), 1 /* TEXT */),
+            createElementVNode("text", utsMapOf({ class: "report-date" }), "生成于 " + toDisplayString(getCurrentDate()), 1 /* TEXT */)
+          ]),
+          createElementVNode("view", utsMapOf({ class: "time-range" }), [
+            createElementVNode("text", utsMapOf({ class: "time-range-text" }), toDisplayString(getTimeRangeText()), 1 /* TEXT */)
+          ]),
+          createElementVNode("view", utsMapOf({ class: "report-grid" }), [
+            createElementVNode(Fragment, null, RenderHelpers.renderList(reportData.value, (item, __key, __index, _cached): any => {
+              return createElementVNode("view", utsMapOf({
+                class: "report-item",
+                key: item.label
+              }), [
+                createElementVNode("text", utsMapOf({ class: "label" }), toDisplayString(item.label), 1 /* TEXT */),
+                createElementVNode("text", utsMapOf({ class: "value" }), toDisplayString(item.value), 1 /* TEXT */),
+                createElementVNode("text", utsMapOf({
+                  class: normalizeClass(['trend', item.trendType])
+                }), toDisplayString(item.trend), 3 /* TEXT, CLASS */)
+              ])
+            }), 128 /* KEYED_FRAGMENT */)
+          ])
+        ])
+      : createCommentVNode("v-if", true),
+    isTrue(summary.value || suggestion.value)
+      ? createElementVNode("view", utsMapOf({
+          key: 1,
+          class: "card ai-card"
+        }), [
+          createElementVNode("text", utsMapOf({ class: "section-title" }), "AI收支总结"),
+          createElementVNode("view", utsMapOf({ class: "summary" }), toDisplayString(summary.value || '暂无数据'), 1 /* TEXT */),
+          createElementVNode("text", utsMapOf({
+            class: "section-title",
+            style: normalizeStyle(utsMapOf({"margin-top":"24rpx"}))
+          }), "AI理财建议", 4 /* STYLE */),
+          createElementVNode("view", utsMapOf({ class: "suggestion" }), toDisplayString(suggestion.value || '暂无建议'), 1 /* TEXT */),
+          tags.value.length > 0
+            ? createElementVNode("view", utsMapOf({
+                key: 0,
+                class: "tag-row"
+              }), [
+                createElementVNode(Fragment, null, RenderHelpers.renderList(tags.value, (tag, __key, __index, _cached): any => {
+                  return createElementVNode("view", utsMapOf({
+                    class: "tag",
+                    key: tag
+                  }), toDisplayString(tag), 1 /* TEXT */)
+                }), 128 /* KEYED_FRAGMENT */)
+              ])
+            : createCommentVNode("v-if", true)
+        ])
+      : createCommentVNode("v-if", true),
+    isTrue(!summary.value && !suggestion.value && !isGenerating.value)
+      ? createElementVNode("view", utsMapOf({
+          key: 2,
+          class: "empty-state"
+        }), [
+          createElementVNode("text", utsMapOf({ class: "empty-text" }), "点击上方按钮生成" + toDisplayString(activeTab.value), 1 /* TEXT */)
+        ])
+      : createCommentVNode("v-if", true)
+  ])
+}
+}
+
+})
+export default __sfc__
+const GenPagesReportReportStyles = [utsMapOf([["container", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#f5f7fa"], ["paddingBottom", "10%"]]))], ["header", padStyleMapOf(utsMapOf([["position", "relative"], ["backgroundImage", "linear-gradient(to right, #4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["paddingTop", "80rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "40rpx"], ["paddingLeft", "30rpx"], ["borderBottomLeftRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"]]))], ["back", padStyleMapOf(utsMapOf([["position", "absolute"], ["left", "30rpx"], ["top", "80rpx"], ["fontSize", "36rpx"], ["color", "#FFFFFF"], ["zIndex", 10]]))], ["title", padStyleMapOf(utsMapOf([["textAlign", "center"], ["width", "100%"], ["fontSize", "36rpx"], ["fontWeight", "bold"], ["color", "#FFFFFF"]]))], ["subtitle", padStyleMapOf(utsMapOf([["textAlign", "center"], ["width", "100%"], ["fontSize", "24rpx"], ["color", "#f0f0f0"], ["marginTop", "10rpx"]]))], ["tabs", padStyleMapOf(utsMapOf([["marginTop", "40rpx"], ["display", "flex"], ["justifyContent", "center"], ["backgroundImage", "none"], ["backgroundColor", "rgba(255,255,255,0.1)"], ["borderTopLeftRadius", "40rpx"], ["borderTopRightRadius", "40rpx"], ["borderBottomRightRadius", "40rpx"], ["borderBottomLeftRadius", "40rpx"], ["paddingTop", "6rpx"], ["paddingRight", "6rpx"], ["paddingBottom", "6rpx"], ["paddingLeft", "6rpx"]]))], ["tab", utsMapOf([["", utsMapOf([["fontSize", "26rpx"], ["color", "#FFFFFF"], ["paddingTop", "12rpx"], ["paddingRight", "36rpx"], ["paddingBottom", "12rpx"], ["paddingLeft", "36rpx"], ["borderTopLeftRadius", "30rpx"], ["borderTopRightRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"], ["borderBottomLeftRadius", "30rpx"], ["textAlign", "center"]])], [".active", utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#ffffff"], ["color", "#4e54c8"], ["fontWeight", "bold"]])]])], ["generate-section", padStyleMapOf(utsMapOf([["marginTop", "30rpx"], ["marginRight", "30rpx"], ["marginBottom", "30rpx"], ["marginLeft", "30rpx"]]))], ["generate-btn", padStyleMapOf(utsMapOf([["width", "100%"], ["backgroundImage", "linear-gradient(to right, #4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["color", "#FFFFFF"], ["fontSize", "28rpx"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "16rpx"], ["borderTopRightRadius", "16rpx"], ["borderBottomRightRadius", "16rpx"], ["borderBottomLeftRadius", "16rpx"], ["paddingTop", "24rpx"], ["paddingRight", 0], ["paddingBottom", "24rpx"], ["paddingLeft", 0], ["fontWeight", "bold"], ["backgroundImage:disabled", "none"], ["backgroundColor:disabled", "#cccccc"], ["color:disabled", "#999999"]]))], ["card", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#ffffff"], ["marginTop", "30rpx"], ["marginRight", "30rpx"], ["marginBottom", "30rpx"], ["marginLeft", "30rpx"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["boxShadow", "0 6rpx 12rpx rgba(0, 0, 0, 0.06)"]]))], ["report-header", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "space-between"], ["marginBottom", "20rpx"]]))], ["report-title", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["fontWeight", "bold"]]))], ["report-date", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#999999"]]))], ["time-range", padStyleMapOf(utsMapOf([["marginTop", "20rpx"], ["paddingTop", "16rpx"], ["paddingRight", 0], ["paddingBottom", "16rpx"], ["paddingLeft", 0], ["borderTopWidth", "1rpx"], ["borderTopStyle", "solid"], ["borderTopColor", "#eeeeee"], ["borderBottomWidth", "1rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#eeeeee"], ["textAlign", "center"]]))], ["time-range-text", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#666666"]]))], ["report-grid", padStyleMapOf(utsMapOf([["display", "flex"], ["flexWrap", "wrap"], ["flexDirection", "row"], ["justifyContent", "space-between"], ["gap", "20rpx 0"]]))], ["report-item", padStyleMapOf(utsMapOf([["width", "48%"], ["backgroundImage", "none"], ["backgroundColor", "#f9f9f9"], ["borderTopLeftRadius", "16rpx"], ["borderTopRightRadius", "16rpx"], ["borderBottomRightRadius", "16rpx"], ["borderBottomLeftRadius", "16rpx"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["display", "flex"], ["flexDirection", "column"], ["alignItems", "center"], ["textAlign", "center"]]))], ["label", padStyleMapOf(utsMapOf([["fontSize", "22rpx"], ["color", "#999999"]]))], ["value", padStyleMapOf(utsMapOf([["fontSize", "30rpx"], ["fontWeight", "bold"], ["marginTop", "10rpx"], ["marginRight", 0], ["marginBottom", "10rpx"], ["marginLeft", 0]]))], ["trend", padStyleMapOf(utsMapOf([["fontSize", "22rpx"]]))], ["green", padStyleMapOf(utsMapOf([["color", "#35b765"]]))], ["red", padStyleMapOf(utsMapOf([["color", "#e74c3c"]]))], ["gray", padStyleMapOf(utsMapOf([["color", "#999999"]]))], ["section-title", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["fontWeight", "bold"], ["marginBottom", "20rpx"]]))], ["summary", padStyleMapOf(utsMapOf([["fontSize", "26rpx"], ["lineHeight", 1.6], ["color", "#333333"], ["marginBottom", "24rpx"]]))], ["suggestion", padStyleMapOf(utsMapOf([["fontSize", "26rpx"], ["lineHeight", 1.6], ["color", "#333333"], ["marginBottom", "24rpx"]]))], ["tag-row", padStyleMapOf(utsMapOf([["marginTop", "20rpx"], ["display", "flex"], ["flexWrap", "wrap"], ["gap", "20rpx"]]))], ["tag", padStyleMapOf(utsMapOf([["paddingTop", "12rpx"], ["paddingRight", "24rpx"], ["paddingBottom", "12rpx"], ["paddingLeft", "24rpx"], ["backgroundImage", "none"], ["backgroundColor", "#eef1f7"], ["borderTopLeftRadius", "30rpx"], ["borderTopRightRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"], ["borderBottomLeftRadius", "30rpx"], ["fontSize", "22rpx"], ["color", "#333333"]]))], ["empty-state", padStyleMapOf(utsMapOf([["marginTop", "100rpx"], ["marginRight", "30rpx"], ["marginBottom", "100rpx"], ["marginLeft", "30rpx"], ["textAlign", "center"]]))], ["empty-text", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#999999"]]))]])]

@@ -1,0 +1,108 @@
+import { ref, computed, onMounted } from 'vue'
+import { getCurrentType, getCurrentIncomeExpense, getPagePath, hasValidPageType } from '../../utils/pageState'
+import AddCategoryModal from '../../components/AddCategoryModal.uvue'
+
+// 响应式数据
+
+const __sfc__ = defineComponent({
+  __name: 'category-demo',
+  setup(__props): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+const showAddCategoryModal = ref(false)
+
+// 计算属性
+const currentType = computed(() => getCurrentType())
+const currentIncomeExpense = computed(() => getCurrentIncomeExpense())
+const currentPath = computed(() => getPagePath())
+const hasValidType = computed(() => hasValidPageType())
+
+// 方法
+const goBack = () => {
+  uni.navigateBack()
+}
+
+const showAddCategory = () => {
+  if (!hasValidType.value) {
+    uni.showToast({
+      title: '请先进入记账页面选择类型',
+      icon: 'none'
+    })
+    return
+  }
+  showAddCategoryModal.value = true
+}
+
+const onCategoryCreated = (newCategory: any) => {
+  console.log('新分类已创建:', newCategory)
+  uni.showToast({
+    title: '分类创建成功！',
+    icon: 'success'
+  })
+}
+
+onMounted(() => {
+  console.log('当前页面状态:', {
+    type: currentType.value,
+    incomeExpense: currentIncomeExpense.value,
+    path: currentPath.value,
+    hasValidType: hasValidType.value
+  })
+})
+
+return (): any | null => {
+
+  return createElementVNode("view", utsMapOf({ class: "demo-container" }), [
+    createElementVNode("view", utsMapOf({ class: "header" }), [
+      createElementVNode("text", utsMapOf({
+        class: "back-btn",
+        onClick: goBack
+      }), "←"),
+      createElementVNode("text", utsMapOf({ class: "header-title" }), "分类管理演示")
+    ]),
+    createElementVNode("view", utsMapOf({ class: "content" }), [
+      createElementVNode("view", utsMapOf({ class: "info-card" }), [
+        createElementVNode("text", utsMapOf({ class: "info-title" }), "当前页面状态"),
+        createElementVNode("view", utsMapOf({ class: "info-item" }), [
+          createElementVNode("text", utsMapOf({ class: "info-label" }), "页面类型："),
+          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentType.value || '未设置'), 1 /* TEXT */)
+        ]),
+        createElementVNode("view", utsMapOf({ class: "info-item" }), [
+          createElementVNode("text", utsMapOf({ class: "info-label" }), "income_expense："),
+          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentIncomeExpense.value || '未设置'), 1 /* TEXT */)
+        ]),
+        createElementVNode("view", utsMapOf({ class: "info-item" }), [
+          createElementVNode("text", utsMapOf({ class: "info-label" }), "页面路径："),
+          createElementVNode("text", utsMapOf({ class: "info-value" }), toDisplayString(currentPath.value || '未设置'), 1 /* TEXT */)
+        ])
+      ]),
+      createElementVNode("view", utsMapOf({ class: "action-card" }), [
+        createElementVNode("text", utsMapOf({ class: "action-title" }), "操作演示"),
+        createElementVNode("button", utsMapOf({
+          class: "action-btn",
+          onClick: showAddCategory,
+          disabled: !hasValidType.value
+        }), toDisplayString(hasValidType.value ? '添加分类' : '请先进入记账页面选择类型'), 9 /* TEXT, PROPS */, ["disabled"]),
+        createElementVNode("text", utsMapOf({ class: "action-tip" }), "点击按钮可以添加分类，会自动使用当前页面的类型")
+      ]),
+      createElementVNode("view", utsMapOf({ class: "tip-card" }), [
+        createElementVNode("text", utsMapOf({ class: "tip-title" }), "使用说明"),
+        createElementVNode("text", utsMapOf({ class: "tip-text" }), "1. 先进入记账页面，选择\"支出\"或\"收入\"类型"),
+        createElementVNode("text", utsMapOf({ class: "tip-text" }), "2. 然后进入此页面，就可以添加对应类型的分类"),
+        createElementVNode("text", utsMapOf({ class: "tip-text" }), "3. 分类会自动同步到本地存储")
+      ])
+    ]),
+    createVNode(unref(AddCategoryModal), utsMapOf({
+      visible: showAddCategoryModal.value,
+      "onUpdate:visible": $event => {(showAddCategoryModal).value = $event},
+      onCreated: onCategoryCreated
+    }), null, 8 /* PROPS */, ["visible", "onUpdate:visible"])
+  ])
+}
+}
+
+})
+export default __sfc__
+const GenPagesCategoryDemoCategoryDemoStyles = [utsMapOf([["demo-container", padStyleMapOf(utsMapOf([["backgroundColor", "#f5f7fa"], ["paddingBottom", "40rpx"]]))], ["header", padStyleMapOf(utsMapOf([["backgroundImage", "linear-gradient(to right, #4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["paddingTop", "80rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "40rpx"], ["paddingLeft", "30rpx"], ["borderBottomLeftRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"], ["textAlign", "center"], ["position", "relative"]]))], ["back-btn", padStyleMapOf(utsMapOf([["position", "absolute"], ["left", "30rpx"], ["top", "80rpx"], ["fontSize", "36rpx"], ["color", "#FFFFFF"]]))], ["header-title", padStyleMapOf(utsMapOf([["fontSize", "36rpx"], ["fontWeight", "bold"], ["color", "#FFFFFF"]]))], ["content", padStyleMapOf(utsMapOf([["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"]]))], ["info-card", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#FFFFFF"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["marginBottom", "30rpx"], ["boxShadow", "0 4rpx 12rpx rgba(0, 0, 0, 0.04)"]]))], ["action-card", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#FFFFFF"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["marginBottom", "30rpx"], ["boxShadow", "0 4rpx 12rpx rgba(0, 0, 0, 0.04)"]]))], ["tip-card", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#FFFFFF"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["marginBottom", "30rpx"], ["boxShadow", "0 4rpx 12rpx rgba(0, 0, 0, 0.04)"]]))], ["info-title", padStyleMapOf(utsMapOf([["fontSize", "32rpx"], ["fontWeight", "bold"], ["color", "#333333"], ["marginBottom", "20rpx"]]))], ["action-title", padStyleMapOf(utsMapOf([["fontSize", "32rpx"], ["fontWeight", "bold"], ["color", "#333333"], ["marginBottom", "20rpx"]]))], ["tip-title", padStyleMapOf(utsMapOf([["fontSize", "32rpx"], ["fontWeight", "bold"], ["color", "#333333"], ["marginBottom", "20rpx"]]))], ["info-item", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "space-between"], ["alignItems", "center"], ["paddingTop", "15rpx"], ["paddingRight", 0], ["paddingBottom", "15rpx"], ["paddingLeft", 0], ["borderBottomWidth", "1rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#f0f0f0"], ["borderBottomWidth:last-child", "medium"], ["borderBottomStyle:last-child", "none"], ["borderBottomColor:last-child", "#000000"]]))], ["info-label", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#666666"]]))], ["info-value", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#4e54c8"], ["fontWeight", "bold"]]))], ["action-btn", padStyleMapOf(utsMapOf([["width", "100%"], ["backgroundImage", "linear-gradient(to right, #4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["color", "#FFFFFF"], ["paddingTop", "24rpx"], ["paddingRight", "24rpx"], ["paddingBottom", "24rpx"], ["paddingLeft", "24rpx"], ["fontSize", "32rpx"], ["borderTopLeftRadius", "40rpx"], ["borderTopRightRadius", "40rpx"], ["borderBottomRightRadius", "40rpx"], ["borderBottomLeftRadius", "40rpx"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["marginBottom", "20rpx"], ["backgroundImage:disabled", "none"], ["backgroundColor:disabled", "#cccccc"], ["color:disabled", "#999999"]]))], ["action-tip", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#999999"], ["textAlign", "center"]]))], ["tip-text", padStyleMapOf(utsMapOf([["fontSize", "26rpx"], ["color", "#666666"], ["lineHeight", 1.6], ["marginBottom", "10rpx"]]))]])]

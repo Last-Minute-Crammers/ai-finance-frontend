@@ -1,0 +1,140 @@
+import { request } from '../../utils/request';
+// 获取用户统计数据
+export function getUserStatistics(type: 'week' | 'month' | 'year'): Promise<any> {
+    const { startTime, endTime } = getTimeRange(type);
+    const requestData = {
+        StartTime: startTime,
+        EndTime: endTime,
+        income_expense: null // null表示查询收入和支出
+    } as UTSJSONObject;
+    const endpoint = type === 'week' ? 'week' : type === 'month' ? 'month' : 'year';
+    console.log('统计数据请求参数:', {
+        type,
+        endpoint,
+        startTime,
+        endTime,
+        requestData
+    });
+    return request({
+        url: `/api/user/transaction/statistic/${endpoint}`,
+        method: 'POST',
+        data: requestData,
+        requireAuth: true
+    });
+}
+// 获取总统计数据
+export function getTotalStatistics(): Promise<any> {
+    return request({
+        url: '/api/user/transaction/statistic/total',
+        method: 'GET',
+        requireAuth: true
+    });
+}
+// 获取分类排行榜
+export function getCategoryRanking(data: {
+    type: 'week' | 'month' | 'year';
+    income_expense: 'income' | 'expense';
+    limit: number;
+}): Promise<any> {
+    const { startTime, endTime } = getTimeRange(data.type);
+    const requestData = {
+        StartTime: startTime,
+        EndTime: endTime,
+        IncomeExpense: data.income_expense,
+        Limit: data.limit
+    } as UTSJSONObject;
+    console.log('分类排行榜请求参数:', {
+        type: data.type,
+        income_expense: data.income_expense,
+        limit: data.limit,
+        startTime,
+        endTime,
+        requestData
+    });
+    return request({
+        url: '/api/user/transaction/statistic/category_rank',
+        method: 'POST',
+        data: requestData,
+        requireAuth: true
+    });
+}
+// 获取交易排行榜
+export function getTransactionRanking(data: {
+    start_time: string;
+    end_time: string;
+    income_expense: 'income' | 'expense';
+    limit: number;
+}): Promise<any> {
+    return request({
+        url: '/api/user/transaction/statistic/amount_rank',
+        method: 'POST',
+        data,
+        requireAuth: true
+    });
+}
+// 获取交易列表用于分类统计
+export function getTransactionListForCategory(data: {
+    type: 'week' | 'month' | 'year';
+    income_expense: 'income' | 'expense';
+}): Promise<any> {
+    const { startTime, endTime } = getTimeRange(data.type);
+    const requestData = {
+        StartTime: startTime,
+        EndTime: endTime,
+        IncomeExpense: data.income_expense,
+        Offset: 0,
+        Limit: 1000 // 获取足够多的数据来进行分类统计
+    } as UTSJSONObject;
+    console.log('交易列表请求参数:', {
+        type: data.type,
+        income_expense: data.income_expense,
+        startTime,
+        endTime,
+        requestData
+    });
+    return request({
+        url: '/api/user/transaction/list',
+        method: 'POST',
+        data: requestData,
+        requireAuth: true
+    });
+}
+// 根据类型获取时间范围
+function getTimeRange(type: 'week' | 'month' | 'year'): {
+    startTime: string;
+    endTime: string;
+} {
+    const now = new Date();
+    let startTime: Date;
+    let endTime: Date = new Date(now); // 创建新的Date对象，避免修改原始对象
+    switch (type) {
+        case 'week':
+            // 获取本周开始（周一）
+            const day = now.getDay();
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+            startTime = new Date(now.getFullYear(), now.getMonth(), diff);
+            break;
+        case 'month':
+            // 获取本月开始
+            startTime = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        case 'year':
+            // 获取本年开始
+            startTime = new Date(now.getFullYear(), 0, 1);
+            break;
+        default:
+            startTime = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    console.log('时间范围计算:', {
+        type,
+        now: now.toISOString(),
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        startTimeDate: startTime,
+        endTimeDate: endTime
+    });
+    return {
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString()
+    };
+}

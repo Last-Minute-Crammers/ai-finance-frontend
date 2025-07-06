@@ -1,0 +1,341 @@
+import { ref, nextTick, onMounted } from 'vue'
+import { sendAIMessage, getAIChatHistory, getAIChatSessionDetail } from '../../common/api/ai'
+
+interface ChatMessage {
+  role: 'ai' | 'user';
+  text: string;
+  loading?: boolean;
+}
+
+interface ChatSessionPreview {
+  sessionId: string;
+  firstQuestion: string;
+  createdAt: string;
+}
+
+
+const __sfc__ = defineComponent({
+  __name: 'AIchat',
+  setup(__props): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+const aiAvatar = '/static/icons/pet.png'
+const userAvatar = '/static/icons/user.png'
+
+const inputText = ref('')
+const isLoading = ref(false)
+const messages = ref<ChatMessage[]>([])
+const bottomAnchor = ref('bottom-anchor')
+const scrollIntoView = ref('bottomAnchor')
+
+// 侧栏相关
+const showDrawer = ref(false)
+const historyLoading = ref(false)
+const chatHistory = ref<ChatSessionPreview[]>([])
+const currentSessionId = ref<string | null>(null)
+const sessionLoading = ref(false)
+
+// 页面初始化时检查是否有传入的sessionId
+onMounted(() => {
+  console.log('AI聊天页面初始化')
+  // 检查页面参数中是否有sessionId
+  const pages = getCurrentPages()
+  const currentPage = pages[pages.length - 1]
+  console.log('当前页面信息:', currentPage)
+  
+  if (currentPage && currentPage.options && currentPage.options.sessionId) {
+    const sessionId = currentPage.options.sessionId
+    console.log('检测到传入的sessionId:', sessionId)
+    loadSession(sessionId)
+  } else {
+    console.log('没有检测到传入的sessionId，显示默认欢迎语')
+    // 显示默认欢迎语
+    messages.value = [{ role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' }]
+  }
+})
+
+function openDrawer() {
+  showDrawer.value = true
+  loadHistory()
+}
+function closeDrawer() {
+  showDrawer.value = false
+}
+
+async function loadHistory() {
+  historyLoading.value = true
+  try {
+    const res = await getAIChatHistory()
+    console.log('历史记录API响应:', res)
+    if (res.success && Array.isArray(res.data)) {
+      chatHistory.value = res.data.map((item: any) => ({
+        sessionId: item.sessionId,
+        firstQuestion: item.firstQuestion || '未知对话',
+        createdAt: item.createdAt || ''
+      }))
+      console.log('处理后的历史记录:', chatHistory.value)
+    } else {
+      chatHistory.value = []
+      console.warn('历史记录响应格式错误:', res)
+    }
+  } catch (e) {
+    console.error('加载历史记录失败:', e)
+    chatHistory.value = []
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+// 加载某个会话的全部消息
+async function loadSession(sessionId: string) {
+  closeDrawer()
+  currentSessionId.value = sessionId
+  sessionLoading.value = true
+  console.log('开始加载会话:', sessionId)
+  
+  try {
+    const res = await getAIChatSessionDetail(sessionId)
+    console.log('会话详情API响应:', res)
+    
+    if (res.success && Array.isArray(res.data)) {
+      // 按createdAt升序排序，保证历史顺序
+      const sorted = res.data.slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      console.log('排序后的会话数据:', sorted)
+      
+      messages.value = []
+      
+      // 处理每条聊天记录
+      sorted.forEach((item: any, index: number) => {
+        console.log(`处理第${index + 1}条记录:`, item)
+        console.log(`- input: "${item.Input}"`)
+        console.log(`- response: "${item.Response}"`)
+        
+        // 添加用户输入
+        if (item.Input && item.Input.trim() !== '') {
+          messages.value.push({ role: 'user', text: item.Input })
+          console.log(`添加用户消息: "${item.Input}"`)
+        }
+        // 添加AI回复
+        if (item.Response && item.Response.trim() !== '') {
+          messages.value.push({ role: 'ai', text: item.Response })
+          console.log(`添加AI消息: "${item.Response}"`)
+        }
+      })
+      
+      console.log('处理完成后的消息数组:', messages.value)
+      
+      // 只有在真正没有历史消息时才显示默认欢迎语
+      if (messages.value.length === 0) {
+        console.log('没有找到历史消息，显示默认欢迎语')
+        messages.value.push({ role: 'ai', text: '你好，我是理财小汪，你的智能理财助手，有什么可以帮您？' })
+      } else {
+        console.log('成功加载历史消息，消息数量:', messages.value.length)
+      }
+      
+      scrollToBottom()
+      console.log('成功加载会话:', sessionId, '消息数量:', messages.value.length)
+    } else {
+      // 如果请求失败，显示错误信息
+      messages.value = [{ role: 'ai', text: '加载历史对话失败，请稍后重试。' }]
+      console.error('加载会话失败: 响应数据格式错误', res)
+    }
+  } catch (e) {
+    console.error('加载会话失败:', e)
+    messages.value = [{ role: 'ai', text: '加载历史对话失败，请稍后重试。' }]
+  } finally {
+    sessionLoading.value = false
+  }
+}
+
+async function sendMessage() {
+  const content = inputText.value.trim()
+  if (!content || isLoading.value) return
+  
+  messages.value.push({ role: 'user', text: content })
+  inputText.value = ''
+  scrollToBottom()
+  
+  const loadingMsgIndex = messages.value.length
+  messages.value.push({ role: 'ai', text: '正在思考中...', loading: true })
+  scrollToBottom()
+  isLoading.value = true
+  
+  try {
+    console.log('发送消息，当前sessionId:', currentSessionId.value)
+    const response = await sendAIMessage(content, currentSessionId.value || undefined)
+    messages.value.splice(loadingMsgIndex, 1)
+    
+    if (response.success && response.data) {
+      messages.value.push({ role: 'ai', text: response.data })
+      
+      // 如果是新对话且没有sessionId，需要获取新创建的sessionId
+      if (!currentSessionId.value) {
+        await loadHistory()
+        if (chatHistory.value.length > 0) {
+          // 找到最新会话（假设最新在最前）
+          currentSessionId.value = chatHistory.value[0].sessionId
+          console.log('获取到新的sessionId:', currentSessionId.value)
+        }
+      }
+    } else {
+      const errorMsg = response.error || '抱歉，我暂时无法回答这个问题。'
+      messages.value.push({ role: 'ai', text: errorMsg })
+    }
+  } catch (error) {
+    console.error('发送消息失败:', error)
+    messages.value.splice(loadingMsgIndex, 1)
+    messages.value.push({ 
+      role: 'ai', 
+      text: '抱歉，我暂时无法连接到AI服务。请稍后再试或联系技术支持。' 
+    })
+    uni.showToast({ title: 'AI服务暂时不可用', icon: 'none' })
+  } finally {
+    isLoading.value = false
+    scrollToBottom()
+  }
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    scrollIntoView.value = bottomAnchor.value
+  })
+}
+
+// 格式化日期显示
+function formatDate(dateString: string): string {
+  if (!dateString) return ''
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    } else if (diffDays === 1) {
+      return '昨天'
+    } else if (diffDays < 7) {
+      return `${diffDays}天前`
+    } else {
+      return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+    }
+  } catch (e) {
+    return dateString
+  }
+}
+
+return (): any | null => {
+
+  return createElementVNode("view", utsMapOf({ class: "chat-wrapper" }), [
+    createElementVNode("view", utsMapOf({ class: "chat-header" }), [
+      createElementVNode("text", utsMapOf({ class: "chat-title" }), "AI 理财助手"),
+      createElementVNode("text", utsMapOf({ class: "chat-subtitle" }), "您的智能理财小伙伴"),
+      createElementVNode("button", utsMapOf({
+        class: "history-btn",
+        onClick: openDrawer
+      }), "历史")
+    ]),
+    createElementVNode("scroll-view", utsMapOf({
+      class: "chat-body",
+      "scroll-y": "",
+      "scroll-into-view": scrollIntoView.value,
+      "scroll-with-animation": ""
+    }), [
+      isTrue(sessionLoading.value)
+        ? createElementVNode("view", utsMapOf({
+            key: 0,
+            class: "loading-container"
+          }), [
+            createElementVNode("text", utsMapOf({ class: "loading-text" }), "正在加载历史对话...")
+          ])
+        : createElementVNode("view", utsMapOf({ key: 1 }), [
+            createElementVNode(Fragment, null, RenderHelpers.renderList(messages.value, (msg, index, __index, _cached): any => {
+              return createElementVNode("view", utsMapOf({
+                key: index,
+                id: 'msg-' + index,
+                class: normalizeClass(["chat-message", msg.role])
+              }), [
+                createElementVNode("image", utsMapOf({
+                  class: "avatar",
+                  src: msg.role === 'ai' ? aiAvatar : userAvatar
+                }), null, 8 /* PROPS */, ["src"]),
+                createElementVNode("view", utsMapOf({ class: "bubble" }), [
+                  createElementVNode("text", null, toDisplayString(msg.text), 1 /* TEXT */)
+                ])
+              ], 10 /* CLASS, PROPS */, ["id"])
+            }), 128 /* KEYED_FRAGMENT */)
+          ]),
+      createElementVNode("view", utsMapOf({
+        id: bottomAnchor.value,
+        class: "scroll-anchor"
+      }), null, 8 /* PROPS */, ["id"])
+    ], 8 /* PROPS */, ["scroll-into-view"]),
+    createElementVNode("view", utsMapOf({ class: "input-area" }), [
+      createElementVNode("input", utsMapOf({
+        class: "input-box",
+        modelValue: inputText.value,
+        onInput: ($event: InputEvent) => {(inputText).value = $event.detail.value},
+        placeholder: "请输入内容...",
+        onConfirm: sendMessage
+      }), null, 40 /* PROPS, NEED_HYDRATION */, ["modelValue", "onInput"]),
+      createElementVNode("button", utsMapOf({
+        class: "send-button",
+        onClick: sendMessage
+      }), "发送")
+    ]),
+    isTrue(showDrawer.value)
+      ? createElementVNode("view", utsMapOf({
+          key: 0,
+          class: "drawer-mask",
+          onClick: closeDrawer
+        }))
+      : createCommentVNode("v-if", true),
+    isTrue(showDrawer.value)
+      ? createElementVNode("view", utsMapOf({
+          key: 1,
+          class: "drawer"
+        }), [
+          createElementVNode("view", utsMapOf({ class: "drawer-header" }), [
+            createElementVNode("text", null, "历史会话"),
+            createElementVNode("button", utsMapOf({
+              class: "drawer-close",
+              onClick: closeDrawer
+            }), "关闭")
+          ]),
+          createElementVNode("view", utsMapOf({ class: "drawer-body" }), [
+            isTrue(historyLoading.value)
+              ? createElementVNode("view", utsMapOf({
+                  key: 0,
+                  class: "drawer-loading"
+                }), "加载中...")
+              : chatHistory.value.length === 0
+                ? createElementVNode("view", utsMapOf({
+                    key: 1,
+                    class: "drawer-empty"
+                  }), "暂无历史")
+                : createElementVNode("view", utsMapOf({ key: 2 }), [
+                    createElementVNode(Fragment, null, RenderHelpers.renderList(chatHistory.value, (item, __key, __index, _cached): any => {
+                      return createElementVNode("view", utsMapOf({
+                        key: item.sessionId,
+                        class: "drawer-item",
+                        onClick: () => {loadSession(item.sessionId)}
+                      }), [
+                        createElementVNode("view", utsMapOf({ class: "drawer-item-content" }), [
+                          createElementVNode("text", utsMapOf({ class: "drawer-title" }), toDisplayString(item.firstQuestion), 1 /* TEXT */),
+                          createElementVNode("text", utsMapOf({ class: "drawer-date" }), toDisplayString(formatDate(item.createdAt)), 1 /* TEXT */)
+                        ])
+                      ], 8 /* PROPS */, ["onClick"])
+                    }), 128 /* KEYED_FRAGMENT */)
+                  ])
+          ])
+        ])
+      : createCommentVNode("v-if", true)
+  ])
+}
+}
+
+})
+export default __sfc__
+const GenPagesAIchatAIchatStyles = [utsMapOf([["chat-wrapper", padStyleMapOf(utsMapOf([["display", "flex"], ["flexDirection", "column"], ["backgroundColor", "#f5f7fa"]]))], ["chat-header", padStyleMapOf(utsMapOf([["backgroundImage", "linear-gradient(to right,#4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["color", "#FFFFFF"], ["paddingTop", "40rpx"], ["paddingRight", "32rpx"], ["paddingBottom", "24rpx"], ["paddingLeft", "32rpx"], ["borderBottomLeftRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"], ["textAlign", "center"]]))], ["chat-title", padStyleMapOf(utsMapOf([["fontSize", "36rpx"], ["fontWeight", "bold"]]))], ["chat-subtitle", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["opacity", 0.9], ["marginTop", "10rpx"]]))], ["chat-body", padStyleMapOf(utsMapOf([["flex", 1], ["paddingTop", "30rpx"], ["paddingRight", "24rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "24rpx"]]))], ["loading-container", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "center"], ["alignItems", "center"], ["height", "200rpx"]]))], ["loading-text", padStyleMapOf(utsMapOf([["color", "#888888"], ["fontSize", "28rpx"]]))], ["chat-message", utsMapOf([["", utsMapOf([["display", "flex"], ["alignItems", "flex-start"], ["marginBottom", "30rpx"]])], [".ai", utsMapOf([["flexDirection", "row"]])], [".user", utsMapOf([["flexDirection", "row-reverse"]])]])], ["avatar", padStyleMapOf(utsMapOf([["width", "64rpx"], ["height", "64rpx"], ["marginTop", 0], ["marginRight", "16rpx"], ["marginBottom", 0], ["marginLeft", "16rpx"]]))], ["bubble", utsMapOf([["", utsMapOf([["backgroundColor", "#ffffff"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["fontSize", "28rpx"], ["lineHeight", 1.6], ["boxShadow", "0 4rpx 8rpx rgba(0, 0, 0, 0.05)"], ["color", "#333333"], ["wordWrap", "break-word"]])], [".chat-message.user ", utsMapOf([["backgroundColor", "#dcefff"]])]])], ["input-area", padStyleMapOf(utsMapOf([["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["display", "flex"], ["borderTopWidth", "1rpx"], ["borderTopStyle", "solid"], ["borderTopColor", "#eeeeee"], ["backgroundColor", "#ffffff"]]))], ["input-box", padStyleMapOf(utsMapOf([["flex", 1], ["borderTopWidth", 1], ["borderRightWidth", 1], ["borderBottomWidth", 1], ["borderLeftWidth", 1], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#cccccc"], ["borderRightColor", "#cccccc"], ["borderBottomColor", "#cccccc"], ["borderLeftColor", "#cccccc"], ["borderTopLeftRadius", "30rpx"], ["borderTopRightRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"], ["borderBottomLeftRadius", "30rpx"], ["paddingTop", "16rpx"], ["paddingRight", "24rpx"], ["paddingBottom", "16rpx"], ["paddingLeft", "24rpx"], ["fontSize", "28rpx"], ["backgroundColor", "#f9f9f9"]]))], ["send-button", padStyleMapOf(utsMapOf([["marginLeft", "20rpx"], ["height", "70rpx"], ["paddingTop", 0], ["paddingRight", "32rpx"], ["paddingBottom", 0], ["paddingLeft", "32rpx"], ["lineHeight", "70rpx"], ["backgroundColor", "#4e54c8"], ["color", "#ffffff"], ["fontSize", "28rpx"], ["borderTopLeftRadius", "32rpx"], ["borderTopRightRadius", "32rpx"], ["borderBottomRightRadius", "32rpx"], ["borderBottomLeftRadius", "32rpx"]]))], ["scroll-anchor", padStyleMapOf(utsMapOf([["height", "1rpx"]]))], ["history-btn", padStyleMapOf(utsMapOf([["position", "absolute"], ["right", "32rpx"], ["top", "40rpx"], ["backgroundImage", "none"], ["backgroundColor", "#ffffff"], ["color", "#4e54c8"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "8rpx"], ["paddingRight", "24rpx"], ["paddingBottom", "8rpx"], ["paddingLeft", "24rpx"], ["fontSize", "24rpx"], ["borderTopWidth", "1rpx"], ["borderRightWidth", "1rpx"], ["borderBottomWidth", "1rpx"], ["borderLeftWidth", "1rpx"], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#4e54c8"], ["borderRightColor", "#4e54c8"], ["borderBottomColor", "#4e54c8"], ["borderLeftColor", "#4e54c8"]]))], ["drawer-mask", padStyleMapOf(utsMapOf([["position", "fixed"], ["top", 0], ["left", 0], ["right", 0], ["bottom", 0], ["backgroundImage", "none"], ["backgroundColor", "rgba(0,0,0,0.2)"], ["zIndex", 99]]))], ["drawer", padStyleMapOf(utsMapOf([["position", "fixed"], ["top", 0], ["right", 0], ["bottom", 0], ["maxWidth", "500rpx"], ["backgroundImage", "none"], ["backgroundColor", "#ffffff"], ["zIndex", 100], ["boxShadow", "-4rpx 0 16rpx rgba(0,0,0,0.08)"], ["display", "flex"], ["flexDirection", "column"]]))], ["drawer-header", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "space-between"], ["alignItems", "center"], ["paddingTop", "32rpx"], ["paddingRight", "24rpx"], ["paddingBottom", "16rpx"], ["paddingLeft", "24rpx"], ["borderBottomWidth", "1rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#eeeeee"], ["fontSize", "30rpx"], ["fontWeight", "bold"]]))], ["drawer-close", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#f5f7fa"], ["color", "#888888"], ["borderTopLeftRadius", "16rpx"], ["borderTopRightRadius", "16rpx"], ["borderBottomRightRadius", "16rpx"], ["borderBottomLeftRadius", "16rpx"], ["paddingTop", "4rpx"], ["paddingRight", "16rpx"], ["paddingBottom", "4rpx"], ["paddingLeft", "16rpx"], ["fontSize", "24rpx"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"]]))], ["drawer-body", padStyleMapOf(utsMapOf([["flex", 1], ["overflowY", "auto"], ["paddingTop", "24rpx"], ["paddingRight", "24rpx"], ["paddingBottom", "24rpx"], ["paddingLeft", "24rpx"], ["textAlign", "left"]]))], ["drawer-item", padStyleMapOf(utsMapOf([["paddingTop", "18rpx"], ["paddingRight", 0], ["paddingBottom", "18rpx"], ["paddingLeft", 0], ["borderBottomWidth", "1rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#f0f0f0"], ["cursor", "pointer"], ["display", "flex"], ["alignItems", "center"], ["justifyContent", "space-between"]]))], ["drawer-item-content", padStyleMapOf(utsMapOf([["flex", 1], ["textAlign", "left"], ["width", "100%"]]))], ["drawer-item-arrow", padStyleMapOf(utsMapOf([["color", "#cccccc"], ["fontSize", "24rpx"], ["marginLeft", "16rpx"]]))], ["drawer-title", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#333333"], ["textAlign", "left"]]))], ["drawer-date", padStyleMapOf(utsMapOf([["fontSize", "22rpx"], ["color", "#aaaaaa"], ["marginLeft", "12rpx"], ["textAlign", "left"]]))], ["drawer-loading", padStyleMapOf(utsMapOf([["color", "#888888"], ["textAlign", "center"], ["marginTop", "40rpx"], ["fontSize", "26rpx"]]))], ["drawer-empty", padStyleMapOf(utsMapOf([["color", "#888888"], ["textAlign", "center"], ["marginTop", "40rpx"], ["fontSize", "26rpx"]]))], ["debug-info", padStyleMapOf(utsMapOf([["paddingTop", "10rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "10rpx"], ["paddingLeft", "20rpx"], ["backgroundColor", "#f0f0f0"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["marginBottom", "20rpx"], ["fontSize", "24rpx"], ["color", "#555555"]]))]])]

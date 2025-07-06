@@ -1,0 +1,261 @@
+import { ref, computed, watch, onUnmounted } from 'vue'
+import { createCategoryWithCurrentType, getAllIcons, type IconDefinition } from '../common/api/category'
+import { getCurrentType, hasValidPageType } from '../utils/pageState'
+
+// Props
+interface Props {
+  visible: boolean
+}
+
+
+const __sfc__ = defineComponent({
+  __name: 'AddCategoryModal',
+  __props: Props,
+  props: {
+    visible: { type: Boolean, required: true }
+  },
+  emits: ["update:visible", "created"],
+  setup(__props): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+const props = __props
+
+// Emits
+function emit(event: string, ...do_not_transform_spread: Array<any | null>) {
+__ins.emit(event, ...do_not_transform_spread)
+}
+
+// 响应式数据
+const categoryName = ref('')
+const selectedIconId = ref(1) // 默认选择第一个图标
+const loading = ref(false)
+const currentPageType = ref<'支出' | '收入' | null>(null)
+
+// 可用图标列表
+const availableIcons = getAllIcons()
+
+// 计算属性
+const currentTypeDisplay = computed(() => {
+  return currentPageType.value || '未设置'
+})
+
+const canSubmit = computed(() => {
+  const hasName = categoryName.value.trim().length > 0
+  const hasType = hasValidPageType()
+  console.log('按钮状态检查:', { 
+    hasName, 
+    hasType, 
+    categoryName: categoryName.value,
+    currentType: currentPageType.value
+  })
+  return hasName && hasType
+})
+
+// 方法
+const updateCurrentType = () => {
+  currentPageType.value = getCurrentType()
+  console.log('AddCategoryModal - 当前页面类型已更新:', currentPageType.value)
+}
+
+const selectIcon = (icon: IconDefinition) => {
+  selectedIconId.value = icon.id
+  console.log('选择图标:', icon.name, 'ID:', icon.id)
+}
+
+const closeModal = () => {
+  emit('update:visible', false)
+  resetForm()
+}
+
+const resetForm = () => {
+  categoryName.value = ''
+  selectedIconId.value = 1
+  loading.value = false
+}
+
+const createCategory = async () => {
+  if (!canSubmit.value) {
+    uni.showToast({
+      title: '请填写分类名称',
+      icon: 'none'
+    })
+    return
+  }
+  
+  try {
+    loading.value = true
+    
+    // 添加超时处理
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('请求超时')), 10000) // 10秒超时
+    })
+    
+    const responsePromise = createCategoryWithCurrentType(
+      categoryName.value.trim(),
+      selectedIconId.value
+    )
+    
+    const response = await Promise.race([responsePromise, timeoutPromise]) as any
+    
+    if (response && response.code === 200) {
+      // 根据消息类型显示不同的提示
+      if (response.message === 'success (local only)') {
+        uni.showToast({
+          title: '分类已保存到本地',
+          icon: 'success',
+          duration: 2000
+        })
+      } else {
+        uni.showToast({
+          title: '分类创建成功！',
+          icon: 'success',
+          duration: 2000
+        })
+      }
+      
+      emit('created', response.data)
+      closeModal()
+    } else {
+      throw new Error(response?.message || '创建失败')
+    }
+  } catch (error) {
+    console.error('创建分类失败:', error)
+    
+    // 根据错误类型显示不同的提示
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    
+    if (errorMessage.includes('网络') || errorMessage.includes('连接')) {
+      uni.showToast({
+        title: '网络连接失败，请检查网络',
+        icon: 'none',
+        duration: 3000
+      })
+    } else if (errorMessage.includes('认证') || errorMessage.includes('token')) {
+      uni.showToast({
+        title: '登录已过期，请重新登录',
+        icon: 'none',
+        duration: 3000
+      })
+    } else {
+      uni.showToast({
+        title: `创建失败: ${errorMessage}`,
+        icon: 'none',
+        duration: 3000
+      })
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听visible变化
+watch(() => props.visible, (newVal) => {
+  if (newVal) {
+    updateCurrentType()
+    if (!hasValidPageType()) {
+      uni.showToast({
+        title: '请先在记账页面选择类型',
+        icon: 'none'
+      })
+      closeModal()
+    }
+  }
+})
+
+// 定期检查页面类型变化（因为全局状态变化不会自动触发组件更新）
+let typeCheckInterval: number | null = null
+
+watch(() => props.visible, (newVal) => {
+  if (newVal) {
+    // 模态框打开时，开始定期检查类型变化
+    typeCheckInterval = setInterval(() => {
+      const newType = getCurrentType()
+      if (newType !== currentPageType.value) {
+        updateCurrentType()
+      }
+    }, 500) // 每500ms检查一次
+  } else {
+    // 模态框关闭时，清除定时器
+    if (typeCheckInterval) {
+      clearInterval(typeCheckInterval)
+      typeCheckInterval = null
+    }
+  }
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (typeCheckInterval) {
+    clearInterval(typeCheckInterval)
+    typeCheckInterval = null
+  }
+})
+
+return (): any | null => {
+
+  return isTrue(_ctx.visible)
+    ? createElementVNode("view", utsMapOf({
+        key: 0,
+        class: "modal-overlay",
+        onClick: closeModal
+      }), [
+        createElementVNode("view", utsMapOf({
+          class: "modal-content",
+          onClick: withModifiers(() => {}, ["stop"])
+        }), [
+          createElementVNode("view", utsMapOf({ class: "modal-header" }), [
+            createElementVNode("text", utsMapOf({ class: "modal-title" }), "添加分类"),
+            createElementVNode("text", utsMapOf({
+              class: "close-btn",
+              onClick: closeModal
+            }), "×")
+          ]),
+          createElementVNode("view", utsMapOf({ class: "modal-body" }), [
+            createElementVNode("view", utsMapOf({ class: "input-group" }), [
+              createElementVNode("text", utsMapOf({ class: "input-label" }), "分类名称"),
+              createElementVNode("input", utsMapOf({
+                class: "input-field",
+                modelValue: categoryName.value,
+                onInput: ($event: InputEvent) => {(categoryName).value = $event.detail.value},
+                placeholder: "请输入分类名称",
+                maxlength: "20"
+              }), null, 40 /* PROPS, NEED_HYDRATION */, ["modelValue", "onInput"])
+            ]),
+            createElementVNode("view", utsMapOf({ class: "input-group" }), [
+              createElementVNode("text", utsMapOf({ class: "input-label" }), "分类图标"),
+              createElementVNode("view", utsMapOf({ class: "icon-grid" }), [
+                createElementVNode(Fragment, null, RenderHelpers.renderList(unref(availableIcons), (icon, __key, __index, _cached): any => {
+                  return createElementVNode("view", utsMapOf({
+                    key: icon.id,
+                    class: normalizeClass(["icon-item", utsMapOf({ selected: selectedIconId.value === icon.id })]),
+                    onClick: () => {selectIcon(icon)}
+                  }), [
+                    createElementVNode("text", utsMapOf({ class: "icon-text" }), toDisplayString(icon.emoji), 1 /* TEXT */),
+                    createElementVNode("text", utsMapOf({ class: "icon-name" }), toDisplayString(icon.name), 1 /* TEXT */)
+                  ], 10 /* CLASS, PROPS */, ["onClick"])
+                }), 128 /* KEYED_FRAGMENT */)
+              ])
+            ]),
+            createElementVNode("view", utsMapOf({ class: "type-info" }), [
+              createElementVNode("text", utsMapOf({ class: "type-label" }), "当前类型："),
+              createElementVNode("text", utsMapOf({ class: "type-value" }), toDisplayString(currentTypeDisplay.value), 1 /* TEXT */)
+            ])
+          ]),
+          createElementVNode("view", utsMapOf({ class: "modal-footer" }), [
+            createElementVNode("button", utsMapOf({
+              class: "btn-confirm",
+              onClick: createCategory,
+              disabled: !canSubmit.value
+            }), toDisplayString(loading.value ? '创建中...' : '创建分类'), 9 /* TEXT, PROPS */, ["disabled"])
+          ])
+        ], 8 /* PROPS */, ["onClick"])
+      ])
+    : createCommentVNode("v-if", true)
+}
+}
+
+})
+export default __sfc__
+const GenComponentsAddCategoryModalStyles = [utsMapOf([["modal-overlay", padStyleMapOf(utsMapOf([["position", "fixed"], ["top", 0], ["left", 0], ["right", 0], ["bottom", 0], ["backgroundImage", "none"], ["backgroundColor", "rgba(0,0,0,0.5)"], ["display", "flex"], ["alignItems", "center"], ["justifyContent", "center"], ["zIndex", 1000]]))], ["modal-content", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#FFFFFF"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["width", "80%"], ["maxWidth", "600rpx"], ["overflow", "hidden"], ["position", "relative"], ["display", "flex"], ["flexDirection", "column"]]))], ["modal-header", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "space-between"], ["alignItems", "center"], ["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["borderBottomWidth", "2rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#f0f0f0"], ["flexShrink", 0]]))], ["modal-title", padStyleMapOf(utsMapOf([["fontSize", "32rpx"], ["fontWeight", "bold"], ["color", "#333333"]]))], ["close-btn", padStyleMapOf(utsMapOf([["fontSize", "40rpx"], ["color", "#999999"], ["paddingTop", "10rpx"], ["paddingRight", "10rpx"], ["paddingBottom", "10rpx"], ["paddingLeft", "10rpx"]]))], ["modal-body", padStyleMapOf(utsMapOf([["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["overflowY", "auto"], ["flex", 1], ["scrollbarWidth", "thin"], ["scrollbarColor", "#c1c1c1 transparent"], ["width::-webkit-scrollbar", "6rpx"], ["backgroundImage::-webkit-scrollbar-track", "none"], ["backgroundColor::-webkit-scrollbar-track", "rgba(0,0,0,0)"], ["backgroundImage::-webkit-scrollbar-thumb", "none"], ["backgroundColor::-webkit-scrollbar-thumb", "#c1c1c1"], ["borderTopLeftRadius::-webkit-scrollbar-thumb", "3rpx"], ["borderTopRightRadius::-webkit-scrollbar-thumb", "3rpx"], ["borderBottomRightRadius::-webkit-scrollbar-thumb", "3rpx"], ["borderBottomLeftRadius::-webkit-scrollbar-thumb", "3rpx"], ["backgroundImage::-webkit-scrollbar-thumb:hover", "none"], ["backgroundColor::-webkit-scrollbar-thumb:hover", "#a8a8a8"]]))], ["input-group", padStyleMapOf(utsMapOf([["marginBottom", "30rpx"]]))], ["input-label", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#333333"], ["marginBottom", "15rpx"]]))], ["input-field", padStyleMapOf(utsMapOf([["width", "100%"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["borderTopWidth", "2rpx"], ["borderRightWidth", "2rpx"], ["borderBottomWidth", "2rpx"], ["borderLeftWidth", "2rpx"], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#e0e0e0"], ["borderRightColor", "#e0e0e0"], ["borderBottomColor", "#e0e0e0"], ["borderLeftColor", "#e0e0e0"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["fontSize", "28rpx"], ["backgroundImage", "none"], ["backgroundColor", "#f9f9f9"]]))], ["icon-grid", padStyleMapOf(utsMapOf([["gridTemplateColumns", "repeat(4, 1fr)"], ["gap", "20rpx"], ["marginTop", "15rpx"]]))], ["icon-item", utsMapOf([["", utsMapOf([["width", "120rpx"], ["height", "80rpx"], ["borderTopWidth", "2rpx"], ["borderRightWidth", "2rpx"], ["borderBottomWidth", "2rpx"], ["borderLeftWidth", "2rpx"], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#e0e0e0"], ["borderRightColor", "#e0e0e0"], ["borderBottomColor", "#e0e0e0"], ["borderLeftColor", "#e0e0e0"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["display", "flex"], ["flexDirection", "column"], ["alignItems", "center"], ["justifyContent", "center"], ["backgroundImage", "none"], ["backgroundColor", "#f9f9f9"], ["paddingTop", "10rpx"], ["paddingRight", "10rpx"], ["paddingBottom", "10rpx"], ["paddingLeft", "10rpx"]])], [".selected", utsMapOf([["borderTopColor", "#4e54c8"], ["borderRightColor", "#4e54c8"], ["borderBottomColor", "#4e54c8"], ["borderLeftColor", "#4e54c8"], ["backgroundImage", "none"], ["backgroundColor", "#e0e3ff"]])]])], ["icon-text", padStyleMapOf(utsMapOf([["fontSize", "32rpx"], ["marginBottom", "4rpx"]]))], ["icon-name", padStyleMapOf(utsMapOf([["fontSize", "20rpx"], ["color", "#666666"], ["textAlign", "center"], ["lineHeight", 1.2]]))], ["type-info", padStyleMapOf(utsMapOf([["display", "flex"], ["alignItems", "center"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["backgroundImage", "none"], ["backgroundColor", "#f0f2ff"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["marginTop", "20rpx"]]))], ["type-label", padStyleMapOf(utsMapOf([["fontSize", "26rpx"], ["color", "#666666"]]))], ["type-value", padStyleMapOf(utsMapOf([["fontSize", "26rpx"], ["color", "#4e54c8"], ["fontWeight", "bold"], ["marginLeft", "10rpx"]]))], ["modal-footer", padStyleMapOf(utsMapOf([["display", "flex"], ["paddingTop", "20rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "30rpx"], ["borderTopWidth", "2rpx"], ["borderTopStyle", "solid"], ["borderTopColor", "#f0f0f0"], ["gap", "15rpx"], ["backgroundImage", "none"], ["backgroundColor", "#fafafa"], ["flexShrink", 0]]))], ["btn-confirm", padStyleMapOf(utsMapOf([["width", "160rpx"], ["paddingTop", "15rpx"], ["paddingRight", "18rpx"], ["paddingBottom", "15rpx"], ["paddingLeft", "18rpx"], ["borderTopLeftRadius", "8rpx"], ["borderTopRightRadius", "8rpx"], ["borderBottomRightRadius", "8rpx"], ["borderBottomLeftRadius", "8rpx"], ["fontSize", "26rpx"], ["fontWeight", "bold"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["minHeight", "50rpx"], ["display", "flex"], ["alignItems", "center"], ["justifyContent", "center"], ["backgroundImage", "linear-gradient(to right, #4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["color", "#FFFFFF"], ["boxShadow", "0 4rpx 12rpx rgba(78, 84, 200, 0.3)"], ["letterSpacing", "2rpx"], ["marginTop", 0], ["marginRight", "auto"], ["marginBottom", 0], ["marginLeft", "auto"], ["transform:active", "translateY(2rpx)"], ["boxShadow:active", "0 2rpx 8rpx rgba(78, 84, 200, 0.3)"], ["backgroundImage:disabled", "none"], ["backgroundColor:disabled", "#cccccc"], ["color:disabled", "#999999"], ["boxShadow:disabled", "none"], ["transform:disabled", "none"]]))]])]
