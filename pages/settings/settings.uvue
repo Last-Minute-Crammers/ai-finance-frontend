@@ -2,220 +2,509 @@
   <view class="container">
     <!-- 顶部 -->
     <view class="header">
-      <text class="back">←</text>
-      <text class="title">设置</text>
-      <text class="subtitle">个性化您的体验</text>
+      <text class="back" @click="goBack">←</text>
+      <view class="title-section">
+        <text class="title">设置</text>
+        <text class="subtitle">个人信息管理</text>
+      </view>
     </view>
 
-    <!-- 设置项列表 -->
-    <view class="settings-list">
-      <!-- 昵称设置 -->
-      <view class="settings-item">
-        <text class="item-label">昵称</text>
-        <input v-model="nickname" class="item-input" placeholder="请输入昵称" />
-      </view>
-
-      <!-- 头像设置 -->
-      <view class="settings-item">
-        <text class="item-label">头像</text>
-        <view class="item-avatar" @click="chooseAvatar">
+    <!-- 用户信息卡片 -->
+    <view class="user-card">
+      <view class="info-item">
+        <text class="info-label">头像</text>
+        <view class="info-content" @click="chooseAvatar">
           <image :src="avatarUrl" class="avatar" mode="aspectFill" />
         </view>
       </view>
-
-      <!-- 显示用户ID -->
-      <view class="settings-item">
-        <text class="item-label">用户ID</text>
-        <view class="item-value">{{ userId }}</view>
+      
+      <view class="info-item">
+        <text class="info-label">昵称</text>
+        <text class="info-content">{{ nickname ?? '未设置' }}</text>
       </view>
-
-      <!-- 修改密码 -->
-      <view class="settings-item">
-        <text class="item-label">修改密码</text>
-        <input v-model="oldPassword" class="item-input" type="password" placeholder="请输入旧密码" />
-        <input v-model="newPassword" class="item-input" type="password" placeholder="请输入新密码" />
-        <text class="item-action" @click="changePassword">修改</text>
+      
+      <view class="info-item">
+        <text class="info-label">用户ID</text>
+        <text class="info-content">{{ userId ?? '未知' }}</text>
       </view>
+    </view>
 
-      <!-- 更多设置 -->
-      <view class="settings-item">
-        <text class="item-label">更多设置</text>
-        <text class="item-action" @click="goToMoreSettings">查看全部</text>
+    <!-- API连接测试卡片 -->
+    <view class="api-card">
+      <view class="card-header">
+        <text class="card-title">API连接状态</text>
+        <text class="card-subtitle">测试后端服务连接</text>
+      </view>
+      
+      <view class="connection-status">
+        <view class="status-indicator" :class="{ 'connected': isConnected, 'disconnected': !isConnected }">
+          <text class="status-dot"></text>
+          <text class="status-text">{{ isConnected ? '已连接' : '未连接' }}</text>
+        </view>
+        
+        <view class="api-info">
+          <text class="api-url">{{ currentApiUrl }}</text>
+          <text class="response-time" v-if="responseTime">响应时间: {{ responseTime }}ms</text>
+        </view>
+      </view>
+      
+      <view class="action-buttons">
+        <button class="test-btn" @click="testConnection" :disabled="isTesting">
+          <text class="btn-icon">🔄</text>
+          <text class="btn-text">{{ isTesting ? '测试中...' : '测试连接' }}</text>
+        </button>
+        
+        <button class="switch-btn" @click="showApiSelector">
+          <text class="btn-icon">⚙️</text>
+          <text class="btn-text">切换API</text>
+        </button>
+      </view>
+      
+      <view class="error-info" v-if="errorMessage">
+        <text class="error-title">连接错误:</text>
+        <text class="error-message">{{ errorMessage }}</text>
       </view>
     </view>
 
     <!-- 退出按钮 -->
-    <view class="logout-button">
-      <button class="logout-btn" @click="logout">退出登录</button>
+    <view class="logout-section">
+      <button class="logout-btn" @click="showLogoutConfirm">
+        <text class="logout-icon">🚪</text>
+        <text class="logout-text">退出登录</text>
+      </button>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { checkBackendConnection, setBackendEnvironment, getAvailableBackendUrls } from '@/utils/request'
 
-const nickname = ref('张三')  // 默认昵称
-const avatarUrl = ref('/static/icons/default-avatar.png')  // 默认头像
-const userId = ref('U123456789')  // 默认用户ID
-const oldPassword = ref('')
-const newPassword = ref('')
+const nickname = ref('')
+const avatarUrl = ref('/static/icons/default-avatar.png')
+const userId = ref('')
 
-// 选择头像
+// API连接状态
+const isConnected = ref(false)
+const isTesting = ref(false)
+const currentApiUrl = ref('http://47.109.194.39/api')
+const responseTime = ref(0)
+const errorMessage = ref('')
+
+onMounted(() => {
+  // 从本地存储获取当前用户信息
+  const userStr = uni.getStorageSync('current_user')
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr)
+      nickname.value = user.username || ''
+      userId.value = user.id ? String(user.id) : ''
+      // 头像可根据后端实际字段调整
+      // avatarUrl.value = user.avatarUrl || avatarUrl.value
+    } catch (e) {
+      // ignore
+    }
+  }
+  
+  // 获取当前API URL
+  const backendUrl = uni.getStorageSync('backend_url')
+  if (backendUrl) {
+    currentApiUrl.value = backendUrl
+  }
+  
+  // 自动测试连接
+  testConnection()
+})
+
+function goBack() {
+  uni.navigateBack()
+}
+
 function chooseAvatar() {
   uni.chooseImage({
     count: 1,
     success: (res) => {
       avatarUrl.value = res.tempFilePaths[0]
+      uni.showToast({
+        title: '头像更新成功',
+        icon: 'success'
+      })
     }
   })
 }
 
-// 修改密码
-function changePassword() {
-  if (!oldPassword.value || !newPassword.value) {
-    uni.showToast({
-      title: '请输入旧密码和新密码',
-      icon: 'none'
-    })
-    return
-  }
-  // 调用 API 修改密码（此处模拟）
-  uni.showToast({
-    title: '密码修改成功',
-    icon: 'success',
-    duration: 2000
+function showLogoutConfirm() {
+  uni.showModal({
+    title: '确认退出',
+    content: '确定要退出登录吗？',
+    confirmText: '退出',
+    cancelText: '取消',
+    confirmColor: '#dc143c',
+    success: (res) => {
+      if (res.confirm) {
+        logout()
+      }
+    }
   })
 }
 
-// 退出登录功能
 function logout() {
-  uni.showToast({
-    title: '已退出登录',
-    icon: 'success',
-    duration: 2000
+  uni.showLoading({
+    title: '退出中...'
   })
   
-  // 清除用户登录状态数据（如 token、用户信息等）
-  // uni.removeStorageSync('token');  // 示例，假设你有存储 token 的逻辑
-
-  // 退出登录后跳转到登录页面
-  uni.navigateTo({
-    url: '/pages/login/login'
-  })
+  setTimeout(() => {
+    uni.hideLoading()
+    uni.showToast({
+      title: '已退出登录',
+      icon: 'success',
+      duration: 2000
+    })
+    uni.removeStorageSync('current_user');
+    uni.removeStorageSync('token');
+    uni.reLaunch({ url: '/pages/login/login' })
+  }, 1000)
 }
 
-// 跳转到更多设置页面
-function goToMoreSettings() {
-  uni.navigateTo({ url: '/pages/more-settings/more-settings' })
+// API连接测试函数
+async function testConnection() {
+  if (isTesting.value) return
+  
+  isTesting.value = true
+  errorMessage.value = ''
+  
+  try {
+    const result = await checkBackendConnection(currentApiUrl.value)
+    
+    if (result.connected) {
+      isConnected.value = true
+      responseTime.value = result.responseTime || 0
+      uni.showToast({
+        title: '连接成功',
+        icon: 'success'
+      })
+    } else {
+      isConnected.value = false
+      errorMessage.value = result.error || '连接失败'
+      uni.showToast({
+        title: '连接失败',
+        icon: 'error'
+      })
+    }
+  } catch (error: any) {
+    isConnected.value = false
+    errorMessage.value = error.message || '测试连接时发生错误'
+    uni.showToast({
+      title: '连接测试失败',
+      icon: 'error'
+    })
+  } finally {
+    isTesting.value = false
+  }
+}
+
+// 显示API选择器
+function showApiSelector() {
+  const availableUrls = getAvailableBackendUrls()
+  const urlOptions = Object.keys(availableUrls).map(key => ({
+    label: `${key}: ${availableUrls[key]}`,
+    value: key
+  }))
+  
+  uni.showActionSheet({
+    itemList: urlOptions.map(item => item.label),
+    success: (res) => {
+      const selectedKey = urlOptions[res.tapIndex].value
+      const selectedUrl = availableUrls[selectedKey]
+      
+      setBackendEnvironment(selectedKey)
+      currentApiUrl.value = selectedUrl
+      
+      uni.showToast({
+        title: 'API已切换',
+        icon: 'success'
+      })
+      
+      // 自动测试新连接
+      testConnection()
+    }
+  })
 }
 </script>
 
 <style scoped>
 .container {
-  background-color: #f5f7fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
   padding-bottom: 10%;
 }
 
-/* 顶部区域 */
 .header {
-  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 80rpx 30rpx 40rpx;
   border-bottom-left-radius: 30rpx;
   border-bottom-right-radius: 30rpx;
   position: relative;
   text-align: center;
+  box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.2);
 }
+
 .back {
   position: absolute;
   left: 30rpx;
   top: 80rpx;
   font-size: 36rpx;
   color: white;
+  font-weight: bold;
 }
-.title, .subtitle {
-  width: 100%;
-  display: block;
+
+.title-section {
   text-align: center;
 }
+
 .title {
   font-size: 36rpx;
   font-weight: bold;
   color: white;
+  display: block;
+  margin-bottom: 8rpx;
 }
+
 .subtitle {
   font-size: 24rpx;
-  color: #f0f0f0;
-  margin-top: 10rpx;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
 }
 
-/* 设置项 */
-.settings-list {
-  margin-top: 40rpx;
+.user-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 40rpx 30rpx 20rpx 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
 }
 
-.settings-item {
-  background-color: #fff;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.info-item {
+  margin-bottom: 40rpx;
 }
 
-.item-label {
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
   font-size: 26rpx;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.info-content {
+  font-size: 30rpx;
   color: #333;
-}
-
-.item-input {
-  font-size: 24rpx;
-  padding: 10rpx;
-  border-radius: 12rpx;
-  width: 60%;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-}
-
-.item-avatar {
-  width: 60rpx;
-  height: 60rpx;
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: #f0f0f0;
+  font-weight: 600;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatar {
-  width: 100%;
-  height: 100%;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: 3rpx solid #667eea;
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.2);
 }
 
-.item-value {
-  font-size: 24rpx;
-  color: #666;
-}
-
-.item-action {
-  font-size: 24rpx;
-  color: #4e54c8;
-  cursor: pointer;
-}
-
-.logout-button {
-  margin-top: 50rpx;
-  padding: 30rpx;
-  text-align: center;
-  align-items: center;
+.logout-section {
+  margin: 40rpx 30rpx 0 30rpx;
 }
 
 .logout-btn {
-  background-color: #e74c3c;
-  color: white;
+  width: 100%;
+  background: linear-gradient(135deg, #dc143c, #b22222);
+  color: #fff;
   font-size: 28rpx;
-  padding: 16rpx 40rpx;
-  border-radius: 30rpx;
-  width: 80%;
+  border: none;
+  border-radius: 20rpx;
+  padding: 30rpx 0;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(220, 20, 60, 0.3);
+  transition: transform 0.2s;
+}
+
+.logout-btn:active {
+  transform: scale(0.98);
+}
+
+.logout-icon {
+  font-size: 24rpx;
+}
+
+.logout-text {
+  font-size: 28rpx;
+}
+
+/* API连接测试卡片样式 */
+.api-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 20rpx 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.card-header {
+  margin-bottom: 30rpx;
+}
+
+.card-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.card-subtitle {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+}
+
+.connection-status {
+  margin-bottom: 30rpx;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.status-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+
+.status-indicator.connected .status-dot {
+  background: #4CAF50;
+  box-shadow: 0 0 8rpx rgba(76, 175, 80, 0.5);
+}
+
+.status-indicator.disconnected .status-dot {
+  background: #f44336;
+  box-shadow: 0 0 8rpx rgba(244, 67, 54, 0.5);
+}
+
+.status-text {
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.status-indicator.connected .status-text {
+  color: #4CAF50;
+}
+
+.status-indicator.disconnected .status-text {
+  color: #f44336;
+}
+
+.api-info {
+  background: #f8f9fa;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #667eea;
+}
+
+.api-url {
+  font-size: 24rpx;
+  color: #333;
+  font-family: monospace;
+  display: block;
+  margin-bottom: 8rpx;
+  word-break: break-all;
+}
+
+.response-time {
+  font-size: 22rpx;
+  color: #666;
+  display: block;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.test-btn, .switch-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 24rpx;
+  border: none;
+  border-radius: 12rpx;
+  padding: 20rpx 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.3);
+  transition: transform 0.2s;
+}
+
+.test-btn:active, .switch-btn:active {
+  transform: scale(0.98);
+}
+
+.test-btn:disabled {
+  background: #ccc;
+  box-shadow: none;
+}
+
+.btn-icon {
+  font-size: 20rpx;
+}
+
+.btn-text {
+  font-size: 24rpx;
+}
+
+.error-info {
+  background: #ffebee;
+  border: 1rpx solid #ffcdd2;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-top: 20rpx;
+}
+
+.error-title {
+  font-size: 24rpx;
+  color: #d32f2f;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.error-message {
+  font-size: 22rpx;
+  color: #c62828;
+  display: block;
+  word-break: break-all;
+  line-height: 1.4;
 }
 </style>

@@ -1,0 +1,208 @@
+<template>
+  <view class="chart-example">
+    <view class="chart-controls">
+      <text class="title">图表示例</text>
+      <view class="button-group">
+        <button @tap="switchChartType('line')" :class="{ active: chartType === 'line' }">折线图</button>
+        <button @tap="switchChartType('bar')" :class="{ active: chartType === 'bar' }">柱状图</button>
+        <button @tap="switchChartType('pie')" :class="{ active: chartType === 'pie' }">饼图</button>
+        <button @tap="switchChartType('area')" :class="{ active: chartType === 'area' }">面积图</button>
+      </view>
+    </view>
+    
+    <view class="chart-container">
+      <!-- 使用转换后的qiun-data-charts组件 -->
+      <QiunDataCharts
+        v-if="useQiun"
+        :type="chartType"
+        :chartData="chartData"
+        :opts="chartOpts"
+        :background="'#FFFFFF'"
+        :loadingType="2"
+        :errorShow="true"
+      />
+      
+      <!-- 使用新的SimpleChart组件 -->
+      <SimpleChart
+        v-else
+        :type="chartType"
+        :series="chartSeries"
+        :categories="chartCategories"
+        :width="chartWidth"
+        :height="chartHeight"
+        :colors="chartColors"
+        :showLegend="true"
+        :showGrid="true"
+      />
+    </view>
+    
+    <view class="toggle-container">
+      <button @tap="toggleChartLibrary" class="toggle-btn">
+        切换到{{ useQiun ? 'SimpleChart' : 'QiunDataCharts' }}
+      </button>
+    </view>
+  </view>
+</template>
+
+<script>
+import QiunDataCharts from './QiunDataCharts.uvue';
+import SimpleChart from './SimpleChart.uvue';
+
+export default {
+  name: 'ChartExample',
+  components: {
+    QiunDataCharts,
+    SimpleChart
+  },
+  data() {
+    return {
+      chartType: 'line',
+      useQiun: false, // 默认使用SimpleChart
+      chartWidth: 350,
+      chartHeight: 250,
+      chartColors: ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE'],
+      
+      // 示例数据
+      chartCategories: ['1月', '2月', '3月', '4月', '5月', '6月'],
+      chartSeries: [
+        {
+          name: '收入',
+          data: [120, 132, 101, 134, 90, 230]
+        },
+        {
+          name: '支出',
+          data: [220, 182, 191, 234, 290, 330]
+        }
+      ],
+      
+      // qiun-data-charts格式的数据
+      chartData: {
+        categories: ['1月', '2月', '3月', '4月', '5月', '6月'],
+        series: [
+          {
+            name: '收入',
+            data: [120, 132, 101, 134, 90, 230]
+          },
+          {
+            name: '支出',
+            data: [220, 182, 191, 234, 290, 330]
+          }
+        ]
+      },
+      
+      chartOpts: {
+        color: ['#007AFF', '#34C759'],
+        padding: [15, 15, 15, 15],
+        legend: {
+          show: true
+        },
+        xAxis: {
+          disableGrid: false
+        },
+        yAxis: {
+          gridType: 'dash',
+          dashLength: 2
+        }
+      }
+    };
+  },
+  methods: {
+    switchChartType(type) {
+      this.chartType = type;
+    },
+    
+    toggleChartLibrary() {
+      this.useQiun = !this.useQiun;
+    },
+    
+    // 生成随机数据
+    generateRandomData() {
+      const data = [];
+      for (let i = 0; i < 6; i++) {
+        data.push(Math.floor(Math.random() * 300) + 50);
+      }
+      return data;
+    },
+    
+    // 更新图表数据
+    updateChartData() {
+      const newData = this.generateRandomData();
+      this.chartSeries[0].data = newData;
+      this.chartData.series[0].data = newData;
+    }
+  },
+  
+  mounted() {
+    // 每5秒更新一次数据
+    setInterval(() => {
+      this.updateChartData();
+    }, 5000);
+  }
+};
+</script>
+
+<style>
+.chart-example {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.chart-controls {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button-group button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+.button-group button.active {
+  background-color: #007AFF;
+  color: white;
+  border-color: #007AFF;
+}
+
+.chart-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toggle-container {
+  text-align: center;
+}
+
+.toggle-btn {
+  padding: 12px 24px;
+  background-color: #34C759;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+}
+</style> 

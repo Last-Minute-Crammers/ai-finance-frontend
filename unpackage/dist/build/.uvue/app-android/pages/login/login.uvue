@@ -1,0 +1,140 @@
+import { ref } from 'vue';
+import { userLogin } from '../../common/api/finance';
+const __sfc__ = defineComponent({
+    __name: 'login',
+    setup(__props): any | null {
+        const __ins = getCurrentInstance()!;
+        const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+        const _cache = __ins.renderCache;
+        const email = ref('');
+        const password = ref('');
+        const passwordVisible = ref(false);
+        const inputType = ref('password');
+        const isLoading = ref(false);
+        // 切换密码显示/隐藏
+        function togglePassword() {
+            passwordVisible.value = !passwordVisible.value;
+            inputType.value = passwordVisible.value ? 'text' : 'password';
+        }
+        // 登录操作
+        async function login(): Promise<void> {
+            if (!email.value || !password.value) {
+                uni.showToast({
+                    title: '请输入邮箱和密码',
+                    icon: 'none',
+                });
+                return;
+            }
+            // 简单的邮箱格式验证
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                uni.showToast({
+                    title: '请输入正确的邮箱格式',
+                    icon: 'none',
+                });
+                return;
+            }
+            isLoading.value = true;
+            try {
+                console.log('开始登录:', { email: email.value });
+                const response = await userLogin(email.value, password.value);
+                console.log('登录响应:', response);
+                // 检查响应格式 - userLogin已经处理了token保存和数据标准化
+                if (response && response.code === 200 && response.data) {
+                    const { token, user } = response.data;
+                    console.log('登录成功，token已保存:', token.substring(0, 20) + '...');
+                    // 保存用户信息到本地存储
+                    uni.setStorageSync('current_user', JSON.stringify(user));
+                    uni.showToast({
+                        title: '登录成功',
+                        icon: 'success',
+                        mask: true,
+                        duration: 1500
+                    });
+                    setTimeout(() => {
+                        uni.navigateTo({
+                            url: '/pages/index/index'
+                        });
+                    }, 1500);
+                }
+                else {
+                    throw new Error('登录响应格式错误');
+                }
+            }
+            catch (error: any) {
+                console.error('登录失败:', error);
+                const errorMsg = error?.message || '登录失败，请重试';
+                uni.showToast({
+                    title: errorMsg,
+                    icon: 'none'
+                });
+            }
+            finally {
+                isLoading.value = false;
+            }
+        }
+        // 跳转到忘记密码页面
+        function goToForgotPassword() {
+            uni.navigateTo({
+                url: '/pages/forgot-password/forgot-password'
+            });
+        }
+        // 跳转到注册页面
+        function goToRegister() {
+            uni.navigateTo({
+                url: '/pages/register/register'
+            });
+        }
+        return (): any | null => {
+            return createElementVNode("view", utsMapOf({ class: "container" }), [
+                createElementVNode("view", utsMapOf({ class: "header" }), [
+                    createElementVNode("text", utsMapOf({ class: "title" }), "登录"),
+                    createElementVNode("text", utsMapOf({ class: "subtitle" }), "欢迎回来！")
+                ]),
+                createElementVNode("view", utsMapOf({ class: "form" }), [
+                    createElementVNode("view", utsMapOf({ class: "input-group" }), [
+                        createElementVNode("input", utsMapOf({
+                            modelValue: email.value,
+                            onInput: ($event: InputEvent) => { (email).value = $event.detail.value; },
+                            class: "input-field",
+                            placeholder: "请输入邮箱",
+                            type: "email"
+                        }), null, 40 /* PROPS, NEED_HYDRATION */, ["modelValue", "onInput"])
+                    ]),
+                    createElementVNode("view", utsMapOf({ class: "input-group" }), [
+                        createElementVNode("input", utsMapOf({
+                            modelValue: password.value,
+                            onInput: ($event: InputEvent) => { (password).value = $event.detail.value; },
+                            class: "input-field",
+                            placeholder: "请输入密码",
+                            type: inputType.value
+                        }), null, 40 /* PROPS, NEED_HYDRATION */, ["modelValue", "onInput", "type"]),
+                        createElementVNode("text", utsMapOf({
+                            class: "toggle-password",
+                            onClick: togglePassword
+                        }), toDisplayString(passwordVisible.value ? '隐藏' : '显示'), 1 /* TEXT */)
+                    ]),
+                    createElementVNode("view", utsMapOf({ class: "button-group" }), [
+                        createElementVNode("button", utsMapOf({
+                            class: "login-btn",
+                            onClick: login,
+                            disabled: isLoading.value
+                        }), toDisplayString(isLoading.value ? '登录中...' : '登录'), 9 /* TEXT, PROPS */, ["disabled"])
+                    ]),
+                    createElementVNode("view", utsMapOf({ class: "footer-links" }), [
+                        createElementVNode("text", utsMapOf({
+                            class: "forgot-password",
+                            onClick: goToForgotPassword
+                        }), "忘记密码?"),
+                        createElementVNode("text", utsMapOf({
+                            class: "register",
+                            onClick: goToRegister
+                        }), "没有账号? 注册")
+                    ])
+                ])
+            ]);
+        };
+    }
+});
+export default __sfc__;
+const GenPagesLoginLoginStyles = [utsMapOf([["container", padStyleMapOf(utsMapOf([["backgroundColor", "#f5f7fa"], ["paddingBottom", "10%"]]))], ["header", padStyleMapOf(utsMapOf([["backgroundImage", "linear-gradient(to right, #4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["paddingTop", "80rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "90rpx"], ["paddingLeft", "30rpx"], ["textAlign", "center"], ["alignItems", "center"], ["color", "#FFFFFF"], ["borderBottomLeftRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"]]))], ["title", padStyleMapOf(utsMapOf([["fontSize", "36rpx"], ["fontWeight", "bold"]]))], ["subtitle", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["marginTop", "10rpx"]]))], ["form", padStyleMapOf(utsMapOf([["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["backgroundColor", "#FFFFFF"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["marginTop", "-40rpx"], ["boxShadow", "0 4rpx 12rpx rgba(0, 0, 0, 0.1)"]]))], ["input-group", padStyleMapOf(utsMapOf([["marginBottom", "30rpx"]]))], ["input-field", padStyleMapOf(utsMapOf([["width", "100%"], ["paddingTop", "16rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "16rpx"], ["paddingLeft", "20rpx"], ["fontSize", "24rpx"], ["borderTopLeftRadius", "12rpx"], ["borderTopRightRadius", "12rpx"], ["borderBottomRightRadius", "12rpx"], ["borderBottomLeftRadius", "12rpx"], ["borderTopWidth", 1], ["borderRightWidth", 1], ["borderBottomWidth", 1], ["borderLeftWidth", 1], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#cccccc"], ["borderRightColor", "#cccccc"], ["borderBottomColor", "#cccccc"], ["borderLeftColor", "#cccccc"], ["backgroundColor", "#f9f9f9"]]))], ["toggle-password", padStyleMapOf(utsMapOf([["fontSize", "20rpx"], ["color", "#4e54c8"], ["cursor", "pointer"]]))], ["button-group", padStyleMapOf(utsMapOf([["marginTop", "20rpx"]]))], ["login-btn", padStyleMapOf(utsMapOf([["width", "100%"], ["paddingTop", "16rpx"], ["paddingRight", "16rpx"], ["paddingBottom", "16rpx"], ["paddingLeft", "16rpx"], ["fontSize", "28rpx"], ["backgroundColor", "#4e54c8"], ["color", "#FFFFFF"], ["borderTopLeftRadius", "30rpx"], ["borderTopRightRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"], ["borderBottomLeftRadius", "30rpx"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"]]))], ["footer-links", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "space-between"], ["marginTop", "20rpx"]]))], ["forgot-password", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#4e54c8"], ["cursor", "pointer"]]))], ["register", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#4e54c8"], ["cursor", "pointer"]]))]])];

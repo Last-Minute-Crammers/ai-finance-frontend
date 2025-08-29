@@ -1,5 +1,13 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
+		
+		{
+			"path" : "pages/login/login",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
+		},
 		{
 			"path": "pages/index/index",
 			"style": {
@@ -33,12 +41,14 @@
 		 	{
 		 		"navigationBarTitleText" : ""
 		 	}
-		 },
-		 {
+		 },		 {
 		 	"path" : "pages/analyze/analyze",
 		 	"style" : 
 		 	{
-		 		"navigationBarTitleText" : ""
+		 		"navigationBarTitleText" : "",
+				"js": [
+					"/echarts.min.js"
+				]
 		 	}
 		 },
 		 {
@@ -50,13 +60,6 @@
 		 },
 		 {
 		 	"path" : "pages/settings/settings",
-		 	"style" : 
-		 	{
-		 		"navigationBarTitleText" : ""
-		 	}
-		 },
-		 {
-		 	"path" : "pages/login/login",
 		 	"style" : 
 		 	{
 		 		"navigationBarTitleText" : ""
@@ -75,6 +78,20 @@
 		 	{
 		 		"navigationBarTitleText" : ""
 		 	}
+		 },
+		 {
+		 	"path" : "pages/friend/friend",
+		 	"style" : 
+		 	{
+		 		"navigationBarTitleText" : ""
+		 	}
+		 },
+		 {
+		 	"path" : "pages/category-demo/category-demo",
+		 	"style" : 
+		 	{
+		 		"navigationBarTitleText" : "分类管理演示"
+		 	}
 		 }
 	],
 	"globalStyle": {
@@ -82,6 +99,11 @@
 		"navigationBarTitleText": "uni-app x",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
-	},
-	"uniIdRouter": {}
+	},	"uniIdRouter": {},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"qiun-data-charts": "@qiun/ucharts"
+		}
+	}
 }

@@ -6,9 +6,9 @@
       <text class="title">社交互动</text>
       <text class="subtitle">与好友一起理财更有趣</text>
 
-      <!-- 搜索框 -->
+      <!-- 搜索好友按钮 -->
       <view class="search-bar">
-        <input v-model="searchQuery" placeholder="搜索好友或话题" class="search-input" />
+        <button class="search-friend-btn" @click="goToAddFriend">搜索好友</button>
       </view>
     </view>
 
@@ -40,7 +40,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-
 const searchQuery = ref('')
 const rankingData = [
   { name: '张小萌', progress: 98 },
@@ -52,6 +51,9 @@ const friendsData = [
   { name: '赵小刚', spendReduction: 15, linkText: 'PK' },
   { name: '钱小丽', spendReduction: 45, linkText: '查看' }
 ]
+const goToAddFriend = () => {
+  uni.navigateTo({ url: '/pages/friend/friend' })
+}
 </script>
 
 <style scoped>
@@ -103,14 +105,18 @@ const friendsData = [
   display: flex;
   justify-content: center;
 }
-.search-input {
+.search-friend-btn {
   width: 85%;
-  padding: 12rpx 16rpx;
-  font-size: 24rpx;
+  padding: 15rpx 20rpx;
+  font-size: 28rpx;
   border: none;
-  background-color: #f5f7fa;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 30rpx;
-  outline: none;
+  color: #4e54c8;
+  font-weight: 500;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  display: block;
 }
 
 /* 排行榜 */
@@ -190,4 +196,5 @@ const friendsData = [
   color: #4e54c8;
   cursor: pointer;
 }
+
 </style>

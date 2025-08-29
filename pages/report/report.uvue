@@ -2,7 +2,7 @@
   <view class="container">
     <!-- 顶部标题栏 -->
     <view class="header">
-      <text class="back">←</text>
+      <text class="back" @click="goBack">←</text>
       <text class="title">财务报告</text>
       <text class="subtitle">智能分析您的财务状况</text>
 
@@ -11,18 +11,31 @@
           v-for="tab in tabs"
           :key="tab"
           :class="['tab', activeTab === tab ? 'active' : '']"
-          @click="activeTab = tab"
+          @click="switchTab(tab)"
         >
           {{ tab }}
         </view>
       </view>
     </view>
 
+    <!-- 生成报告按钮 -->
+    <view class="generate-section">
+      <button class="generate-btn" @click="generateReport" :disabled="isGenerating">
+        <text v-if="isGenerating">生成中...</text>
+        <text v-else>生成{{ activeTab }}</text>
+      </button>
+    </view>
+
     <!-- 报告区块 -->
-    <view class="card report-card">
+    <view class="card report-card" v-if="reportData.length > 0">
       <view class="report-header">
-        <text class="report-title">10月财务报告</text>
-        <text class="report-date">生成于 2023-11-01</text>
+        <text class="report-title">{{ getReportTitle() }}</text>
+        <text class="report-date">生成于 {{ getCurrentDate() }}</text>
+      </view>
+      
+      <!-- 添加时间范围显示 -->
+      <view class="time-range">
+        <text class="time-range-text">{{ getTimeRangeText() }}</text>
       </view>
 
       <view class="report-grid">
@@ -34,47 +47,296 @@
       </view>
     </view>
 
-    <!-- AI 建议区块 -->
-    <view class="card ai-card">
-      <text class="section-title">AI理财建议</text>
-
-      <view class="suggestion">
-        <text class="bulb">💡</text>
-        <view class="content">
-          <text class="main">减少外卖开支</text>
-          <text class="desc">您本月外卖支出 ¥1,245，占总支出 30%。尝试每周减少两次外卖，每月可节约约 ¥500。</text>
-        </view>
+    <!-- AI 总结与建议区块 -->
+    <view class="card ai-card" v-if="summary || suggestion">
+      <text class="section-title">AI收支总结</text>
+      <view class="summary">{{ summary ?? '暂无数据' }}</view>
+      <text class="section-title" style="margin-top: 24rpx;">AI理财建议</text>
+      <view class="suggestion">{{ suggestion ?? '暂无建议' }}</view>
+      <view class="tag-row" v-if="tags.length > 0">
+        <view class="tag" v-for="tag in tags" :key="tag">{{ tag }}</view>
       </view>
+    </view>
 
-      <view class="suggestion">
-        <text class="bulb">💡</text>
-        <view class="content">
-          <text class="main">尝试52周存钱法</text>
-          <text class="desc">从第1周存 ¥10 开始，每周递增 ¥10，一年可存下 ¥13,780。</text>
-        </view>
-      </view>
-
-      <view class="tag-row">
-        <view class="tag">佛系消费派</view>
-        <view class="tag">储蓄达人</view>
-        <view class="tag">餐饮优化空间</view>
-      </view>
+    <!-- 空状态 -->
+    <view class="empty-state" v-if="!summary && !suggestion && !isGenerating">
+      <text class="empty-text">点击上方按钮生成{{ activeTab }}</text>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getAIReport, getUserStatistics, getTotalStatistics } from '../../common/api/report'
+
+// 根据类型获取时间范围
+function getTimeRange(type: 'week' | 'month' | 'year'): { startTime: string, endTime: string } {
+  const now = new Date()
+  let startTime: Date
+  let endTime: Date = now
+  
+  switch (type) {
+    case 'week':
+      // 获取本周开始（周一）
+      const day = now.getDay()
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1) // 如果是周日，则减6天；否则减(day-1)天
+      startTime = new Date(now.getFullYear(), now.getMonth(), diff)
+      break
+    case 'month':
+      // 获取本月开始
+      startTime = new Date(now.getFullYear(), now.getMonth(), 1)
+      break
+    case 'year':
+      // 获取本年开始
+      startTime = new Date(now.getFullYear(), 0, 1)
+      break
+    default:
+      startTime = new Date(now.getFullYear(), now.getMonth(), 1)
+  }
+  
+  return {
+    startTime: startTime.toISOString().split('T')[0],
+    endTime: endTime.toISOString().split('T')[0]
+  }
+}
 
 const tabs = ['周报', '月报', '年报']
 const activeTab = ref('月报')
 
-const reportData = [
-  { label: '总收入', value: '¥8,500', trend: '↑5% 较上月', trendType: 'green' },
-  { label: '总支出', value: '¥4,200', trend: '↓12% 较上月', trendType: 'red' },
-  { label: '储蓄率', value: '50.6%', trend: '↑3% 较上月', trendType: 'green' },
-  { label: '预算执行', value: '82%', trend: '↓8% 较上月', trendType: 'red' }
-]
+const summary = ref('')
+const suggestion = ref('')
+const tags = ref<string[]>([])
+const isGenerating = ref(false)
+
+// 报告数据
+const reportData = ref([
+  { label: '总收入', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+  { label: '总支出', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+  { label: '储蓄率', value: '0%', trend: '暂无数据', trendType: 'gray' },
+  { label: '净收入', value: '¥0', trend: '暂无数据', trendType: 'gray' }
+])
+
+function goBack() {
+  uni.navigateBack()
+}
+
+function switchTab(tab: string) {
+  activeTab.value = tab
+  // 切换tab时清空之前的数据
+  summary.value = ''
+  suggestion.value = ''
+  tags.value = []
+  resetReportData()
+}
+
+function resetReportData() {
+  reportData.value = [
+    { label: '总收入', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+    { label: '总支出', value: '¥0', trend: '暂无数据', trendType: 'gray' },
+    { label: '储蓄率', value: '0%', trend: '暂无数据', trendType: 'gray' },
+    { label: '净收入', value: '¥0', trend: '暂无数据', trendType: 'gray' }
+  ]
+}
+
+function getReportTitle() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  
+  if (activeTab.value === '周报') {
+    // 计算本周是第几周
+    const startOfYear = new Date(year, 0, 1)
+    const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+    const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7)
+    return `${year}年第${weekNumber}周财务报告`
+  } else if (activeTab.value === '月报') {
+    return `${year}年${month}月财务报告`
+  } else {
+    return `${year}年财务报告`
+  }
+}
+
+function getCurrentDate() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+function getTimeRangeText() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const date = now.getDate()
+  
+  if (activeTab.value === '周报') {
+    // 计算本周开始时间（周一）
+    const day = now.getDay()
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1)
+    const weekStart = new Date(year, now.getMonth(), diff)
+    const weekStartMonth = weekStart.getMonth() + 1
+    const weekStartDate = weekStart.getDate()
+    
+    return `${year}年${weekStartMonth}月${weekStartDate}日 - ${year}年${month}月${date}日`
+  } else if (activeTab.value === '月报') {
+    return `${year}年${month}月1日 - ${year}年${month}月${date}日`
+  } else {
+    return `${year}年1月1日 - ${year}年${month}月${date}日`
+  }
+}
+
+async function generateReport() {
+  if (isGenerating.value) return
+  
+  isGenerating.value = true
+  
+  try {
+    // 根据后端API，传递type
+    const type = activeTab.value === '周报' ? 'week' : activeTab.value === '月报' ? 'month' : 'year'
+    
+    console.log('开始生成AI报告，类型:', type)
+    
+    // 调用AI报告API，它会自动获取所有需要的数据
+    const aiResponse = await getAIReport({ type })
+    
+    console.log('AI报告生成响应:', aiResponse)
+    
+    // 处理AI报告数据
+    if (aiResponse && (aiResponse.summary || aiResponse.suggestion || aiResponse.tags)) {
+      summary.value = aiResponse.summary || ''
+      suggestion.value = aiResponse.suggestion || ''
+      tags.value = aiResponse.tags || []
+      console.log('AI报告数据处理成功:', { summary: summary.value, suggestion: suggestion.value, tags: tags.value })
+    } else {
+      console.log('AI报告数据格式错误:', aiResponse)
+      throw new Error('AI返回数据格式错误')
+    }
+    
+    // 获取总统计数据用于显示基础信息
+    try {
+      const statsResponse = await getTotalStatistics()
+      console.log('总统计数据响应:', statsResponse)
+      
+      if (statsResponse) {
+        let totalStats = null
+        
+        if (statsResponse.Data) {
+          totalStats = statsResponse.Data
+        } else if (statsResponse.data) {
+          totalStats = statsResponse.data
+        } else {
+          totalStats = statsResponse
+        }
+        
+        console.log('总统计数据:', totalStats)
+        
+        if (totalStats && (totalStats.Income || totalStats.Expense)) {
+          updateReportDataWithTotalStats(totalStats)
+        } else {
+          console.log('没有找到有效的统计数据')
+          updateReportDataWithNoData()
+        }
+      } else {
+        console.log('没有找到统计数据，显示默认信息')
+        updateReportDataWithNoData()
+      }
+    } catch (statsError) {
+      console.error('获取统计数据失败:', statsError)
+      updateReportDataWithNoData()
+    }
+    
+    uni.showToast({
+      title: '报告生成成功',
+      icon: 'success'
+    })
+  } catch (error) {
+    console.error('生成报告失败:', error)
+    uni.showToast({
+      title: '生成失败，请重试',
+      icon: 'none'
+    })
+    
+    // 显示默认信息
+    summary.value = '生成报告时出现错误，请检查网络连接或稍后重试。'
+    suggestion.value = '建议检查您的网络连接，确保能够正常访问服务器。'
+    tags.value = ['网络错误', '请重试', '稍后再来']
+    updateReportDataWithNoData()
+  } finally {
+    isGenerating.value = false
+  }
+}
+
+function updateReportDataWithTotalStats(totalStats: any) {
+  console.log('开始处理总统计数据:', totalStats)
+  console.log('totalStats类型:', typeof totalStats)
+  console.log('totalStats.Income:', totalStats.Income)
+  console.log('totalStats.Expense:', totalStats.Expense)
+  
+  const income = totalStats.Income || { Amount: 0, Count: 0 }
+  const expense = totalStats.Expense || { Amount: 0, Count: 0 }
+  
+  console.log('收入数据:', income)
+  console.log('支出数据:', expense)
+  console.log('收入Amount:', income.Amount)
+  console.log('支出Amount:', expense.Amount)
+  
+  const incomeAmount = income.Amount / 100 // 转换为元
+  const expenseAmount = expense.Amount / 100 // 转换为元
+  const savings = incomeAmount - expenseAmount
+  const savingsRate = incomeAmount > 0 ? (savings / incomeAmount * 100) : 0
+  
+  console.log('计算后的金额:', {
+    incomeAmount,
+    expenseAmount,
+    savings,
+    savingsRate
+  })
+  
+  reportData.value = [
+    { 
+      label: '总收入', 
+      value: `¥${incomeAmount.toFixed(2)}`, 
+      trend: `${income.Count}笔交易`, 
+      trendType: 'green' 
+    },
+    { 
+      label: '总支出', 
+      value: `¥${expenseAmount.toFixed(2)}`, 
+      trend: `${expense.Count}笔交易`, 
+      trendType: 'red' 
+    },
+    { 
+      label: '储蓄率', 
+      value: `${savingsRate.toFixed(1)}%`, 
+      trend: savings >= 0 ? '正储蓄' : '负储蓄', 
+      trendType: savings >= 0 ? 'green' : 'red' 
+    },
+    { 
+      label: '净收入', 
+      value: `¥${savings.toFixed(2)}`, 
+      trend: savings >= 0 ? '收入大于支出' : '支出大于收入', 
+      trendType: savings >= 0 ? 'green' : 'red' 
+    }
+  ]
+  
+  console.log('更新后的报告数据:', reportData.value)
+}
+
+function updateReportDataWithNoData() {
+  reportData.value = [
+    { label: '总收入', value: '¥0.00', trend: '暂无交易记录', trendType: 'gray' },
+    { label: '总支出', value: '¥0.00', trend: '暂无交易记录', trendType: 'gray' },
+    { label: '储蓄率', value: '0.0%', trend: '暂无数据', trendType: 'gray' },
+    { label: '净收入', value: '¥0.00', trend: '暂无数据', trendType: 'gray' }
+  ]
+}
+
+onMounted(() => {
+  // 页面加载时不自动生成报告，等待用户点击按钮
+  
+  // 调试信息：验证时间计算
+  console.log('周报时间范围:', getTimeRange('week'))
+  console.log('月报时间范围:', getTimeRange('month'))
+  console.log('年报时间范围:', getTimeRange('year'))
+})
 </script>
 
 <style scoped>
@@ -141,6 +403,27 @@ const reportData = [
   font-weight: bold;
 }
 
+/* 生成按钮 */
+.generate-section {
+  margin: 30rpx;
+}
+
+.generate-btn {
+  width: 100%;
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  color: white;
+  font-size: 28rpx;
+  border: none;
+  border-radius: 16rpx;
+  padding: 24rpx 0;
+  font-weight: bold;
+}
+
+.generate-btn:disabled {
+  background: #ccc;
+  color: #999;
+}
+
 /* 卡片 */
 .card {
   background: #fff;
@@ -163,6 +446,19 @@ const reportData = [
 .report-date {
   font-size: 24rpx;
   color: #999;
+}
+
+/* 时间范围 */
+.time-range {
+  margin-top: 20rpx;
+  padding: 16rpx 0;
+  border-top: 1rpx solid #eee;
+  border-bottom: 1rpx solid #eee;
+  text-align: center;
+}
+.time-range-text {
+  font-size: 24rpx;
+  color: #666;
 }
 
 /* 四格布局 */
@@ -201,6 +497,9 @@ const reportData = [
 .red {
   color: #e74c3c;
 }
+.gray {
+  color: #999;
+}
 
 /* AI建议 */
 .section-title {
@@ -208,23 +507,11 @@ const reportData = [
   font-weight: bold;
   margin-bottom: 20rpx;
 }
-.suggestion {
-  display: flex;
-  align-items: flex-start;
+.summary, .suggestion {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #333;
   margin-bottom: 24rpx;
-}
-.bulb {
-  font-size: 32rpx;
-  margin-right: 12rpx;
-}
-.content .main {
-  font-weight: bold;
-  font-size: 24rpx;
-}
-.content .desc {
-  font-size: 22rpx;
-  color: #666;
-  margin-top: 6rpx;
 }
 
 /* 标签组 */
@@ -240,5 +527,16 @@ const reportData = [
   border-radius: 30rpx;
   font-size: 22rpx;
   color: #333;
+}
+
+/* 空状态 */
+.empty-state {
+  margin: 100rpx 30rpx;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
 }
 </style>

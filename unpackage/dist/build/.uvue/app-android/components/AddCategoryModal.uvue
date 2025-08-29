@@ -1,0 +1,167 @@
+import { ref, computed, watch, onUnmounted } from 'vue';
+import { createCategoryWithCurrentType, getAllIcons, type IconDefinition, type Category } from '../common/api/category';
+import { type ApiResponse } from '../common/api/types';
+import { getCurrentType, hasValidPageType } from '../utils/pageState';
+// Props
+interface Props {
+    visible: boolean;
+}
+const __sfc__ = defineComponent({
+    __name: 'AddCategoryModal',
+    __props: Props,
+    props: {
+        visible: { type: Boolean, required: true }
+    },
+    emits: ["update:visible", "created"],
+    setup(__props): any | null {
+        const __ins = getCurrentInstance()!;
+        const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+        const _cache = __ins.renderCache;
+        const props: Props = __props;
+        // Emits
+        function emit(event: string, ...do_not_transform_spread: Array<any | null>) {
+            __ins.emit(event, ...do_not_transform_spread);
+        }
+        // 响应式数据
+        const categoryName = ref<string>('');
+        const selectedIconId = ref<number>(1);
+        const loading = ref<boolean>(false);
+        const currentPageType = ref<'支出' | '收入' | null>(null);
+        // 可用图标列表
+        const availableIcons: IconDefinition[] = getAllIcons();
+        // 计算属性
+        const currentTypeDisplay = computed<string>((): string => {
+            return currentPageType.value ?? '未设置';
+        });
+        const canSubmit = computed<boolean>((): boolean => {
+            const hasName: boolean = categoryName.value.trim().length > 0;
+            const hasType: boolean = hasValidPageType();
+            return hasName && hasType;
+        });
+        // 方法
+        function updateCurrentType(): void {
+            currentPageType.value = getCurrentType();
+        }
+        function selectIcon(icon: IconDefinition): void {
+            selectedIconId.value = icon.id;
+        }
+        function resetForm(): void {
+            categoryName.value = '';
+            selectedIconId.value = 1;
+            loading.value = false;
+        }
+        function closeModal(): void {
+            emit('update:visible', false);
+            resetForm();
+        }
+        async function createCategory(): Promise<void> {
+            if (!canSubmit.value) {
+                uni.showToast({
+                    title: '请填写分类名称',
+                    icon: 'none'
+                });
+                return;
+            }
+            try {
+                loading.value = true;
+                const response: ApiResponse<Category> | null = await createCategoryWithCurrentType(categoryName.value.trim(), selectedIconId.value, '#4e54c8');
+                if (response && response.code === 200) {
+                    emit('created', response.data as Category);
+                    closeModal();
+                }
+                else {
+                    const errorMsg: string = response?.message ?? '创建失败';
+                    throw new Error(errorMsg);
+                }
+            }
+            catch (error: any) {
+                const errorMessage: string = error instanceof Error ? (error as Error).message : (typeof error === 'string' ? error as string : JSON.stringify(error));
+                uni.showToast({
+                    title: `创建失败: ${errorMessage}`,
+                    icon: 'none',
+                    duration: 3000
+                });
+            }
+            finally {
+                loading.value = false;
+            }
+        }
+        watch(() => props.visible, (newVal: boolean): void => {
+            if (newVal) {
+                updateCurrentType();
+                if (!hasValidPageType()) {
+                    uni.showToast({
+                        title: '请先在记账页面选择类型',
+                        icon: 'none'
+                    });
+                }
+            }
+        });
+        // 组件卸载时清理
+        onUnmounted(() => {
+            resetForm();
+        });
+        return (): any | null => {
+            return isTrue(_ctx.visible)
+                ? createElementVNode("view", utsMapOf({
+                    key: 0,
+                    class: "modal-overlay",
+                    onClick: closeModal
+                }), [
+                    createElementVNode("view", utsMapOf({
+                        class: "modal-content",
+                        onClick: withModifiers(() => { }, ["stop"])
+                    }), [
+                        createElementVNode("view", utsMapOf({ class: "modal-header" }), [
+                            createElementVNode("text", utsMapOf({ class: "modal-title" }), "添加分类"),
+                            createElementVNode("text", utsMapOf({
+                                class: "close-btn",
+                                onClick: closeModal
+                            }), "×")
+                        ]),
+                        createElementVNode("view", utsMapOf({ class: "modal-body" }), [
+                            createElementVNode("view", utsMapOf({ class: "input-group" }), [
+                                createElementVNode("text", utsMapOf({ class: "input-label" }), "分类名称"),
+                                createElementVNode("input", utsMapOf({
+                                    class: "input-field",
+                                    modelValue: categoryName.value,
+                                    onInput: ($event: InputEvent) => { (categoryName).value = $event.detail.value; },
+                                    placeholder: "请输入分类名称",
+                                    maxlength: "20"
+                                }), null, 40 /* PROPS, NEED_HYDRATION */, ["modelValue", "onInput"])
+                            ]),
+                            createElementVNode("view", utsMapOf({ class: "input-group" }), [
+                                createElementVNode("text", utsMapOf({ class: "input-label" }), "分类图标"),
+                                createElementVNode("view", utsMapOf({ class: "icon-grid" }), [
+                                    createElementVNode(Fragment, null, RenderHelpers.renderList(unref(availableIcons), (icon, __key, __index, _cached): any => {
+                                        return createElementVNode("view", utsMapOf({
+                                            key: icon.id,
+                                            class: normalizeClass(["icon-item", utsMapOf({ selected: selectedIconId.value === icon.id })]),
+                                            onClick: () => { selectIcon(icon); }
+                                        }), [
+                                            createElementVNode("text", utsMapOf({ class: "icon-text" }), toDisplayString(icon.emoji), 1 /* TEXT */),
+                                            createElementVNode("text", utsMapOf({ class: "icon-name" }), toDisplayString(icon.name), 1 /* TEXT */)
+                                        ], 10 /* CLASS, PROPS */, ["onClick"]);
+                                    }), 128 /* KEYED_FRAGMENT */)
+                                ])
+                            ]),
+                            createElementVNode("view", utsMapOf({ class: "type-info" }), [
+                                createElementVNode("text", utsMapOf({ class: "type-label" }), "当前类型："),
+                                createElementVNode("text", utsMapOf({ class: "type-value" }), toDisplayString(currentTypeDisplay.value), 1 /* TEXT */)
+                            ])
+                        ]),
+                        createElementVNode("view", utsMapOf({ class: "modal-footer" }), [
+                            createElementVNode("button", utsMapOf({
+                                class: "btn-confirm",
+                                onClick: createCategory,
+                                disabled: !canSubmit.value
+                            }), toDisplayString(loading.value ? '创建中...' : '创建分类'), 9 /* TEXT, PROPS */, ["disabled"])
+                        ])
+                    ], 8 /* PROPS */, ["onClick"])
+                ])
+                : createCommentVNode("v-if", true);
+        };
+    }
+});
+export default __sfc__;
+const GenComponentsAddCategoryModalStyles = [utsMapOf([["modal-overlay", padStyleMapOf(utsMapOf([["position", "fixed"], ["top", 0], ["left", 0], ["right", 0], ["bottom", 0], ["backgroundColor", "rgba(0,0,0,0.5)"], ["display", "flex"], ["alignItems", "center"], ["justifyContent", "center"], ["zIndex", 1000]]))], ["modal-content", padStyleMapOf(utsMapOf([["backgroundColor", "#FFFFFF"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["width", "80%"], ["maxWidth", "600rpx"], ["overflow", "hidden"]]))], ["modal-header", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "space-between"], ["alignItems", "center"], ["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["borderBottomWidth", "1rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#eeeeee"]]))], ["modal-title", padStyleMapOf(utsMapOf([["fontSize", "32rpx"], ["fontWeight", "bold"], ["color", "#333333"]]))], ["close-btn", padStyleMapOf(utsMapOf([["fontSize", "40rpx"], ["color", "#999999"], ["paddingTop", "10rpx"], ["paddingRight", "10rpx"], ["paddingBottom", "10rpx"], ["paddingLeft", "10rpx"]]))], ["modal-body", padStyleMapOf(utsMapOf([["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["overflowY", "auto"]]))], ["input-group", padStyleMapOf(utsMapOf([["marginBottom", "30rpx"]]))], ["input-label", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#333333"], ["marginBottom", "15rpx"]]))], ["input-field", padStyleMapOf(utsMapOf([["width", "100%"], ["height", "80rpx"], ["borderTopWidth", "2rpx"], ["borderRightWidth", "2rpx"], ["borderBottomWidth", "2rpx"], ["borderLeftWidth", "2rpx"], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#dddddd"], ["borderRightColor", "#dddddd"], ["borderBottomColor", "#dddddd"], ["borderLeftColor", "#dddddd"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["paddingTop", 0], ["paddingRight", "20rpx"], ["paddingBottom", 0], ["paddingLeft", "20rpx"], ["fontSize", "28rpx"], ["backgroundColor", "#f9f9f9"]]))], ["icon-grid", padStyleMapOf(utsMapOf([["gridTemplateColumns", "repeat(4, 1fr)"], ["gap", "20rpx"], ["marginTop", "15rpx"]]))], ["icon-item", utsMapOf([["", utsMapOf([["display", "flex"], ["flexDirection", "column"], ["alignItems", "center"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["borderTopWidth", "2rpx"], ["borderRightWidth", "2rpx"], ["borderBottomWidth", "2rpx"], ["borderLeftWidth", "2rpx"], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#eeeeee"], ["borderRightColor", "#eeeeee"], ["borderBottomColor", "#eeeeee"], ["borderLeftColor", "#eeeeee"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["backgroundColor", "#f9f9f9"], ["transitionDuration", "0.3s"], ["transitionTimingFunction", "ease"]])], [".selected", utsMapOf([["borderTopColor", "#4e54c8"], ["borderRightColor", "#4e54c8"], ["borderBottomColor", "#4e54c8"], ["borderLeftColor", "#4e54c8"], ["backgroundColor", "#e8eaff"]])]])], ["icon-text", padStyleMapOf(utsMapOf([["fontSize", "40rpx"], ["marginBottom", "10rpx"]]))], ["icon-name", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#666666"], ["textAlign", "center"]]))], ["type-info", padStyleMapOf(utsMapOf([["display", "flex"], ["alignItems", "center"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["backgroundColor", "#f0f8ff"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["marginTop", "20rpx"]]))], ["type-label", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#666666"], ["marginRight", "10rpx"]]))], ["type-value", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#4e54c8"]]))], ["modal-footer", padStyleMapOf(utsMapOf([["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["borderTopWidth", "1rpx"], ["borderTopStyle", "solid"], ["borderTopColor", "#eeeeee"]]))], ["btn-confirm", padStyleMapOf(utsMapOf([["width", "100%"], ["height", "80rpx"], ["backgroundImage", "linear-gradient(to right, #4e54c8, #8f94fb)"], ["backgroundColor", "rgba(0,0,0,0)"], ["color", "#FFFFFF"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["fontSize", "28rpx"], ["backgroundImage:disabled", "none"], ["backgroundColor:disabled", "#cccccc"], ["color:disabled", "#999999"]]))], ["@TRANSITION", utsMapOf([["icon-item", utsMapOf([["duration", "0.3s"], ["timingFunction", "ease"]])]])]])];

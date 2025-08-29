@@ -1,0 +1,71 @@
+import 'E:/language/HBuilderX/plugins/uniapp-cli-vite/node_modules/@dcloudio/uni-console/src/runtime/app/index.ts';
+import App from './App.uvue';
+import { createSSRApp } from 'vue';
+export function createApp(): UTSJSONObject {
+    const app = createSSRApp(App);
+    return {
+        app
+    };
+}
+// common/api/finance.ts
+interface Transaction {
+    amount: number;
+    category: string;
+    date: string;
+}
+export const addTransaction = (data: Transaction) => {
+    return uni.request({ url: '/api/transaction', method: 'POST', data });
+};
+export function main(app: IApp) {
+    definePageRoutes();
+    defineAppConfig();
+    (createApp()['app'] as VueApp).mount(app, GenUniApp());
+}
+export class UniAppConfig extends io.dcloud.uniapp.appframe.AppConfig {
+    override name: string = "AI Financial Management";
+    override appid: string = "__UNI__5A7011F";
+    override versionName: string = "1.0.0";
+    override versionCode: string = "100";
+    override uniCompilerVersion: string = "4.64";
+    constructor() { super(); }
+}
+import GenPagesLoginLoginClass from './pages/login/login.uvue?type=page';
+import GenPagesIndexIndexClass from './pages/index/index.uvue?type=page';
+import GenPagesTransactionTransactionClass from './pages/transaction/transaction.uvue?type=page';
+import GenPagesPetPetClass from './pages/pet/pet.uvue?type=page';
+import GenPagesAIchatAIchatClass from './pages/AIchat/AIchat.uvue?type=page';
+import GenPagesReportReportClass from './pages/report/report.uvue?type=page';
+import GenPagesAnalyzeAnalyzeClass from './pages/analyze/analyze.uvue?type=page';
+import GenPagesSocialSocialClass from './pages/social/social.uvue?type=page';
+import GenPagesSettingsSettingsClass from './pages/settings/settings.uvue?type=page';
+import GenPagesRegisterRegisterClass from './pages/register/register.uvue?type=page';
+import GenPagesForgotPasswordForgotPasswordClass from './pages/forgot-password/forgot-password.uvue?type=page';
+import GenPagesFriendFriendClass from './pages/friend/friend.uvue?type=page';
+import GenPagesCategoryDemoCategoryDemoClass from './pages/category-demo/category-demo.uvue?type=page';
+function definePageRoutes() {
+    __uniRoutes.push({ path: "pages/login/login", component: GenPagesLoginLoginClass, meta: { isQuit: true } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/index/index", component: GenPagesIndexIndexClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", "uni-app x"]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/transaction/transaction", component: GenPagesTransactionTransactionClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/pet/pet", component: GenPagesPetPetClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/AIchat/AIchat", component: GenPagesAIchatAIchatClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/report/report", component: GenPagesReportReportClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/analyze/analyze", component: GenPagesAnalyzeAnalyzeClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""], ["js", ["/echarts.min.js"]]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/social/social", component: GenPagesSocialSocialClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/settings/settings", component: GenPagesSettingsSettingsClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/register/register", component: GenPagesRegisterRegisterClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/forgot-password/forgot-password", component: GenPagesForgotPasswordForgotPasswordClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/friend/friend", component: GenPagesFriendFriendClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", ""]]) } as UniPageRoute);
+    __uniRoutes.push({ path: "pages/category-demo/category-demo", component: GenPagesCategoryDemoCategoryDemoClass, meta: { isQuit: false } as UniPageMeta, style: utsMapOf([["navigationBarTitleText", "分类管理演示"]]) } as UniPageRoute);
+}
+const __uniTabBar: Map<string, any | null> | null = null;
+const __uniLaunchPage: Map<string, any | null> = utsMapOf([["url", "pages/login/login"], ["style", utsMapOf([["navigationBarTitleText", ""]])]]);
+function defineAppConfig() {
+    __uniConfig.entryPagePath = '/pages/login/login';
+    __uniConfig.globalStyle = utsMapOf([["navigationBarTextStyle", "black"], ["navigationBarTitleText", "uni-app x"], ["navigationBarBackgroundColor", "#F8F8F8"], ["backgroundColor", "#F8F8F8"]]);
+    __uniConfig.getTabBarConfig = (): Map<string, any> | null => null;
+    __uniConfig.tabBar = __uniConfig.getTabBarConfig();
+    __uniConfig.conditionUrl = '';
+    __uniConfig.uniIdRouter = utsMapOf();
+    __uniConfig.ready = true;
+}
+//# sourceMappingURL=main.uts.map

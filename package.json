@@ -1,0 +1,17 @@
+{
+  "name": "ai-finance-frontend",
+  "version": "1.0.0",
+  "description": "AI智能记账应用",
+  "scripts": {
+    "check": "node scripts/build.js",
+    "dev": "echo '请在HBuilderX中运行项目'",
+    "clean": "rm -rf unpackage/dist"
+  },
+  "dependencies": {
+    "@qiun/ucharts": "^2.5.0-20230101"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "^3.4.15",
+    "@types/uni-app": "^1.4.8"
+  }
+}

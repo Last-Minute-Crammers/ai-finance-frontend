@@ -1,74 +1,70 @@
 <template>
-  <view class="container">
-    <!-- 顶部 -->
+  <view class="register-container">
     <view class="header">
-      <text class="back">←</text>
       <text class="title">注册</text>
-      <text class="subtitle">创建您的账户</text>
+      <text class="subtitle">创建新账户</text>
     </view>
-
-    <!-- 注册表单 -->
+    
     <view class="form">
-      <view class="input-group">
-        <input
-          v-model="username"
-          class="input-field"
-          placeholder="请输入用户名"
-        />
+      <view class="form-item">
+        <input type="text" v-model="username" placeholder="请输入用户名" class="input-field" />
       </view>
-      <view class="input-group">
-        <input
-          v-model="password"
-          class="input-field"
-          :type="passwordType"
-          placeholder="请输入密码"
-        />
-        <text class="toggle-password" @click="togglePasswordVisibility">
-          {{ passwordVisible ? '隐藏' : '显示' }}
-        </text>
+      <view class="form-item">
+        <input type="email" v-model="email" placeholder="请输入邮箱" class="input-field" />
       </view>
-      <view class="input-group">
-        <input
-          v-model="confirmPassword"
-          class="input-field"
-          :type="passwordType"
-          placeholder="确认密码"
-        />
+      <view class="form-item">
+        <input type="password" v-model="password" placeholder="请输入密码" class="input-field" />
       </view>
-
-      <!-- 注册按钮 -->
-      <view class="button-group">
-        <button class="register-btn" @click="register">注册</button>
+      <view class="form-item">
+        <input type="password" v-model="confirmPassword" placeholder="请确认密码" class="input-field" />
       </view>
-
-      <!-- 跳转到登录页面 -->
-      <view class="footer-links">
-        <text class="have-account" @click="goToLogin">已有账号? 登录</text>
+      <view class="form-item">
+        <input type="text" v-model="captcha" placeholder="请输入验证码(任意值)" class="input-field" />
       </view>
+      <button class="register-btn" @click="register" :disabled="isLoading">
+        {{ isLoading ? '注册中...' : '注册' }}
+      </button>
+      <view class="login-link" @click="goToLogin">已有账号？去登录</view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { userRegister } from '../../common/api/finance'
 
 const username = ref('')
+const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const passwordVisible = ref(false)
-const passwordType = ref('password')
-
-// 切换密码显示/隐藏
-function togglePasswordVisibility() {
-  passwordVisible.value = !passwordVisible.value
-  passwordType.value = passwordVisible.value ? 'text' : 'password'
-}
+const captcha = ref('')
+const isLoading = ref(false)
 
 // 注册操作
-function register() {
-  if (!username.value || !password.value || !confirmPassword.value) {
+async function register() {
+  // 输入验证
+  if (!username.value || !email.value || !password.value || !confirmPassword.value || !captcha.value) {
     uni.showToast({
-      title: '请填写所有字段',
+      title: '请填写完整信息',
+      icon: 'none',
+    })
+    return
+  }
+
+  // 用户名验证
+  if (username.value.length < 2) {
+    uni.showToast({
+      title: '用户名至少2个字符',
+      icon: 'none',
+    })
+    return
+  }
+
+  // 邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email.value)) {
+    uni.showToast({
+      title: '请输入正确的邮箱格式',
       icon: 'none',
     })
     return
@@ -76,26 +72,67 @@ function register() {
 
   if (password.value !== confirmPassword.value) {
     uni.showToast({
-      title: '两次密码输入不一致',
+      title: '两次密码不一致',
       icon: 'none',
     })
     return
   }
 
-  // 模拟注册成功操作
-  uni.showToast({
-    title: '注册成功',
-    icon: 'success',
-    duration: 2000,
-  })
+  if (password.value.length < 6) {
+    uni.showToast({
+      title: '密码长度至少6位',
+      icon: 'none',
+    })
+    return
+  }
 
-  // 注册成功后跳转到登录页面
-  uni.navigateTo({
-    url: '/pages/login/login',
-  })
+  isLoading.value = true
+
+  try {
+    console.log('开始注册:', { username: username.value, email: email.value })
+    const response = await userRegister({
+      username: username.value,
+      email: email.value,
+      password: password.value,
+      captcha: captcha.value
+    })
+    console.log('注册响应:', response)
+
+    // 检查响应格式 - 修正大小写
+    if (response && (response.Data || response.data)) {
+      const data = response.Data || response.data
+      // 保存token和用户信息
+      uni.setStorageSync('token', data.token)
+      uni.setStorageSync('current_user', data.user)
+      
+      uni.showToast({
+        title: '注册成功',
+        icon: 'success',
+        mask: true,
+        duration: 1500,
+      })
+
+      setTimeout(() => {
+        uni.navigateTo({
+          url: '/pages/index/index',
+        })
+      }, 1500)
+    } else {
+      throw new Error('注册响应格式错误')
+    }
+  } catch (error: any) {
+    console.error('注册失败:', error)
+    const errorMsg = error?.message || '注册失败，请重试'
+    uni.showToast({
+      title: errorMsg,
+      icon: 'none'
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 
-// 跳转到登录页面
+// 跳转到登录页
 function goToLogin() {
   uni.navigateTo({
     url: '/pages/login/login',
@@ -103,42 +140,41 @@ function goToLogin() {
 }
 </script>
 
-<style scoped>
-.container {
+<style>
+.register-container {
   background-color: #f5f7fa;
   min-height: 100vh;
   padding-bottom: 10%;
 }
 
-/* 顶部区域 */
 .header {
   background: linear-gradient(to right, #4e54c8, #8f94fb);
-  padding: 80rpx 30rpx 90rpx;
+  padding: 80rpx 30rpx 60rpx;
   text-align: center;
-  align-items: center;
   color: white;
   border-bottom-left-radius: 30rpx;
   border-bottom-right-radius: 30rpx;
 }
+
 .title {
   font-size: 36rpx;
   font-weight: bold;
 }
+
 .subtitle {
   font-size: 24rpx;
   margin-top: 10rpx;
 }
 
-/* 注册表单 */
 .form {
   padding: 30rpx;
   background-color: white;
   border-radius: 20rpx;
-  margin-top: -40rpx;
+  margin: -40rpx 20rpx 0;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 }
 
-.input-group {
+.form-item {
   margin-bottom: 30rpx;
 }
 
@@ -151,16 +187,6 @@ function goToLogin() {
   background-color: #f9f9f9;
 }
 
-.toggle-password {
-  font-size: 20rpx;
-  color: #4e54c8;
-  cursor: pointer;
-}
-
-.button-group {
-  margin-top: 20rpx;
-}
-
 .register-btn {
   width: 100%;
   padding: 16rpx;
@@ -169,17 +195,12 @@ function goToLogin() {
   color: white;
   border-radius: 30rpx;
   border: none;
+  margin: 20rpx 0;
 }
 
-.footer-links {
-  display: flex;
-  justify-content: center;
-  margin-top: 20rpx;
-}
-
-.have-account {
-  font-size: 24rpx;
+.login-link {
+  text-align: center;
   color: #4e54c8;
-  cursor: pointer;
+  font-size: 24rpx;
 }
 </style>

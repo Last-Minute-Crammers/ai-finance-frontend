@@ -9,15 +9,21 @@
     <view class="balance-card">
       <view class="summary-block">
         <text class="balance-label">当前余额</text>
-        <text class="balance-value">¥{{ balance.toFixed(2) }}</text>
+        <text class="balance-value" v-if="!loading">¥{{ balance.toFixed(2) }}</text>
+        <text class="balance-value loading" v-else>加载中...</text>
       </view>
       <view class="divider" />
       <view class="summary-block">
-        <text class="balance-label">本月花销</text>
-        <view class="expense-row">
-          <text class="expense-icon">🔻</text>
-          <text class="balance-value expense">¥{{ expense.toFixed(2) }}</text>
+        <text class="balance-label">本月收支</text>
+        <view class="expense-row" v-if="!loading">
+          <text class="expense-icon" :class="monthlyNet >= 0 ? 'positive' : 'negative'">
+            {{ monthlyNet >= 0 ? '🔺' : '🔻' }}
+          </text>
+          <text class="balance-value" :class="monthlyNet >= 0 ? 'income' : 'expense'">
+            ¥{{ Math.abs(monthlyNet).toFixed(2) }}
+          </text>
         </view>
+        <text class="balance-value loading" v-else>加载中...</text>
       </view>
     </view>
 
@@ -37,28 +43,79 @@
   </view>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      balance: 8542.36,
-      expense: 2260.45, // 新增本月花销
-      features: [
-        { name: '记账', desc: '记录每一笔收支', icon: '/static/icons/book.png', path: '/pages/transaction/transaction' },
-        { name: '财务分析', desc: '可视化您的消费', icon: '/static/icons/chart.png', path: '/pages/analyze/analyze' },
-        { name: 'AI理财宠物', desc: '陪伴式理财体验', icon: '/static/icons/pet.png', path: '/pages/pet/pet' },
-        { name: '财务报告', desc: '智能分析建议', icon: '/static/icons/report.png', path: '/pages/report/report' },
-        { name: '社交互动', desc: '与好友一起理财', icon: '/static/icons/social.png', path: '/pages/social/social' },
-        { name: '设置', desc: '个性化您的体验', icon: '/static/icons/settings.png', path: '/pages/settings/settings' }
-      ]
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { getTotalStatistic, getMonthStatistic } from '../../common/api/transaction'
+
+const balance = ref<number>(0)
+const monthlyNet = ref<number>(0)
+const loading = ref<boolean>(true)
+
+interface Feature {
+  name: string
+  desc: string
+  icon: string
+  path: string
+}
+const features: Feature[] = [
+  { name: '记账', desc: '记录每一笔收支', icon: '/static/icons/book.png', path: '/pages/transaction/transaction' },
+  { name: '财务分析', desc: '可视化您的消费', icon: '/static/icons/chart.png', path: '/pages/analyze/analyze' },
+  { name: 'AI理财宠物', desc: '陪伴式理财体验', icon: '/static/icons/pet.png', path: '/pages/pet/pet' },
+  { name: '财务报告', desc: '智能分析建议', icon: '/static/icons/report.png', path: '/pages/report/report' },
+  { name: '社交互动', desc: '与好友一起理财', icon: '/static/icons/social.png', path: '/pages/social/social' },
+  { name: '设置', desc: '个性化您的体验', icon: '/static/icons/settings.png', path: '/pages/settings/settings' }
+]
+
+function goPage(path: string): void {
+  uni.navigateTo({ url: path })
+}
+
+async function loadStatisticData(): Promise<void> {
+  try {
+    loading.value = true
+    const token: string | null = uni.getStorageSync('token')
+    if (!token) {
+      uni.navigateTo({ url: '/pages/login/login' })
+      return
     }
-  },
-  methods: {
-    goPage(path) {
-      uni.navigateTo({ url: path });
+    const totalRes: any = await getTotalStatistic()
+    if (totalRes && totalRes.Data) {
+      balance.value = (totalRes.Data.total_assets || 0) / 100
     }
+    const now: Date = new Date()
+    const monthStart: Date = new Date(now.getFullYear(), now.getMonth(), 1)
+    const monthEnd: Date = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    const monthlyRes: any = await getMonthStatistic({
+      startTime: monthStart.toISOString(),
+      endTime: monthEnd.toISOString()
+    })
+    if (monthlyRes && monthlyRes.Data && monthlyRes.Data.List && monthlyRes.Data.List.length > 0) {
+      const monthData: any = monthlyRes.Data.List[0]
+      const monthIncome: number = (monthData.Income && monthData.Income.Amount ? monthData.Income.Amount : 0) / 100
+      const monthExpense: number = (monthData.Expense && monthData.Expense.Amount ? monthData.Expense.Amount : 0) / 100
+      monthlyNet.value = monthIncome - monthExpense
+    }
+  } catch (error: any) {
+    balance.value = 0
+    monthlyNet.value = 0
+    uni.showToast({
+      title: '数据加载失败',
+      icon: 'none'
+    })
+  } finally {
+    loading.value = false
   }
 }
+
+onMounted(function(): void {
+  loadStatisticData()
+})
+
+defineExpose({
+  onShow: function(): void {
+    loadStatisticData()
+  }
+})
 </script>
 
 <style scoped>
@@ -100,79 +157,86 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 6rpx;
+  padding: 20rpx 0;
 }
 .balance-label {
-  font-size: 24rpx;
+  font-size: 28rpx;
   color: #666;
+  margin-bottom: 10rpx;
 }
 .balance-value {
-  font-size: 36rpx;
-  color: #333;
+  font-size: 48rpx;
   font-weight: bold;
-  margin-top: 4rpx;
+  color: #333;
+}
+.balance-value.loading {
+  font-size: 32rpx;
+  color: #999;
+}
+.balance-value.income {
+  color: #34C759;
 }
 .balance-value.expense {
-  color: #ff3b30;
+  color: #FF3B30;
+}
+.divider {
+  width: 80%;
+  height: 1rpx;
+  background-color: #eee;
+  margin: 10rpx 0;
 }
 .expense-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-top: 4rpx;
+  gap: 10rpx;
 }
 .expense-icon {
-  font-size: 30rpx;
-  color: #ff3b30;
-  margin-right: 6rpx;
+  font-size: 32rpx;
 }
-.divider {
-  width: 60%;
-  height: 1rpx;
-  background-color: #eee;
-  margin: 14rpx 0;
+.expense-icon.positive {
+  color: #34C759;
+}
+.expense-icon.negative {
+  color: #FF3B30;
 }
 
-/* 功能区：3行2列 */
+/* 功能区 */
 .feature-grid {
   flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-content: space-around;
-  padding: 0 24rpx;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  padding: 20rpx;
+  overflow-y: auto;
 }
 .feature-item {
-  width: 48%;
-  height: 30%;
   background-color: #fff;
-  border-radius: 16rpx;
-  padding: 20rpx 10rpx;
-  display: flex;
-  flex-direction: column;    /* 垂直布局 */
-  align-items: center;       /* 横向居中 */
-  justify-content: center;   /* 垂直居中整个内容块 */
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.04);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+.feature-item:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
+}
+.feature-icon {
+  width: 80rpx;
+  height: 80rpx;
   margin-bottom: 20rpx;
 }
-
-.feature-icon {
-  width: 60rpx;
-  height: 60rpx;
-  margin-bottom: 10rpx;
-}
-
 .feature-title {
-  font-size: 26rpx;
-  color: #333;
+  font-size: 32rpx;
   font-weight: bold;
-  text-align: center;
+  color: #333;
+  margin-bottom: 10rpx;
+  display: block;
 }
-
 .feature-sub {
-  font-size: 20rpx;
-  color: #999;
-  margin-top: 4rpx;
-  text-align: center;
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.4;
+  display: block;
 }
 </style>

@@ -13,116 +13,377 @@
       <view class="type-btn" :class="{ active: type === '收入' }" @click="changeType('收入')">收入</view>
     </view>
 
-    <!-- 金额输入 -->
-    <view class="amount-card">
-      <view class="amount-line">
-        <text class="currency">¥</text>
-        <input class="amount-input" type="digit" v-model="amount" placeholder="0.00" />
-        <text class="arrow">⌄</text>
+    <!-- 分类选择卡片 -->
+    <view class="category-card">
+      <view class="section-header">
+        <text class="section-label">选择分类</text>
+        <view class="header-actions">
+          <text class="add-btn" @click="showAddCategory">➕</text>
+          <text class="refresh-btn" @click="refreshCategories">🔄</text>
+        </view>
       </view>
-
-      <!-- 分类 -->
-      <text class="section-label">选择分类</text>
-      <view class="category-grid">
+      
+      <!-- 加载状态 -->
+      <view v-if="categoryLoading" class="loading-categories">
+        <text>加载分类中...</text>
+      </view>
+      
+      <!-- 分类列表 -->
+      <view v-else class="category-grid">
         <view
           v-for="(item, index) in categories"
-          :key="index"
+          :key="item.id"
           class="category-item"
-          :class="{ selected: selectedCategory === item.name }"
-          @click="selectedCategory = item.name"
+          :class="{ selected: selectedCategoryId === item.id }"
+          @click="selectCategory(item)"
         >
-          <text class="emoji">{{ item.icon }}</text>
+          <text class="emoji">{{ getCategoryIcon(item) }}</text>
           <text class="name">{{ item.name }}</text>
         </view>
       </view>
 
-      <!-- 日期 -->
-      <view class="date-row">
-        <text class="date-label">日期</text>
-        <text class="date-value">今天，{{ date }}</text>
+      <!-- 空状态 -->
+      <view v-if="!categoryLoading && categories.length === 0" class="empty-categories">
+        <text>暂无分类，请先添加分类</text>
       </view>
     </view>
 
-    <!-- 工具区域 -->
-    <view class="tools">
-      <view class="tool-item">
-        <text class="tool-icon">🎤</text>
-        <text class="tool-label">语音输入</text>
+    <!-- 交易详情卡片 -->
+    <view class="transaction-details-card">
+      <!-- 金额输入 -->
+      <view class="input-group">
+        <text class="input-label">金额</text>
+        <view class="amount-input-wrapper">
+          <text class="currency">¥</text>
+          <input 
+            class="amount-input" 
+            type="digit" 
+            v-model="amount" 
+            placeholder="0.00" 
+            maxlength="10"
+          />
+        </view>
       </view>
-      <view class="tool-item">
-        <text class="tool-icon">📷</text>
-        <text class="tool-label">拍照记账</text>
+
+      <!-- 备注输入 -->
+      <view class="input-group">
+        <text class="input-label">备注</text>
+        <input 
+          class="remark-input" 
+          v-model="remark" 
+          placeholder="添加备注（可选）" 
+          maxlength="100"
+        />
+      </view>
+
+      <!-- 时间选择 -->
+      <view class="input-group">
+        <text class="input-label">交易时间</text>
+        <view class="time-input-row" style="display: flex; flex-direction: row; align-items: center; gap: 12rpx; justify-content: center;">
+          <input class="time-input" v-model="year" maxlength="4" placeholder="年" style="width: 130rpx; text-align: center;" />
+          <text>年</text>
+          <input class="time-input" v-model="month" maxlength="2" placeholder="月" style="width: 80rpx; text-align: center;" />
+          <text>月</text>
+          <input class="time-input" v-model="day" maxlength="2" placeholder="日" style="width: 80rpx; text-align: center;" />
+          <text>日</text>
+          <input class="time-input" v-model="hour" maxlength="2" placeholder="时" style="width: 80rpx; text-align: center;" />
+          <text>:</text>
+          <input class="time-input" v-model="minute" maxlength="2" placeholder="分" style="width: 80rpx; text-align: center;" />
+          <text>分</text>
+        </view>
       </view>
     </view>
 
     <!-- 保存按钮 -->
     <view class="save-btn-wrapper">
-      <button class="save-btn" @click="submitTransaction">保存记录</button>
+      <button class="save-btn" @click="submitTransaction" :disabled="loading">
+        {{ loading ? '保存中...' : '保存记录' }}
+      </button>
     </view>
+    
+    <!-- 添加分类模态框 -->
+    <AddCategoryModal 
+      v-model:visible="showAddCategoryModal"
+      @created="onCategoryCreated"
+    />
   </view>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      type: '支出',
-      amount: '',
-      selectedCategory: '餐饮',
-      date: '',
-      categories: [
-        { name: '餐饮', icon: '🍔' },
-        { name: '购物', icon: '🛒' },
-        { name: '交通', icon: '🚗' },
-        { name: '住房', icon: '🏠' },
-        { name: '娱乐', icon: '🎬' },
-        { name: '数码', icon: '📱' },
-        { name: '服饰', icon: '👗' },
-        { name: '其他', icon: '➕' }
-      ]
-    };
-  },
-  onLoad() {
-    this.date = this.formatDate(new Date())
-  },
-  methods: {
-    goBack() {
-      uni.navigateBack();
-    },
-    changeType(newType) {
-      this.type = newType;
-    },
-    formatDate(date) {
-      const y = date.getFullYear();
-      const m = (date.getMonth() + 1).toString().padStart(2, '0');
-      const d = date.getDate().toString().padStart(2, '0');
-      return `${y}年${m}月${d}日`;
-    },
-    submitTransaction() {
-      if (!this.amount) {
-        uni.showToast({ title: '请输入金额', icon: 'none' });
-        return;
-      }
-      const data = {
-        type: this.type,
-        amount: this.amount,
-        category: this.selectedCategory,
-        date: this.date
-      };
-      console.log('记录已保存：', data);
-      uni.showToast({ title: '记录已保存', icon: 'success' });
+<script setup lang="ts">
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue'
+import { createTransaction } from '../../common/api/transaction'
+import { getCategoryList, refreshCategoryList, type Category, getIconById } from '../../common/api/category'
+import { setPageType, setPagePath, resetPageState } from '../../utils/pageState'
+import AddCategoryModal from '../../components/AddCategoryModal.uvue'
+
+// 响应式数据
+const type = ref('支出')
+const amount = ref('')
+const remark = ref('')
+const year = ref('')
+const month = ref('')
+const day = ref('')
+const hour = ref('')
+const minute = ref('')
+const loading = ref(false)
+const categoryLoading = ref(false)
+const categories = ref<Category[]>([])
+const selectedCategoryId = ref<number | null>(null)
+const showAddCategoryModal = ref(false)
+
+// 获取分类列表
+const fetchCategoryList = async (forceRefresh = false) => {
+  try {
+    categoryLoading.value = true
+    
+    // 根据当前类型获取对应分类
+    const incomeExpenseType = type.value === '支出' ? 'expense' : 'income'
+    
+    let response
+    if (forceRefresh) {
+      // 强制从服务器刷新数据
+      response = await refreshCategoryList({
+        income_expense: incomeExpenseType
+      })
+    } else {
+      // 优先使用本地缓存，如果没有则从服务器获取
+      response = await getCategoryList({
+        income_expense: incomeExpenseType
+      })
     }
+    
+    console.log('分类列表响应:', response)
+    console.log('响应数据结构:', {
+      code: response.code,
+      message: response.message,
+      dataType: typeof response.data,
+      dataLength: Array.isArray(response.data) ? response.data.length : 'not array',
+      data: response.data
+    })
+    
+    if (response.code === 200) {
+      // 确保 response.data 是数组，即使是空数组也要处理
+      categories.value = response.data || []
+      // 重置选中的分类
+      selectedCategoryId.value = null
+      
+      // 显示数据来源提示
+      if (response.message === 'success (cached)') {
+        console.log('使用本地缓存数据')
+      } else {
+        console.log('使用服务器数据')
+      }
+      
+      // 如果是空数组，显示提示信息
+      if (categories.value.length === 0) {
+        console.log('当前类型暂无分类数据')
+      } else {
+        console.log('成功加载分类数据:', categories.value.length, '个分类')
+      }
+    } else {
+      console.error('API返回错误:', response)
+      uni.showToast({
+        title: response.message || '获取分类列表失败',
+        icon: 'none'
+      })
+    }
+  } catch (error) {
+    console.error('获取分类列表失败:', error)
+    uni.showToast({
+      title: '网络错误，请检查网络连接',
+      icon: 'none'
+    })
+  } finally {
+    categoryLoading.value = false
+  }
+}
+
+// 获取分类图标
+const getCategoryIcon = (category: Category): string => {
+  // 优先使用iconId获取图标
+  if (category.iconId) {
+    const iconInfo = getIconById(category.iconId)
+    if (iconInfo) {
+      return iconInfo.emoji
+    }
+  }
+  
+  // 兼容旧数据：直接使用icon字段
+  if (category.icon) {
+    return category.icon
+  }
+  
+  // 默认图标
+  return '📁'
+}
+
+// 选择分类
+const selectCategory = (category: Category) => {
+  selectedCategoryId.value = category.id
+}
+
+// 刷新分类数据
+const refreshCategories = async () => {
+  try {
+    uni.showToast({
+      title: '刷新分类中...',
+      icon: 'loading',
+      duration: 1000
+    })
+    await fetchCategoryList(true) // 强制刷新
+    uni.showToast({
+      title: '分类已更新',
+      icon: 'success',
+      duration: 1500
+    })
+  } catch (error) {
+    console.error('刷新分类失败:', error)
+    uni.showToast({
+      title: '刷新失败',
+      icon: 'none'
+    })
+  }
+}
+
+// 显示添加分类模态框
+const showAddCategory = () => {
+  showAddCategoryModal.value = true
+}
+
+// 分类创建成功回调
+const onCategoryCreated = (newCategory: Category) => {
+  console.log('新分类已创建:', newCategory)
+  // 刷新分类列表
+  fetchCategoryList(true)
+}
+
+// 初始化时间输入为当前时间
+const initTimeInput = () => {
+  const now = new Date()
+  year.value = String(now.getFullYear())
+  month.value = String(now.getMonth() + 1).padStart(2, '0')
+  day.value = String(now.getDate()).padStart(2, '0')
+  hour.value = String(now.getHours()).padStart(2, '0')
+  minute.value = String(now.getMinutes()).padStart(2, '0')
+}
+
+// 格式化时间输入为ISO格式
+const formatTimeToISO = () => {
+  try {
+    const y = parseInt(year.value)
+    const m = parseInt(month.value) - 1
+    const d = parseInt(day.value)
+    const h = parseInt(hour.value)
+    const min = parseInt(minute.value)
+    const date = new Date(y, m, d, h, min)
+    if (isNaN(date.getTime())) throw new Error('无效的日期')
+    return date.toISOString()
+  } catch (error) {
+    return new Date().toISOString()
+  }
+}
+
+// 页面加载时获取当前日期和分类列表
+onMounted(async () => {
+  // 设置页面路径和初始类型
+  setPagePath('/pages/transaction/transaction')
+  setPageType(type.value)
+  
+  // 初始化时间输入
+  initTimeInput()
+  await fetchCategoryList()
+})
+
+// 页面卸载时重置状态
+onUnmounted(() => {
+  resetPageState()
+})
+
+// 监听类型变化，重新获取分类列表
+watch(type, async () => {
+  await fetchCategoryList()
+})
+
+function goBack() {
+  uni.navigateBack()
+}
+
+function changeType(newType: string) {
+  type.value = newType
+  // 更新页面状态
+  setPageType(newType as '支出' | '收入')
+}
+
+async function submitTransaction() {
+  try {
+    loading.value = true
+    // 输入验证
+    if (!amount.value) {
+      uni.showToast({ title: '请输入金额', icon: 'none' })
+      return
+    }
+    const amountNum = parseFloat(amount.value)
+    if (isNaN(amountNum) || amountNum <= 0) {
+      uni.showToast({ title: '请输入有效的正数金额', icon: 'none' })
+      return
+    }
+    if (!selectedCategoryId.value) {
+      uni.showToast({ title: '请选择分类', icon: 'none' })
+      return
+    }
+    // 时间输入验证
+    if (!year.value || !month.value || !day.value || !hour.value || !minute.value) {
+      uni.showToast({ title: '请完整填写时间', icon: 'none' })
+      return
+    }
+    const formattedTime = formatTimeToISO()
+    const transactionData = {
+      CategoryId: selectedCategoryId.value,
+      IncomeExpense: type.value === '支出' ? 'expense' : 'income',
+      Amount: Math.round(amountNum * 100),
+      Remark: remark.value.trim(),
+      TradeTime: formattedTime
+    }
+    const response = await createTransaction(transactionData)
+    // 判断后端返回Msg
+    if (response && (response.Msg === '查询成功' || response.Msg === 'success')) {
+      amount.value = ''
+      remark.value = ''
+      selectedCategoryId.value = null
+      initTimeInput()
+      uni.showToast({ 
+        title: '记录已保存',
+        icon: 'success',
+        mask: true,
+        duration: 1500
+      })
+      setTimeout(() => {
+        uni.navigateBack()
+      }, 1500)
+    } else {
+      throw new Error(response.Msg || '保存失败')
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    uni.showToast({
+      title: `保存失败: ${errorMessage}`,
+      icon: 'none',
+      duration: 2000
+    })
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
-<style scoped>
-/* 样式保持不变，与之前样式兼容 */
+<style>
 .transaction-container {
   background-color: #f5f7fa;
   min-height: 100vh;
-  padding-bottom: 10%;
+  padding-bottom: 120rpx;
+  overflow-y: auto;
 }
+
 .header {
   background: linear-gradient(to right, #4e54c8, #8f94fb);
   padding: 80rpx 30rpx 40rpx;
@@ -131,6 +392,7 @@ export default {
   text-align: center;
   position: relative;
 }
+
 .back-btn {
   position: absolute;
   left: 30rpx;
@@ -138,16 +400,19 @@ export default {
   font-size: 36rpx;
   color: white;
 }
+
 .header-title {
   font-size: 36rpx;
   font-weight: bold;
   color: white;
 }
+
 .header-sub {
   font-size: 24rpx;
   color: white;
   margin-top: 10rpx;
 }
+
 .type-toggle {
   display: flex;
   justify-content: center;
@@ -156,6 +421,7 @@ export default {
   margin: 30rpx auto 20rpx;
   width: 60%;
 }
+
 .type-btn {
   flex: 1;
   text-align: center;
@@ -165,109 +431,231 @@ export default {
   font-weight: bold;
   border-radius: 40rpx;
 }
+
 .type-btn.active {
   background: white;
   color: #4e54c8;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
 }
-.amount-card {
+
+.category-card {
   background: #fff;
-  margin: 0 20rpx;
+  margin: 0 20rpx 20rpx;
   padding: 30rpx;
   border-radius: 20rpx;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
 }
-.amount-line {
+
+.transaction-details-card {
+  background: #fff;
+  margin: 0 20rpx 20rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.input-group:last-child {
+  margin-bottom: 0;
+}
+
+.input-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 15rpx;
+  display: block;
+  font-weight: bold;
+}
+
+.amount-input-wrapper {
   display: flex;
   align-items: center;
-  font-size: 44rpx;
-  margin-bottom: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  background: #f9f9f9;
 }
+
 .currency {
   color: #333;
-  margin-right: 10rpx;
+  margin-right: 15rpx;
+  font-size: 36rpx;
+  font-weight: bold;
 }
+
 .amount-input {
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 44rpx;
+  font-size: 36rpx;
+  font-weight: bold;
 }
-.arrow {
+
+.remark-input {
+  width: 100%;
+  padding: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
   font-size: 28rpx;
-  color: #888;
+  background: #f9f9f9;
 }
+
+.time-input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  justify-content: center;
+}
+
+.time-input {
+  width: 100%;
+  padding: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  background: #f9f9f9;
+  font-family: monospace;
+  letter-spacing: 2rpx;
+}
+
+.time-format-hint {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 10rpx;
+  line-height: 1.4;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
 .section-label {
   font-size: 24rpx;
   color: #333;
-  margin-bottom: 20rpx;
 }
+
+.header-actions {
+  display: flex;
+  gap: 15rpx;
+}
+
+.add-btn, .refresh-btn {
+  font-size: 28rpx;
+  color: #4e54c8;
+  padding: 10rpx;
+  border-radius: 50%;
+  background: #f0f2ff;
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.add-btn:active, .refresh-btn:active {
+  background: #e0e3ff;
+}
+
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20rpx;
   margin-bottom: 30rpx;
 }
+
 .category-item {
   background: #f4f4f4;
   border-radius: 16rpx;
   padding: 20rpx 0;
   text-align: center;
 }
+
 .category-item.selected {
   background: #e0e3ff;
   border: 2rpx solid #4e54c8;
 }
+
 .emoji {
   font-size: 36rpx;
   margin-bottom: 10rpx;
+  display: block;
 }
+
 .name {
   font-size: 22rpx;
+  display: block;
 }
+
 .date-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.date-label {
   font-size: 24rpx;
   color: #666;
 }
+
 .date-value {
+  font-size: 24rpx;
   color: #333;
 }
-.tools {
-  display: flex;
-  justify-content: space-around;
-  background: #fff;
-  margin: 40rpx 30rpx;
-  padding: 30rpx 0;
-  border-radius: 20rpx;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
-}
-.tool-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.tool-icon {
-  font-size: 36rpx;
-  margin-bottom: 10rpx;
-}
-.tool-label {
-  font-size: 22rpx;
-}
+
 .save-btn-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 40rpx;
-  padding: 0 30rpx 10%;
+  padding: 30rpx 40rpx;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, #f5f7fa 80%, transparent);
+  z-index: 100;
 }
+
 .save-btn {
   width: 100%;
   background: linear-gradient(to right, #4e54c8, #8f94fb);
   color: white;
   padding: 20rpx;
-  font-size: 28rpx;
-  border-radius: 40rpx;
-  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.1);
+  font-size: 30rpx;
+  border-radius: 35rpx;
+  border: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.save-btn:disabled {
+  background: #ccc;
+  color: #999;
+  transform: none;
+}
+
+.loading-categories {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #666;
+}
+
+.empty-categories {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #999;
+  font-size: 24rpx;
 }
 </style>

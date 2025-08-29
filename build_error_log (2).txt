@@ -1,0 +1,1495 @@
+以下是HBuilderX云打包编译错误信息，分析一下是什么原因？
+
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/components/AddCategoryModal.kt:74:33 Type mismatch: inferred type is ApiResponse<Category>? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/components/AddCategoryModal.kt:74:53 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ApiResponse<Category>?
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/components/AddCategoryModal.kt:75:57 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type ApiResponse<Category>?
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/components/AddCategoryModal.kt:101:24 Type mismatch: inferred type is Boolean but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:160:34 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:160:34 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:312:15 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:312:15 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:413:34 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:418:2 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:418:21 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:425:38 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:427:2 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:427:35 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:447:67 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:449:18 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:449:18 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:454:18 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:454:18 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:461:3 Expecting an element
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:468:80 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:475:80 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:482:51 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:483:24 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:483:24 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:487:7 Expecting an element
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:488:3 Expecting an element
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:507:35 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:513:2 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:513:42 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:534:37 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:538:2 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:538:35 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:546:55 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:547:17 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:547:17 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:551:18 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:551:18 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:556:3 Expecting an element
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:646:33 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:648:2 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:648:49 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:734:32 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:740:2 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:740:39 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:815:60 Expecting ','
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:846:37 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:848:2 Property getter or setter expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:848:49 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1366:41 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:2 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:3 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:5 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:15 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:16 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:19 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:21 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1409:34 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1412:3 Expecting a top level declaration
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1529:27 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:17:32 Unresolved reference: createCanvasContext
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:61:20 Not enough information to infer type variable K
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:61:27 Cannot find a parameter with this name: production
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:61:68 Cannot find a parameter with this name: local
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:61:101 Cannot find a parameter with this name: dockerHost
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:61:150 Cannot find a parameter with this name: ip
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:61:180 Cannot find a parameter with this name: external
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:64:34 Type mismatch: inferred type is Any? but String? was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:65:12 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:65:12 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:65:29 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:83:25 Type mismatch: inferred type is Any? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:83:25 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:83:56 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:84:41 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:92:1 Property must be initialized
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:110:37 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:110:37 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:110:50 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:116:29 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:123:32 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:123:41 Type mismatch: inferred type is UTSError but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:140:21 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:140:43 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:140:58 Unresolved reference: undefined
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:145:46 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:146:47 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:148:47 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:148:55 Type mismatch: inferred type is UTSJSONObject but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:153:102 None of the following functions can be called with the arguments supplied: 
+public fun resolveInOperator(obj: UTSJSONObject, key: String): Boolean defined in io.dcloud.uts
+public fun resolveInOperator(obj: UTSKeyIterable, key: String): Boolean defined in io.dcloud.uts
+public fun resolveInOperator(obj: UTSObject, key: String): Boolean defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:154:21 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:154:43 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:154:69 Unresolved reference: errMsg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:160:34 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:166:21 Type mismatch: inferred type is UTSJSONObject but () -> Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:185:25 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:189:21 Variable 'diagnostics' must be initialized
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:189:33 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:195:33 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:203:33 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:211:40 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:228:18 Type parameters are not allowed here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:258:17 Type mismatch: inferred type is Any? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:259:50 Unresolved reference: keys
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:259:71 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:260:84 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:260:90 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:270:58 Type mismatch: inferred type is UTSJSONObject but Record<String, String> /* = Map<String, String> */ was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:272:16 Type mismatch: inferred type is Any but IUTSObject was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:275:21 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:280:103 Type mismatch: inferred type is Record<String, String> /* = Map<String, String> */ but UTSJSONObject? was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:282:34 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:282:64 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:283:42 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:285:37 Interface UniRequestError does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:285:82 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:285:112 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:285:129 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:291:48 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:291:54 Unresolved reference: errMsg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:291:70 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:291:81 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:292:36 Interface UniRequestError does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:309:1 Property must be initialized
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:312:15 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:331:46 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:347:21 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:42 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public val Char.code: Int defined in kotlin
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:67 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public val Char.code: Int defined in kotlin
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:91 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:114 Unresolved reference: statusCode
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:147 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:163 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:192 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:350:212 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:353:34 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:354:42 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:355:41 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:356:42 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:357:41 Unresolved reference: token
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:358:42 Unresolved reference: token
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:359:41 Unresolved reference: access_token
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:360:42 Unresolved reference: access_token
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:361:41 Unresolved reference: accessToken
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:362:42 Unresolved reference: accessToken
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:364:25 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:365:53 Type mismatch: inferred type is String? but Any was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:366:71 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type String?
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:367:45 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:367:68 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:367:91 Unresolved reference: user
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:367:99 Type mismatch: inferred type is UTSJSONObject but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:370:52 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:370:68 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:370:79 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:379:55 Unresolved reference: Id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:379:66 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:380:61 Unresolved reference: Username
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:380:78 Unresolved reference: username
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:381:58 Unresolved reference: Email
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:381:72 Unresolved reference: email
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:391:49 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:391:65 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:391:85 Unresolved reference: error
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:391:103 Unresolved reference: msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:391:110 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:393:36 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:418:21 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:418:21 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:419:12 Type mismatch: inferred type is UTSPromise<T> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:419:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:422:20 Unresolved reference: userData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:427:35 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:427:35 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:428:12 Type mismatch: inferred type is UTSPromise<T> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:428:20 Type mismatch: inferred type is UTSJSONObject but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:428:34 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:439:13 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:461:1 A 'return' expression required in a function with a block body ('{...}')
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:461:2 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.compareTo(other: Number): Int defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:462:5 'return' is not allowed here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:462:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:469:12 Type mismatch: inferred type is UTSPromise<T> but UTSPromise<ApiResponse<[Error type: No type specified for unknown element]>> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:469:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:476:12 Type mismatch: inferred type is UTSPromise<T> but UTSPromise<ApiResponse<[Error type: No type specified for unknown element]>> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:476:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:487:6 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.compareTo(other: Number): Int defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:488:2 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.compareTo(other: Number): Int defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:489:5 'return' is not allowed here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:489:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:495:11 Redeclaration: Transaction
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:513:42 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:513:42 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:514:56 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:515:12 Type mismatch: inferred type is UTSPromise<T> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:515:20 Type mismatch: inferred type is UTSJSONObject but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:515:34 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:526:13 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:538:35 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:538:35 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:539:12 Type mismatch: inferred type is UTSPromise<T> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:539:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:542:20 Unresolved reference: params
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:556:1 A 'return' expression required in a function with a block body ('{...}')
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:556:2 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.compareTo(other: Number): Int defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:557:5 'return' is not allowed here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:557:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:571:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:572:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:573:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:574:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:575:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:576:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:577:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:578:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:579:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:580:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:581:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:582:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:583:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:584:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:585:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:586:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:587:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:588:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:589:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:590:5 Interface IconDefinition does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:593:12 Type mismatch: inferred type is IconDefinition? but Any was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:599:12 Type mismatch: inferred type is IconDefinition? but Any was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:618:29 Type mismatch: inferred type is Any? but String? was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:619:13 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:620:50 Type mismatch: inferred type is Any? but UTSArray<Category> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:620:61 Type mismatch: inferred type is String? but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:648:49 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:648:49 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:649:12 Type mismatch: inferred type is UTSPromise<???> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:652:102 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:660:40 Type mismatch: inferred type is T but Any was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:660:54 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:663:34 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:667:33 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:667:70 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:670:47 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:671:57 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:672:58 Unresolved reference: Icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:672:71 Unresolved reference: icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:673:48 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:673:53 Unresolved reference: Icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:673:66 Unresolved reference: icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:675:33 Unresolved reference: undefined
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:677:50 Type mismatch: inferred type is `<no name provided>` but Category was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:678:47 Unresolved reference: ID
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:679:49 Unresolved reference: Name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:680:56 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:680:62 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:681:49 Unresolved reference: Icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:681:62 Unresolved reference: icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:682:50 Unresolved reference: Color
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:683:58 Unresolved reference: IncomeExpense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:684:55 Unresolved reference: CreatedAt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:685:55 Unresolved reference: UpdatedAt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:691:32 Interface ApiResponse does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:691:78 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:691:85 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:693:61 Type mismatch: inferred type is Boolean but UTSArray<Category> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:693:78 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:722:102 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:740:39 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:740:39 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:741:12 Type mismatch: inferred type is UTSPromise<???> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:742:32 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:743:29 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:745:17 Unresolved reference: undefined
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:748:28 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:749:38 Unresolved reference: emoji
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:749:47 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:749:60 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:750:29 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:751:38 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:754:45 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:762:43 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:762:50 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:763:40 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:763:48 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:769:50 Unresolved reference: import
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:776:32 Type mismatch: inferred type is Number? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:777:29 Type mismatch: inferred type is Number? but Number was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:781:32 Interface Category does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:781:80 Type mismatch: inferred type is Number? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:781:90 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:781:110 Unresolved reference: emoji
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:781:119 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:781:133 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:781:142 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:790:71 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:808:34 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public val Char.code: Int defined in kotlin
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:808:59 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:810:36 Type mismatch: inferred type is Category but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:811:42 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:815:28 None of the following functions can be called with the arguments supplied: 
+public open fun filter(callback: (value: Unit) -> Boolean): UTSArray<Unit> defined in io.dcloud.uts.UTSArray
+public open fun filter(callback: (value: Unit, index: Number) -> Boolean): UTSArray<Unit> defined in io.dcloud.uts.UTSArray
+public open fun filter(callback: (value: Unit, index: Number, array: UTSArray<Unit>) -> Boolean): UTSArray<Unit> defined in io.dcloud.uts.UTSArray
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:815:35 Function '<no name provided>' must have a body
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:815:39 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:815:45 Unresolved reference: cat
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:816:29 'return' is not allowed here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:816:36 Unresolved reference: cat
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:816:36 Type mismatch: inferred type is Boolean but UTSPromise<ApiResponse<Category>?> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:816:44 Unresolved reference: undefined
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:819:59 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:823:49 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:826:40 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:826:49 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:826:60 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:848:49 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:848:49 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:849:12 Type mismatch: inferred type is UTSPromise<???> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:852:49 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:855:34 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:858:52 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:858:60 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:858:74 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public inline fun <T, R> Array<out TypeVariable(T)>.map(transform: (TypeVariable(T)) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> BooleanArray.map(transform: (Boolean) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> ByteArray.map(transform: (Byte) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> CharArray.map(transform: (Char) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> CharSequence.map(transform: (Char) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.text
+public inline fun <R> DoubleArray.map(transform: (Double) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> FloatArray.map(transform: (Float) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> IntArray.map(transform: (Int) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> LongArray.map(transform: (Long) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R, T> Result<TypeVariable(T)>.map(transform: (value: TypeVariable(T)) -> TypeVariable(R)): Result<TypeVariable(R)> defined in kotlin
+public inline fun <R> ShortArray.map(transform: (Short) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> UByteArray.map(transform: (UByte) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> UIntArray.map(transform: (UInt) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> ULongArray.map(transform: (ULong) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <R> UShortArray.map(transform: (UShort) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <T, R> Iterable<TypeVariable(T)>.map(transform: (TypeVariable(T)) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public inline fun <K, V, R> Map<out TypeVariable(K), TypeVariable(V)>.map(transform: (Map.Entry<TypeVariable(K), TypeVariable(V)>) -> TypeVariable(R)): List<TypeVariable(R)> defined in kotlin.collections
+public fun <T, R> Sequence<TypeVariable(T)>.map(transform: (TypeVariable(T)) -> TypeVariable(R)): Sequence<TypeVariable(R)> defined in kotlin.sequences
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:859:45 Unresolved reference: Icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:859:58 Unresolved reference: icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:860:40 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:860:45 Unresolved reference: Icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:860:58 Unresolved reference: icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:862:25 Unresolved reference: undefined
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:864:28 Type mismatch: inferred type is `<no name provided>` but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:865:39 Unresolved reference: ID
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:866:41 Unresolved reference: Name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:867:48 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:867:54 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:868:41 Unresolved reference: Icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:868:54 Unresolved reference: icon
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:869:42 Unresolved reference: Color
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:870:50 Unresolved reference: IncomeExpense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:871:47 Unresolved reference: CreatedAt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:872:47 Unresolved reference: UpdatedAt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:878:47 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:878:54 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:883:41 Type mismatch: inferred type is Any? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:883:61 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:886:54 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:902:12 Type mismatch: inferred type is UTSPromise<T> but UTSPromise<Any> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:902:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:905:24 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:927:45 An anonymous function is not allowed to specify default values for its parameters
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:927:64 An anonymous function is not allowed to specify default values for its parameters
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:928:12 Type mismatch: inferred type is UTSPromise<T> but UTSPromise<Any> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:928:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:945:12 Type mismatch: inferred type is UTSPromise<T> but UTSPromise<Any> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:945:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:988:17 Interface PageState does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:990:15 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:991:15 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1005:15 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1078:43 Unresolved reference: startTime
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1079:41 Unresolved reference: endTime
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1080:68 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1093:49 Type mismatch: inferred type is Any but T was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1093:49 Type mismatch: inferred type is T but Any was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1093:49 Type mismatch: inferred type is UTSPromise<Any> but UTSPromise<T> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1093:49 Type mismatch: inferred type is UTSPromise<T> but UTSPromise<Any> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1094:29 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1103:29 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1114:29 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1125:21 Type mismatch: inferred type is UTSPromise<Any> but UTSPromise<T> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1131:73 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1131:92 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1131:100 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1132:100 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1132:129 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1132:137 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1133:102 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1133:132 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1133:140 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1134:69 Type mismatch: inferred type is T but Any was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1139:20 Type mismatch: inferred type is Any but IUTSObject was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1146:49 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1147:50 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1148:20 Type mismatch: inferred type is Any but IUTSObject was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1159:41 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1163:72 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1164:68 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1169:41 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1173:72 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1174:68 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1183:76 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1183:102 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1183:110 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1184:78 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1184:105 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1184:113 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1189:61 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1193:68 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1194:64 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1199:65 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1199:86 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1199:94 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1204:62 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1208:68 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1209:64 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1214:67 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1214:89 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1214:97 Type mismatch: inferred type is T but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1231:42 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1232:43 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1236:36 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1240:37 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1248:66 Unresolved reference: type
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1249:30 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1253:37 Unresolved reference: type
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1261:12 Type mismatch: inferred type is UTSPromise<T> but UTSPromise<Any> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1261:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1270:24 None of the following functions can be called with the arguments supplied: 
+public constructor Date(value: Number) defined in io.dcloud.uts.Date
+public constructor Date(value: String?) defined in io.dcloud.uts.Date
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1292:31 Unresolved reference: toISOString
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1296:9 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1300:40 None of the following functions can be called with the arguments supplied: 
+public open fun <R> map(callback: (value: Any) -> TypeVariable(R)): UTSArray<TypeVariable(R)> defined in io.dcloud.uts.UTSArray
+public open fun <R> map(callback: (value: Any, index: Number) -> TypeVariable(R)): UTSArray<TypeVariable(R)> defined in io.dcloud.uts.UTSArray
+public open fun <R> map(callback: (value: Any, index: Number, array: UTSArray<Any>) -> TypeVariable(R)): UTSArray<TypeVariable(R)> defined in io.dcloud.uts.UTSArray
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1300:44 Function invocation 'convertAmountToYuan(...)' expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1300:44 No value passed for parameter 'data'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1304:20 For-loop range must have an 'iterator()' method
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1305:37 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1305:41 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1306:17 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public inline operator fun kotlin.text.StringBuilder /* = java.lang.StringBuilder */.set(index: Int, value: Char): Unit defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1306:23 No set method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1306:42 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1306:46 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1308:17 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public inline operator fun kotlin.text.StringBuilder /* = java.lang.StringBuilder */.set(index: Int, value: Char): Unit defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1308:23 No set method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1308:51 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1308:55 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1316:9 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1320:40 None of the following functions can be called with the arguments supplied: 
+public open fun <R> map(callback: (value: Any) -> TypeVariable(R)): UTSArray<TypeVariable(R)> defined in io.dcloud.uts.UTSArray
+public open fun <R> map(callback: (value: Any, index: Number) -> TypeVariable(R)): UTSArray<TypeVariable(R)> defined in io.dcloud.uts.UTSArray
+public open fun <R> map(callback: (value: Any, index: Number, array: UTSArray<Any>) -> TypeVariable(R)): UTSArray<TypeVariable(R)> defined in io.dcloud.uts.UTSArray
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1320:44 Function invocation 'convertCategoryStatsToYuan(...)' expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1320:44 No value passed for parameter 'data'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1324:20 For-loop range must have an 'iterator()' method
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1325:57 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1325:61 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1326:17 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public inline operator fun kotlin.text.StringBuilder /* = java.lang.StringBuilder */.set(index: Int, value: Char): Unit defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1326:23 No set method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1326:42 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1326:46 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1328:17 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public inline operator fun kotlin.text.StringBuilder /* = java.lang.StringBuilder */.set(index: Int, value: Char): Unit defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1328:23 No set method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1328:58 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1328:62 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1336:9 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1341:63 Unresolved reference: income_daily_stats
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1342:64 Unresolved reference: expense_daily_stats
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1346:57 Unresolved reference: weekly_stats
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1350:58 Unresolved reference: monthly_stats
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:21 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1369:21 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1370:39 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1376:29 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1380:44 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1383:13 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1387:13 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1402:12 Type mismatch: inferred type is UTSPromise<T> but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1402:20 Type mismatch: inferred type is `<no name provided>` but RequestOptions was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1412:1 A 'return' expression required in a function with a block body ('{...}')
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1412:3 Conflicting overloads: public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt, public fun `<no name provided>`(): Unit defined in uni.UNI5A7011F in file index.kt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1412:3 Function declaration must have a name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1415:25 None of the following functions can be called with the arguments supplied: 
+public constructor Date(value: Number) defined in io.dcloud.uts.Date
+public constructor Date(value: String?) defined in io.dcloud.uts.Date
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1416:11 Unresolved reference: type
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1435:42 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1438:13 Unresolved reference: type
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1461:12 Type mismatch: inferred type is `<no name provided>` but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1466:15 Unresolved reference: defineComponent
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1466:31 Unresolved reference: defineComponent
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1466:47 Unresolved reference: let
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1471:38 Unresolved reference: PropType
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1483:40 Unresolved reference: PropType
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1489:40 Unresolved reference: PropType
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1495:40 Unresolved reference: PropType
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1501:28 Classifier 'Number' does not have a companion object, and thus must be initialized here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1505:28 Classifier 'Number' does not have a companion object, and thus must be initialized here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1509:40 Unresolved reference: PropType
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1535:9 A 'return' expression required in a function with a block body ('{...}')
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1535:11 Too many arguments for public abstract operator fun invoke(): [Error type: No type specified for unknown element] defined in kotlin.Function0
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1536:13 'return' is not allowed here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1545:13 Unresolved reference: it
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1545:16 Variable expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1546:13 Unresolved reference: it
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1547:17 Unresolved reference: it
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1556:36 Unresolved reference: loading
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1557:36 Unresolved reference: error
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1558:36 Unresolved reference: ctx
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1558:42 Unresolved reference: uni_createCanvasContext
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1558:69 Unresolved reference: chartId
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1559:36 Unresolved reference: processData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1560:42 Unresolved reference: drawChart
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1561:36 Unresolved reference: loading
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1564:36 Unresolved reference: error
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1564:48 Type mismatch: inferred type is Throwable but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1564:55 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1569:36 Unresolved reference: loading
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1575:28 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1576:35 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1576:48 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1577:28 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1579:53 Unresolved reference: categories
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1580:49 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1589:37 Unresolved reference: ctx
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1589:48 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1592:47 Unresolved reference: ctx
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1593:52 Unresolved reference: width
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1594:53 Unresolved reference: height
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1595:33 Unresolved reference: clearRect
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1596:33 Unresolved reference: setFillStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1597:33 Unresolved reference: fillRect
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1598:38 Unresolved reference: type
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1600:40 Unresolved reference: drawLineChart
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1602:40 Unresolved reference: drawBarChart
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1604:40 Unresolved reference: drawPieChart
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1606:40 Unresolved reference: drawAreaChart
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1608:36 Unresolved reference: showLegend
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1609:36 Unresolved reference: drawLegend
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1611:33 Unresolved reference: draw
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1618:29 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1618:52 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1621:42 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1622:50 Type mismatch: inferred type is Boolean but UTSArray<Number> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1622:57 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1622:65 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1623:56 Type mismatch: inferred type is Boolean but UTSArray<String> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1623:59 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1623:83 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1629:46 Type mismatch: inferred type is Number but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1629:46 Type mismatch: inferred type is Boolean but Number was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1629:69 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1630:28 Unresolved reference: showGrid
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1631:28 Unresolved reference: drawGrid
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1633:25 Unresolved reference: setStrokeStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1633:43 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1634:25 Unresolved reference: setLineWidth
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1635:25 Unresolved reference: beginPath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1643:37 Unresolved reference: moveTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1645:37 Unresolved reference: lineTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1650:25 Unresolved reference: stroke
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1651:25 Unresolved reference: setFillStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1651:41 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1658:33 Unresolved reference: beginPath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1659:33 Unresolved reference: arc
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1660:33 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public fun <T> Array<TypeVariable(T)>.fill(element: TypeVariable(T), fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun BooleanArray.fill(element: Boolean, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ByteArray.fill(element: Byte, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun CharArray.fill(element: Char, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun DoubleArray.fill(element: Double, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun FloatArray.fill(element: Float, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun IntArray.fill(element: Int, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun LongArray.fill(element: Long, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ShortArray.fill(element: Short, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UByteArray.fill(element: UByte, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UIntArray.fill(element: UInt, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ULongArray.fill(element: ULong, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UShortArray.fill(element: UShort, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public inline fun <T> MutableList<TypeVariable(T)>.fill(value: TypeVariable(T)): Unit defined in kotlin.collections
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1669:29 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1669:52 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1672:42 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1673:50 Type mismatch: inferred type is Boolean but UTSArray<Number> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1673:57 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1673:65 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1674:56 Type mismatch: inferred type is Boolean but UTSArray<String> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1674:59 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1674:83 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1680:46 Type mismatch: inferred type is Number but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1680:46 Type mismatch: inferred type is Boolean but Number was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1680:69 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1681:28 Unresolved reference: showGrid
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1682:28 Unresolved reference: drawGrid
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1693:33 Unresolved reference: setFillStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1693:49 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1693:63 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1694:33 Unresolved reference: fillRect
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1703:29 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1703:52 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1706:42 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1707:50 Type mismatch: inferred type is Boolean but UTSArray<Number> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1707:57 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1707:65 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1721:33 Unresolved reference: setFillStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1721:49 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1721:63 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1722:33 Unresolved reference: beginPath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1723:33 Unresolved reference: moveTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1724:33 Unresolved reference: arc
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1725:33 Unresolved reference: closePath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1726:33 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public fun <T> Array<TypeVariable(T)>.fill(element: TypeVariable(T), fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun BooleanArray.fill(element: Boolean, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ByteArray.fill(element: Byte, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun CharArray.fill(element: Char, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun DoubleArray.fill(element: Double, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun FloatArray.fill(element: Float, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun IntArray.fill(element: Int, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun LongArray.fill(element: Long, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ShortArray.fill(element: Short, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UByteArray.fill(element: UByte, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UIntArray.fill(element: UInt, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ULongArray.fill(element: ULong, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UShortArray.fill(element: UShort, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public inline fun <T> MutableList<TypeVariable(T)>.fill(value: TypeVariable(T)): Unit defined in kotlin.collections
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1736:29 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1736:52 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1739:42 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1740:50 Type mismatch: inferred type is Boolean but UTSArray<Number> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1740:57 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1740:65 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1741:56 Type mismatch: inferred type is Boolean but UTSArray<String> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1741:59 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1741:83 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1747:46 Type mismatch: inferred type is Number but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1747:46 Type mismatch: inferred type is Boolean but Number was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1747:69 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1748:28 Unresolved reference: showGrid
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1749:28 Unresolved reference: drawGrid
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1751:25 Unresolved reference: setFillStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1751:41 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1752:25 Unresolved reference: beginPath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1760:37 Unresolved reference: moveTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1762:37 Unresolved reference: lineTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1767:25 Unresolved reference: lineTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1768:25 Unresolved reference: lineTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1769:25 Unresolved reference: closePath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1770:25 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public fun <T> Array<TypeVariable(T)>.fill(element: TypeVariable(T), fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun BooleanArray.fill(element: Boolean, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ByteArray.fill(element: Byte, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun CharArray.fill(element: Char, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun DoubleArray.fill(element: Double, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun FloatArray.fill(element: Float, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun IntArray.fill(element: Int, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun LongArray.fill(element: Long, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ShortArray.fill(element: Short, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UByteArray.fill(element: UByte, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UIntArray.fill(element: UInt, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun ULongArray.fill(element: ULong, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public fun UShortArray.fill(element: UShort, fromIndex: Int = ..., toIndex: Int = ...): Unit defined in kotlin.collections
+public inline fun <T> MutableList<TypeVariable(T)>.fill(value: TypeVariable(T)): Unit defined in kotlin.collections
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1771:25 Unresolved reference: setStrokeStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1771:43 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1772:25 Unresolved reference: setLineWidth
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1773:25 Unresolved reference: beginPath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1781:37 Unresolved reference: moveTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1783:37 Unresolved reference: lineTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1788:25 Unresolved reference: stroke
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1791:29 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1791:52 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1799:38 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1800:50 Unresolved reference: chartData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1802:33 Unresolved reference: setFillStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1802:49 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1802:63 Unresolved reference: colors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1803:33 Unresolved reference: fillRect
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1804:33 Unresolved reference: setFillStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1805:33 Unresolved reference: setFontSize
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1806:33 Unresolved reference: fillText
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1806:49 Unresolved reference: name
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1806:57 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1812:25 Unresolved reference: setStrokeStyle
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1813:25 Unresolved reference: setLineWidth
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1818:33 Unresolved reference: beginPath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1819:33 Unresolved reference: moveTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1820:33 Unresolved reference: lineTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1821:33 Unresolved reference: stroke
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1830:33 Unresolved reference: beginPath
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1831:33 Unresolved reference: moveTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1832:33 Unresolved reference: lineTo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1833:33 Unresolved reference: stroke
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1839:24 Unresolved reference: error
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1839:36 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1839:43 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1840:27 Unresolved reference: message
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1846:24 Unresolved reference: initChart
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1934:11 Redeclaration: Transaction
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/index.kt:1940:12 Type mismatch: inferred type is io.dcloud.uniapp.extapi.RequestTask? /* = uts.sdk.modules.DCloudUniNetwork.RequestTask? */ but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:43:21 Type mismatch: inferred type is UniNormalPage but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:43:36 Type mismatch: inferred type is OnLoadOptions but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:43:59 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:46:21 Unresolved reference: loadSession
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:49:38 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:60:17 Unresolved reference: loadHistory
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:71:61 No value passed for parameter 'p1'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:71:61 No value passed for parameter 'p2'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:73:37 Unresolved reference: success
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:73:69 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:74:57 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:75:45 Type mismatch: inferred type is `<no name provided>` but Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:76:62 Unresolved reference: sessionId
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:77:66 Unresolved reference: firstQuestion
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:77:83 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:78:62 Unresolved reference: createdAt
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:78:75 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:106:37 Unresolved reference: success
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:106:69 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:107:50 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:107:72 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:107:75 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:114:70 Unresolved reference: Input
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:115:73 Unresolved reference: Response
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:116:46 Unresolved reference: Input
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:116:60 Unresolved reference: Input
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:117:61 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:119:61 Unresolved reference: Input
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:121:103 Unresolved reference: Input
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:123:46 Unresolved reference: Response
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:123:63 Unresolved reference: Response
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:124:61 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:126:61 Unresolved reference: Response
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:128:93 Unresolved reference: Response
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:134:57 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:141:33 Unresolved reference: scrollToBottom
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:144:50 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:155:46 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:171:29 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:174:45 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:179:25 Unresolved reference: scrollToBottom
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:181:45 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:186:25 Unresolved reference: scrollToBottom
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:190:73 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:190:73 Type mismatch: inferred type is Boolean but String? was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:190:99 Unresolved reference: undefined
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:192:42 Unresolved reference: success
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:192:62 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:193:53 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:195:57 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:197:37 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:205:57 Unresolved reference: error
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:205:66 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:206:53 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:215:49 Type mismatch: inferred type is `<no name provided>` but ChatMessage was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:223:29 Unresolved reference: scrollToBottom
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:236:21 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:245:37 Unresolved reference: toLocaleTimeString
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/AIchat/AIchat.kt:254:37 Unresolved reference: toLocaleDateString
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:63:17 Unresolved reference: loadData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:93:35 Unresolved reference: loadTrendDataFromTransactions
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:94:35 Unresolved reference: loadCategoryData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:100:50 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:104:52 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:108:52 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:113:46 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:136:54 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:137:55 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:138:48 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:139:69 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:141:49 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:142:71 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:146:29 Unresolved reference: processTrendDataFromTransactions
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:151:50 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:155:52 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:159:52 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:169:34 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:170:34 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:171:35 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:172:34 Unresolved reference: generateTimeRanges
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:174:40 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:174:47 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:177:58 Unresolved reference: TradeTime
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:182:36 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:182:51 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:182:61 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:186:58 Unresolved reference: TradeTime
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:191:36 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:191:51 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:191:61 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:195:49 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.div(other: Number): Number defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:196:51 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.div(other: Number): Number defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:199:54 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:223:30 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:229:44 None of the following functions can be called with the arguments supplied: 
+public constructor Date(value: Number) defined in io.dcloud.uts.Date
+public constructor Date(value: String?) defined in io.dcloud.uts.Date
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:231:45 Overload resolution ambiguity: 
+public constructor Date(value: Number) defined in io.dcloud.uts.Date
+public constructor Date(value: String?) defined in io.dcloud.uts.Date
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:233:43 Overload resolution ambiguity: 
+public constructor Date(value: Number) defined in io.dcloud.uts.Date
+public constructor Date(value: String?) defined in io.dcloud.uts.Date
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:235:59 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:256:49 None of the following functions can be called with the arguments supplied: 
+public constructor Date(value: Number) defined in io.dcloud.uts.Date
+public constructor Date(value: String?) defined in io.dcloud.uts.Date
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:259:47 Overload resolution ambiguity: 
+public constructor Date(value: Number) defined in io.dcloud.uts.Date
+public constructor Date(value: String?) defined in io.dcloud.uts.Date
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:300:47 Not enough information to infer type variable K
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:301:50 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:301:75 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:302:50 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:302:55 Overload resolution ambiguity: 
+public inline fun <T> Iterable<TypeVariable(T)>.forEach(action: (TypeVariable(T)) -> Unit): Unit defined in kotlin.collections
+public inline fun <K, V> Map<out TypeVariable(K), TypeVariable(V)>.forEach(action: (Map.Entry<TypeVariable(K), TypeVariable(V)>) -> Unit): Unit defined in kotlin.collections
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:302:67 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:306:61 Unresolved reference: fromEntries
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:314:63 Unresolved reference: keys
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:315:68 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:316:68 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:317:67 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:318:42 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:319:88 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:320:68 Unresolved reference: keys
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:320:82 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:321:68 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:322:68 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:325:42 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:325:65 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:326:60 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:328:49 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:328:72 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:329:60 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:331:49 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:331:72 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:332:60 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:334:49 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:334:72 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:335:60 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:338:33 Type mismatch: inferred type is Nothing? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:338:68 Unresolved reference: length
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:339:79 Unresolved reference: length
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:340:53 Unresolved reference: generateCategoryStatsFromTransactions
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:341:33 Unresolved reference: updateCategoryChart
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:345:50 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:352:46 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:360:43 Not enough information to infer type variable K
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:363:106 Unresolved reference: keys
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:364:50 Unresolved reference: CategoryId
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:364:76 Unresolved reference: categoryId
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:364:102 Unresolved reference: Category
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:364:118 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:366:46 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:366:68 Unresolved reference: amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:366:78 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:367:37 Unresolved reference: CategoryName
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:368:52 Unresolved reference: CategoryName
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:369:44 Unresolved reference: categoryName
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:370:52 Unresolved reference: categoryName
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:371:44 Unresolved reference: Category
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:372:52 Unresolved reference: Category
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:373:44 Unresolved reference: Category
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:374:52 Unresolved reference: Category
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:376:41 Type mismatch: inferred type is Boolean but Number was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:377:40 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:377:40 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:377:52 Type inference failed. The value of the type parameter K should be mentioned in input types (argument types, receiver type or expected type). Try to specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:377:52 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:377:52 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:377:71 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:382:41 Function '<Error function>' should return Unit to be used by corresponding operator '+='
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:383:40 Function '<Error function>' should return Unit to be used by corresponding operator '+='
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:395:90 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:395:93 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:407:41 Unresolved reference: Category
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:407:59 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:408:42 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:408:52 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:408:55 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.div(other: Number): Number defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:410:46 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:431:38 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:458:51 Type mismatch: inferred type is Any? but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:473:61 Unresolved reference: categories
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:473:96 Unresolved reference: categories
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:474:51 Unresolved reference: `default`
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:474:134 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:474:179 Unresolved reference: categories
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:494:64 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:494:98 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:495:51 Unresolved reference: `default`
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:495:137 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:495:161 Not enough information to infer type variable E
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:513:60 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:513:94 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:515:117 Unresolved reference: series
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:515:129 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:515:135 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:515:140 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:515:149 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:517:128 Not enough information to infer type variable V
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:517:158 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun String.get(index: Number): Char defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:517:176 No get method providing array access
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/analyze/analyze.kt:517:202 Unresolved reference: length
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/category-demo/category-demo.kt:108:21 Not enough information to infer type variable return type of lambda
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/category-demo/category-demo.kt:108:152 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/forgot-password/forgot-password.kt:42:21 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/forgot-password/forgot-password.kt:50:21 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/forgot-password/forgot-password.kt:50:44 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/forgot-password/forgot-password.kt:50:71 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:68:57 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:72:34 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:29:41 Null can not be a value of a non-null type Ref<TypeVariable(T)>
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:33:40 Null can not be a value of a non-null type Ref<TypeVariable(T)>
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:35:17 Unresolved reference: getCurrentUserInfo
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:36:17 Unresolved reference: loadFriendInvitations
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:37:17 Unresolved reference: loadFriendList
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:42:21 Type mismatch: inferred type is Any? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:44:45 Type mismatch: inferred type is Any? but Any was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:44:56 Type mismatch: inferred type is Any? but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:46:45 Null can not be a value of a non-null type Any
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:49:41 Null can not be a value of a non-null type Any
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:55:29 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:59:29 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:59:90 Unresolved reference: email
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:61:50 Null can not be a value of a non-null type Any
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:66:50 Unresolved reference: searchUserByEmailDirect
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:74:51 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:77:48 Unresolved reference: inviter
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:77:81 Unresolved reference: status
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:87:54 Null can not be a value of a non-null type Any
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:88:72 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:88:92 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:92:50 Null can not be a value of a non-null type Any
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:124:29 Type mismatch: inferred type is UTSJSONObject? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:142:29 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:149:52 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:151:48 Unresolved reference: pending
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:153:29 Unresolved reference: loadFriendInvitations
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:156:48 Unresolved reference: pending
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:158:29 Unresolved reference: loadFriendInvitations
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:172:55 Unresolved reference: status
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:172:90 Unresolved reference: invitee
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:172:124 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:188:51 Type mismatch: inferred type is Boolean but UTSArray<Any> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:188:73 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:201:84 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:207:72 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:207:72 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:207:92 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:223:84 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:228:72 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:228:72 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:228:92 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:241:38 Null can not be a value of a non-null type Any
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:256:29 Type mismatch: inferred type is (InputEvent /* = UniInputEvent */) -> Unit but () -> Unit was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:256:29 Type mismatch: inferred type is (InputEvent /* = UniInputEvent */) -> Unit but () -> TypeVariable(_R) was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:256:32 Expected no parameters 
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:270:130 Unresolved reference: email
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:271:133 Unresolved reference: username
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:273:60 Unresolved reference: added
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:273:89 Unresolved reference: pending
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:285:63 Unresolved reference: pending
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:302:129 Unresolved reference: inviter
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:303:126 Unresolved reference: inviter
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:332:131 Unresolved reference: username
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/friend/friend.kt:333:128 Unresolved reference: email
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:40:17 Interface Feature does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:41:17 Interface Feature does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:42:17 Interface Feature does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:43:17 Interface Feature does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:44:17 Interface Feature does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:45:17 Interface Feature does not have constructors
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:55:50 Type mismatch: inferred type is Any? but String? was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:56:33 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:61:33 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:61:54 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:62:59 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:62:80 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:62:83 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.div(other: Number): Number defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:71:33 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:71:58 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:71:77 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:71:101 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:72:65 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:73:74 Unresolved reference: Income
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:73:94 Unresolved reference: Income
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:74:47 Unresolved reference: Income
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:79:75 Unresolved reference: Expense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:79:96 Unresolved reference: Expense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/index/index.kt:80:47 Unresolved reference: Expense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:44:29 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:44:45 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:60:33 Type mismatch: inferred type is ApiResponse<LoginResponse> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:60:70 Type mismatch: inferred type is LoginResponse? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:62:59 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type LoginResponse?
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:63:58 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type LoginResponse?
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:76:44 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:76:62 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/login/login.kt:77:68 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/pet/pet.kt:76:66 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/pet/pet.kt:76:69 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.minus(other: Number): Number defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/pet/pet.kt:76:91 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:36:29 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:36:48 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:36:64 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:36:83 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:36:109 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:70:33 Type mismatch: inferred type is Unit but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:70:55 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:70:72 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:71:53 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:71:70 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:72:66 Unresolved reference: token
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:73:73 Unresolved reference: user
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:84:44 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:84:62 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/register/register.kt:85:68 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:27:52 Type expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:30:14 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:30:13 A 'return' expression required in a function with a block body ('{...}')
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:34:23 Unresolved reference: type
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:53:17 'return' is not allowed here
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:104:17 Unresolved reference: resetReportData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:154:55 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:154:107 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:204:33 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:204:59 Unresolved reference: summary
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:204:81 Unresolved reference: suggestion
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:204:106 Unresolved reference: tags
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:205:49 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:205:60 Unresolved reference: summary
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:205:71 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:206:52 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:206:63 Unresolved reference: suggestion
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:206:77 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:207:46 Type mismatch: inferred type is Boolean but UTSArray<String> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:207:57 Unresolved reference: tags
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:207:65 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:220:37 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:222:55 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:223:68 Unresolved reference: Data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:224:62 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:225:68 Unresolved reference: data
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:227:54 Type mismatch: inferred type is Any but Nothing? was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:230:41 Type mismatch: inferred type is Nothing? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:230:67 Unresolved reference: Income
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:230:88 Unresolved reference: Expense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:231:41 Unresolved reference: updateReportDataWithTotalStats
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:234:41 Unresolved reference: updateReportDataWithNoData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:238:37 Unresolved reference: updateReportDataWithNoData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:243:33 Unresolved reference: updateReportDataWithNoData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:257:29 Unresolved reference: updateReportDataWithNoData
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:268:62 Unresolved reference: Income
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:269:63 Unresolved reference: Expense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:270:41 Unresolved reference: Income
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:270:51 Type mismatch: inferred type is `<no name provided>` but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:274:42 Unresolved reference: Expense
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:274:53 Type mismatch: inferred type is `<no name provided>` but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:280:49 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:281:50 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:282:43 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:283:45 Unresolved reference: Amount
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:290:54 None of the following functions can be called with the arguments supplied: 
+public constructor Map<K, V>(map: io.dcloud.uts.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(mutableList: UTSArray<UTSArray<Any?>>) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Int) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(size: Number) defined in io.dcloud.uts.Map
+public constructor Map<K, V>(kotlinMap: kotlin.collections.Map<TypeVariable(K), TypeVariable(V)>) defined in io.dcloud.uts.Map
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:311:38 Illegal escape: '\\x'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:312:49 Unresolved reference: Count
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:317:38 Illegal escape: '\\x'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:318:50 Unresolved reference: Count
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:337:38 Illegal escape: '\\x'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:435:120 Unresolved reference: label
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:436:119 Unresolved reference: label
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:437:119 Unresolved reference: value
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:440:50 Unresolved reference: trendType
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:441:67 Unresolved reference: trend
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:450:32 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:450:49 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:470:32 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/report/report.kt:470:50 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:45:21 Type mismatch: inferred type is Any? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:47:47 Type mismatch: inferred type is Any? but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:48:42 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:48:47 Unresolved reference: username
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:48:59 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:49:49 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:50:41 Unresolved reference: id
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:58:21 Type mismatch: inferred type is Any? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:59:43 Type mismatch: inferred type is Any? but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:61:17 Unresolved reference: testConnection
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:79:25 Unresolved reference: logout
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:106:40 Unresolved reference: connected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:108:54 Type mismatch: inferred type is Boolean but Number was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:108:61 Unresolved reference: responseTime
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:108:77 The integer literal does not conform to the expected type Boolean
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:112:54 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:112:61 Unresolved reference: error
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:112:70 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:118:50 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:118:50 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:118:67 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:129:41 Unresolved reference: keys
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:129:69 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:136:90 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/settings/settings.kt:143:43 Type mismatch: inferred type is String? but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/social/social.kt:69:122 Not enough information to infer type variable V
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/social/social.kt:69:160 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public operator fun Number.plus(other: Number): Number defined in io.dcloud.uts
+public operator fun Number.plus(other: String): String defined in io.dcloud.uts
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:40:65 An anonymous function is not allowed to specify default values for its parameters
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:49:33 This variable must either have a type annotation or be initialized
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:72:52 Type mismatch: inferred type is Boolean but UTSArray<Category> was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:72:69 Type mismatch: inferred type is UTSArray<???> but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:86:72 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:86:92 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:99:21 Type mismatch: inferred type is Number? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:100:48 Type mismatch: inferred type is Number? but Number was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:101:25 Type mismatch: inferred type is Any but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:102:41 Unresolved reference: emoji
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:105:21 Type mismatch: inferred type is String? but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:106:28 Type mismatch: inferred type is String? but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:135:30 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:136:31 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:137:29 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:138:30 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:139:32 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:158:23 Type mismatch: inferred type is () -> UTSPromise<Unit> but OnMounted /* = () -> Unit */ was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:163:48 No value passed for parameter 'p1'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:173:48 No value passed for parameter 'p1'
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:190:33 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:199:33 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:203:33 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:203:48 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:203:64 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:203:78 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:203:93 Unresolved reference: !
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:220:33 Type mismatch: inferred type is Unit but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:220:55 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:220:82 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:230:48 Type mismatch: inferred type is Boolean but String was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:230:57 Unresolved reference: Msg
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:230:64 Type mismatch: inferred type is String but Boolean was expected
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:237:33 None of the following functions can be called with the arguments supplied: 
+public inline fun String(stringBuffer: StringBuffer): String defined in kotlin.text
+public inline fun String(stringBuilder: StringBuilder): String defined in kotlin.text
+public inline fun String(bytes: ByteArray): String defined in kotlin.text
+public inline fun String(chars: CharArray): String defined in kotlin.text
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:394:21 Not enough information to infer type variable return type of lambda
+e: file://[PackagePath]/wgtRoot/__UNI__5A7011F/.uniappx/android/src/pages/transaction/transaction.kt:394:152 Cannot infer a type for this parameter. Please specify it explicitly.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileReleaseKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+* Exception is:
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileReleaseKotlin'.
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:130)
+	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:293)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:128)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+	at org.gradle.workers.internal.DefaultWorkerExecutor$WorkItemExecution.waitForCompletion(DefaultWorkerExecutor.java:287)
+	at org.gradle.internal.work.DefaultAsyncWorkTracker.lambda$waitForItemsAndGatherFailures$2(DefaultAsyncWorkTracker.java:130)
+	at org.gradle.internal.Factories$1.create(Factories.java:31)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withoutLocks(DefaultWorkerLeaseService.java:335)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withoutLocks(DefaultWorkerLeaseService.java:318)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withoutLock(DefaultWorkerLeaseService.java:323)
+	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForItemsAndGatherFailures(DefaultAsyncWorkTracker.java:126)
+	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForItemsAndGatherFailures(DefaultAsyncWorkTracker.java:92)
+	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForAll(DefaultAsyncWorkTracker.java:78)
+	at org.gradle.internal.work.DefaultAsyncWorkTracker.waitForCompletion(DefaultAsyncWorkTracker.java:66)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:252)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:29)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:26)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:47)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:229)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:212)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:195)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:162)
+	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:105)
+	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:44)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:59)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:56)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:56)
+	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:44)
+	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
+	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
+	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:50)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:28)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:67)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:37)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:61)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:26)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:40)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:29)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:75)
+	at org.gradle.internal.Either$Right.fold(Either.java:175)
+	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:73)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:48)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:46)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:35)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:49)
+	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:27)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:71)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:39)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:65)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:36)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:107)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:56)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:64)
+	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:43)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:125)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:61)
+	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:36)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:289)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:48)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:35)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:61)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:127)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
+	at org.jetbrains.kotlin.gradle.tasks.TasksUtilsKt.throwExceptionIfCompilationFailed(tasksUtils.kt:22)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:144)
+	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:76)
+	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
+	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOperation(AbstractWorker.java:41)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsolationWorkerFactory.java:59)
+	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0(DefaultWorkerExecutor.java:174)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runExecution(DefaultConditionalExecutionQueue.java:194)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.access$700(DefaultConditionalExecutionQueue.java:127)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner$1.run(DefaultConditionalExecutionQueue.java:169)
+	at org.gradle.internal.Factories$1.create(Factories.java:31)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:132)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runBatch(DefaultConditionalExecutionQueue.java:164)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.run(DefaultConditionalExecutionQueue.java:133)
+	... 2 moreBUILD FAILED in 1m 31s
+gradle build error: 1

@@ -1,0 +1,470 @@
+import { ref, onMounted, computed } from 'vue';
+import { getCategoryRanking, getTransactionListForCategory } from '../../common/api/analyze';
+import { getCategoryList } from '../../common/api/category';
+import SimpleChart from '../../components/SimpleChart.uvue';
+// 时间选择器
+const __sfc__ = defineComponent({
+    __name: 'analyze',
+    setup(__props): any | null {
+        const __ins = getCurrentInstance()!;
+        const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+        const _cache = __ins.renderCache;
+        const timeTabs = [
+            { label: '本周', value: 'week' },
+            { label: '本月', value: 'month' },
+            { label: '本年', value: 'year' }
+        ] as UTSJSONObject[];
+        const activeTimeTab = ref('month');
+        // 数据状态
+        const isLoading = ref(false);
+        const trendChartData = ref({});
+        const categoryChartData = ref({});
+        // 图表颜色配置
+        const chartColors = { __$originalPosition: new UTSSourceMapPosition("chartColors", "pages/analyze/analyze.uvue", 108, 7),
+            bar: ["#91CB74", "#EE6666"],
+            pie: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4"]
+        } as UTSJSONObject;
+        // 方法
+        function goBack() {
+            uni.navigateBack();
+        }
+        function switchTimeTab(tab: string) {
+            activeTimeTab.value = tab;
+            loadData();
+        }
+        function getPeriodText(): string {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            switch (activeTimeTab.value) {
+                case 'week':
+                    return `${year}年第${Math.ceil((now.getTime() - new Date(year, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) + 1)}周`;
+                case 'month':
+                    return `${year}年${month}月`;
+                case 'year':
+                    return `${year}年`;
+                default:
+                    return '';
+            }
+        }
+        function formatAmount(amount: number): string {
+            return (amount / 100).toFixed(2);
+        }
+        async function loadData(): Promise<void> {
+            if (isLoading.value)
+                return;
+            isLoading.value = true;
+            try {
+                // 直接加载交易数据来生成趋势图
+                await loadTrendDataFromTransactions();
+                // 加载分类数据用于饼图
+                await loadCategoryData();
+            }
+            catch (error: any) {
+                console.error('加载数据失败:', error, " at pages/analyze/analyze.uvue:157");
+                uni.showToast({
+                    title: '加载失败，请重试',
+                    icon: 'none'
+                });
+                // 显示空图表
+                trendChartData.value = {
+                    categories: [],
+                    series: [
+                        { name: "收入", data: [] },
+                        { name: "支出", data: [] }
+                    ]
+                };
+                categoryChartData.value = { series: [] };
+            }
+            finally {
+                isLoading.value = false;
+            }
+        }
+        async function loadTrendDataFromTransactions(): Promise<void> {
+            try {
+                console.log('开始从交易数据生成趋势图，时间范围:', activeTimeTab.value, " at pages/analyze/analyze.uvue:179");
+                // 获取收入交易数据
+                const incomeResponse = await getTransactionListForCategory({
+                    type: activeTimeTab.value,
+                    income_expense: 'income'
+                });
+                // 获取支出交易数据
+                const expenseResponse = await getTransactionListForCategory({
+                    type: activeTimeTab.value,
+                    income_expense: 'expense'
+                });
+                console.log('收入交易响应:', incomeResponse, " at pages/analyze/analyze.uvue:193");
+                console.log('支出交易响应:', expenseResponse, " at pages/analyze/analyze.uvue:194");
+                // 提取交易列表
+                let incomeTransactions = [];
+                let expenseTransactions = [];
+                if (incomeResponse.Data?.List) {
+                    incomeTransactions = incomeResponse.Data.List;
+                }
+                if (expenseResponse.Data?.List) {
+                    expenseTransactions = expenseResponse.Data.List;
+                }
+                console.log('收入交易数量:', incomeTransactions.length, " at pages/analyze/analyze.uvue:208");
+                console.log('支出交易数量:', expenseTransactions.length, " at pages/analyze/analyze.uvue:209");
+                // 处理趋势数据
+                processTrendDataFromTransactions(incomeTransactions, expenseTransactions);
+            }
+            catch (error: any) {
+                console.error('加载趋势数据失败:', error, " at pages/analyze/analyze.uvue:215");
+                // 显示空图表
+                trendChartData.value = {
+                    categories: [],
+                    series: [
+                        { name: "收入", data: [] },
+                        { name: "支出", data: [] }
+                    ]
+                };
+            }
+        }
+        function processTrendDataFromTransactions(incomeTransactions: any[], expenseTransactions: any[]) {
+            console.log('从交易数据生成趋势图', " at pages/analyze/analyze.uvue:228");
+            const categories = [];
+            const incomeData = [];
+            const expenseData = [];
+            // 根据时间范围生成时间段
+            const timeRanges = generateTimeRanges();
+            console.log('生成的时间段:', timeRanges, " at pages/analyze/analyze.uvue:236");
+            timeRanges.forEach((range, index) => {
+                categories.push(range.label);
+                // 计算该时间段的收入
+                const incomeInRange = incomeTransactions.filter((transaction): boolean => {
+                    const tradeTime = new Date(transaction.TradeTime);
+                    return tradeTime >= range.start && tradeTime <= range.end;
+                });
+                const totalIncome = incomeInRange.reduce((sum, transaction): any => {
+                    return sum + (transaction.Amount || 0);
+                }, 0);
+                // 计算该时间段的支出
+                const expenseInRange = expenseTransactions.filter((transaction): boolean => {
+                    const tradeTime = new Date(transaction.TradeTime);
+                    return tradeTime >= range.start && tradeTime <= range.end;
+                });
+                const totalExpense = expenseInRange.reduce((sum, transaction): any => {
+                    return sum + (transaction.Amount || 0);
+                }, 0);
+                console.log(`时间段${index + 1} (${range.label}): 收入 ${totalIncome}, 支出 ${totalExpense}`, " at pages/analyze/analyze.uvue:261");
+                incomeData.push(totalIncome / 100);
+                expenseData.push(totalExpense / 100);
+            });
+            trendChartData.value = {
+                categories,
+                series: [
+                    {
+                        name: "收入",
+                        data: incomeData
+                    },
+                    {
+                        name: "支出",
+                        data: expenseData
+                    }
+                ]
+            };
+            console.log('最终趋势图数据:', trendChartData.value, " at pages/analyze/analyze.uvue:281");
+        }
+        function generateTimeRanges(): never[] {
+            const now = new Date();
+            const ranges = [];
+            switch (activeTimeTab.value) {
+                case 'week':
+                    // 生成最近7天的数据
+                    for (let i = 6; i >= 0; i--) {
+                        const date = new Date(now);
+                        date.setDate(date.getDate() - i);
+                        const start = new Date(date);
+                        start.setHours(0, 0, 0, 0);
+                        const end = new Date(date);
+                        end.setHours(23, 59, 59, 999);
+                        ranges.push({
+                            label: `${date.getMonth() + 1}/${date.getDate()}`,
+                            start,
+                            end
+                        });
+                    }
+                    break;
+                case 'month':
+                    // 生成最近4周的数据
+                    for (let i = 3; i >= 0; i--) {
+                        const weekStart = new Date(now);
+                        weekStart.setDate(weekStart.getDate() - (weekStart.getDay() + 7 * i));
+                        weekStart.setHours(0, 0, 0, 0);
+                        const weekEnd = new Date(weekStart);
+                        weekEnd.setDate(weekEnd.getDate() + 6);
+                        weekEnd.setHours(23, 59, 59, 999);
+                        ranges.push({
+                            label: `第${Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000) - i)}周`,
+                            start: weekStart,
+                            end: weekEnd
+                        });
+                    }
+                    break;
+                case 'year':
+                    // 生成最近12个月的数据
+                    for (let i = 11; i >= 0; i--) {
+                        const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
+                        ranges.push({
+                            label: `${monthStart.getMonth() + 1}月`,
+                            start: monthStart,
+                            end: monthEnd
+                        });
+                    }
+                    break;
+            }
+            return ranges;
+        }
+        async function loadCategoryData(): Promise<void> {
+            try {
+                console.log('开始加载分类数据，参数:', {
+                    type: activeTimeTab.value,
+                    income_expense: 'expense'
+                }, " at pages/analyze/analyze.uvue:346");
+                // 1. 先获取分类列表
+                console.log('获取分类列表...', " at pages/analyze/analyze.uvue:352");
+                const categoryResponse = await getCategoryList({
+                    income_expense: 'expense'
+                });
+                console.log('分类列表响应:', categoryResponse, " at pages/analyze/analyze.uvue:357");
+                // 创建分类ID到分类名称的映射
+                const categoryMap = new Map();
+                if (categoryResponse.data && categoryResponse.data.length > 0) {
+                    categoryResponse.data.forEach(category => {
+                        categoryMap.set(category.id, category.name);
+                    });
+                    console.log('分类映射:', Object.fromEntries(categoryMap), " at pages/analyze/analyze.uvue:365");
+                }
+                // 2. 获取交易列表
+                const response = await getTransactionListForCategory({
+                    type: activeTimeTab.value,
+                    income_expense: 'expense'
+                });
+                console.log('交易列表响应:', response, " at pages/analyze/analyze.uvue:374");
+                console.log('交易列表响应类型:', typeof response, " at pages/analyze/analyze.uvue:375");
+                console.log('交易列表响应所有属性:', Object.keys(response), " at pages/analyze/analyze.uvue:376");
+                // 尝试不同的数据访问方式
+                console.log('response.Data:', response.Data, " at pages/analyze/analyze.uvue:379");
+                console.log('response.data:', response.data, " at pages/analyze/analyze.uvue:380");
+                console.log('response.Msg:', response.Msg, " at pages/analyze/analyze.uvue:381");
+                // 检查 Data 字段的结构
+                if (response.Data) {
+                    console.log('Data 字段类型:', typeof response.Data, " at pages/analyze/analyze.uvue:385");
+                    console.log('Data 字段所有属性:', Object.keys(response.Data), " at pages/analyze/analyze.uvue:386");
+                    console.log('Data.List:', response.Data.List, " at pages/analyze/analyze.uvue:387");
+                    console.log('Data.list:', response.Data.list, " at pages/analyze/analyze.uvue:388");
+                }
+                // 尝试不同的数据访问方式
+                let transactionList = null;
+                if (response.Data?.List && response.Data.List.length > 0) {
+                    transactionList = response.Data.List;
+                    console.log('使用 response.Data.List', " at pages/analyze/analyze.uvue:395");
+                }
+                else if (response.Data?.list && response.Data.list.length > 0) {
+                    transactionList = response.Data.list;
+                    console.log('使用 response.Data.list', " at pages/analyze/analyze.uvue:398");
+                }
+                else if (response.data?.List && response.data.List.length > 0) {
+                    transactionList = response.data.List;
+                    console.log('使用 response.data.List', " at pages/analyze/analyze.uvue:401");
+                }
+                else if (response.data?.list && response.data.list.length > 0) {
+                    transactionList = response.data.list;
+                    console.log('使用 response.data.list', " at pages/analyze/analyze.uvue:404");
+                }
+                if (transactionList && transactionList.length > 0) {
+                    console.log('开始处理交易数据，数据条数:', transactionList.length, " at pages/analyze/analyze.uvue:408");
+                    // 从交易数据生成分类统计，传入分类映射
+                    const categoryStats = generateCategoryStatsFromTransactions(transactionList, categoryMap);
+                    updateCategoryChart(categoryStats);
+                }
+                else {
+                    console.log('没有交易数据，显示空饼图', " at pages/analyze/analyze.uvue:413");
+                    categoryChartData.value = { series: [] };
+                }
+            }
+            catch (error: any) {
+                console.error('加载分类数据失败:', error, " at pages/analyze/analyze.uvue:417");
+                // 分类数据加载失败时，不显示饼图，但不影响整体功能
+                categoryChartData.value = { series: [] };
+            }
+        }
+        // 从交易列表生成分类统计
+        function generateCategoryStatsFromTransactions(transactions: any[], categoryMap: Map<number, string>): unknown[] {
+            console.log('从交易数据生成分类统计，原始交易数据:', transactions, " at pages/analyze/analyze.uvue:425");
+            // 按分类ID分组统计
+            const categoryMapForStats = new Map();
+            transactions.forEach((transaction, index) => {
+                console.log(`处理第${index + 1}条交易:`, transaction, " at pages/analyze/analyze.uvue:431");
+                console.log(`第${index + 1}条交易的属性:`, Object.keys(transaction), " at pages/analyze/analyze.uvue:432");
+                // 尝试不同的字段访问方式
+                const categoryId = transaction.CategoryId || transaction.categoryId || transaction.Category?.Id || 0;
+                let categoryName = '未知分类';
+                const amount = transaction.Amount || transaction.amount || 0;
+                // 尝试获取分类名称
+                if (transaction.CategoryName) {
+                    categoryName = transaction.CategoryName;
+                }
+                else if (transaction.categoryName) {
+                    categoryName = transaction.categoryName;
+                }
+                else if (transaction.Category?.Name) {
+                    categoryName = transaction.Category.Name;
+                }
+                else if (transaction.Category?.name) {
+                    categoryName = transaction.Category.name;
+                }
+                // 使用分类映射获取名称
+                if (categoryMap.has(categoryId)) {
+                    categoryName = categoryMap.get(categoryId) || categoryName;
+                }
+                console.log(`第${index + 1}条交易 - 分类ID: ${categoryId}, 分类名称: ${categoryName}, 金额: ${amount}`, " at pages/analyze/analyze.uvue:455");
+                if (categoryMapForStats.has(categoryId)) {
+                    const existing = categoryMapForStats.get(categoryId);
+                    existing.Amount += amount;
+                    existing.Count += 1;
+                }
+                else {
+                    categoryMapForStats.set(categoryId, {
+                        Category: { Name: categoryName },
+                        Amount: amount,
+                        Count: 1
+                    });
+                }
+            });
+            // 转换为数组并按金额排序
+            const categoryStats = Array.from(categoryMapForStats.values())
+                .sort((a, b): number => b.Amount - a.Amount)
+                .slice(0, 8); // 只取前8个分类
+            console.log('生成的分类统计:', categoryStats, " at pages/analyze/analyze.uvue:475");
+            return categoryStats;
+        }
+        function updateCategoryChart(categoryList: any[]) {
+            console.log('更新分类图表，原始数据:', categoryList, " at pages/analyze/analyze.uvue:480");
+            if (categoryList.length > 0) {
+                const series = categoryList.map((item, index): UTSJSONObject => {
+                    const name = item.Category?.Name || '未知分类';
+                    const data = (item.Amount || 0) / 100;
+                    console.log(`分类${index + 1}: ${name} - ${data}`, " at pages/analyze/analyze.uvue:486");
+                    return { name, data };
+                });
+                categoryChartData.value = { series };
+                console.log('最终分类饼图数据:', categoryChartData.value, " at pages/analyze/analyze.uvue:491");
+            }
+            else {
+                console.log('分类列表为空，显示空饼图', " at pages/analyze/analyze.uvue:493");
+                categoryChartData.value = { series: [] };
+            }
+        }
+        onMounted(() => {
+            loadData();
+        });
+        return (): any | null => {
+            return createElementVNode("view", utsMapOf({ class: "container" }), [
+                createElementVNode("view", utsMapOf({ class: "header" }), [
+                    createElementVNode("text", utsMapOf({
+                        class: "back",
+                        onClick: goBack
+                    }), "←"),
+                    createElementVNode("text", utsMapOf({ class: "title" }), "财务分析"),
+                    createElementVNode("text", utsMapOf({ class: "subtitle" }), "深度分析您的财务状况")
+                ]),
+                createElementVNode("view", utsMapOf({ class: "time-selector" }), [
+                    createElementVNode("view", utsMapOf({ class: "tabs" }), [
+                        createElementVNode(Fragment, null, RenderHelpers.renderList(timeTabs, (tab, __key, __index, _cached): any => {
+                            return createElementVNode("view", utsMapOf({
+                                key: tab["value"],
+                                class: normalizeClass(['tab', activeTimeTab.value === tab["value"] ? 'active' : '']),
+                                onClick: () => { switchTimeTab(tab["value"]); }
+                            }), toDisplayString(tab["label"]), 11 /* TEXT, CLASS, PROPS */, ["onClick"]);
+                        }), 64 /* STABLE_FRAGMENT */)
+                    ])
+                ]),
+                createElementVNode("view", utsMapOf({ class: "chart-card" }), [
+                    createElementVNode("view", utsMapOf({ class: "chart-header" }), [
+                        createElementVNode("text", utsMapOf({ class: "chart-title" }), "收支趋势"),
+                        createElementVNode("text", utsMapOf({ class: "chart-subtitle" }), toDisplayString(getPeriodText()) + "收支变化", 1 /* TEXT */)
+                    ]),
+                    createElementVNode("view", utsMapOf({ class: "chart-container" }), [
+                        isTrue(trendChartData.value.categories && trendChartData.value.categories.length > 0)
+                            ? createVNode(unref(SimpleChart), utsMapOf({
+                                key: 0,
+                                type: "bar",
+                                series: trendChartData.value.series,
+                                categories: trendChartData.value.categories,
+                                width: 350,
+                                height: 200,
+                                colors: ['#91CB74', '#EE6666'],
+                                showLegend: true,
+                                showGrid: true
+                            }), null, 8 /* PROPS */, ["series", "categories"])
+                            : createElementVNode("view", utsMapOf({
+                                key: 1,
+                                class: "empty-chart"
+                            }), [
+                                createElementVNode("text", utsMapOf({ class: "empty-text" }), "暂无数据")
+                            ])
+                    ])
+                ]),
+                createElementVNode("view", utsMapOf({ class: "chart-card" }), [
+                    createElementVNode("view", utsMapOf({ class: "chart-header" }), [
+                        createElementVNode("text", utsMapOf({ class: "chart-title" }), "支出分类"),
+                        createElementVNode("text", utsMapOf({ class: "chart-subtitle" }), "按分类统计支出")
+                    ]),
+                    createElementVNode("view", utsMapOf({ class: "chart-container pie-chart-container" }), [
+                        isTrue(categoryChartData.value.series && categoryChartData.value.series.length > 0)
+                            ? createVNode(unref(SimpleChart), utsMapOf({
+                                key: 0,
+                                type: "pie",
+                                series: categoryChartData.value.series,
+                                categories: [],
+                                width: 350,
+                                height: 300,
+                                colors: ['#1890FF', '#91CB74', '#FAC858', '#EE6666', '#73C0DE', '#3CA272', '#FC8452', '#9A60B4'],
+                                showLegend: false,
+                                showGrid: false
+                            }), null, 8 /* PROPS */, ["series"])
+                            : createElementVNode("view", utsMapOf({
+                                key: 1,
+                                class: "empty-chart"
+                            }), [
+                                createElementVNode("text", utsMapOf({ class: "empty-text" }), "暂无数据")
+                            ])
+                    ]),
+                    isTrue(categoryChartData.value.series && categoryChartData.value.series.length > 0)
+                        ? createElementVNode("view", utsMapOf({
+                            key: 0,
+                            class: "custom-legend"
+                        }), [
+                            createElementVNode(Fragment, null, RenderHelpers.renderList(categoryChartData.value.series, (item, idx, __index, _cached): any => {
+                                return createElementVNode("view", utsMapOf({
+                                    class: "legend-item",
+                                    key: item.name
+                                }), [
+                                    createElementVNode("view", utsMapOf({
+                                        class: "legend-dot",
+                                        style: normalizeStyle(utsMapOf({ backgroundColor: chartColors["pie"][idx % chartColors["pie"].length] }))
+                                    }), null, 4 /* STYLE */),
+                                    createElementVNode("text", utsMapOf({ class: "legend-text" }), toDisplayString(item.name), 1 /* TEXT */)
+                                ]);
+                            }), 128 /* KEYED_FRAGMENT */)
+                        ])
+                        : createCommentVNode("v-if", true)
+                ]),
+                isTrue(isLoading.value)
+                    ? createElementVNode("view", utsMapOf({
+                        key: 0,
+                        class: "loading-overlay"
+                    }), [
+                        createElementVNode("text", utsMapOf({ class: "loading-text" }), "加载中...")
+                    ])
+                    : createCommentVNode("v-if", true)
+            ]);
+        };
+    }
+});
+export default __sfc__;
+const GenPagesAnalyzeAnalyzeStyles = [utsMapOf([["container", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#f5f7fa"], ["paddingBottom", "10%"]]))], ["header", padStyleMapOf(utsMapOf([["position", "relative"], ["backgroundImage", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"], ["backgroundColor", "rgba(0,0,0,0)"], ["paddingTop", "80rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "40rpx"], ["paddingLeft", "30rpx"], ["borderBottomLeftRadius", "30rpx"], ["borderBottomRightRadius", "30rpx"], ["textAlign", "center"], ["boxShadow", "0 4rpx 20rpx rgba(102, 126, 234, 0.2)"]]))], ["back", padStyleMapOf(utsMapOf([["position", "absolute"], ["left", "30rpx"], ["top", "80rpx"], ["fontSize", "36rpx"], ["color", "#FFFFFF"], ["fontWeight", "bold"]]))], ["title", padStyleMapOf(utsMapOf([["textAlign", "center"], ["width", "100%"], ["fontSize", "36rpx"], ["fontWeight", "bold"], ["color", "#FFFFFF"], ["marginBottom", "8rpx"]]))], ["subtitle", padStyleMapOf(utsMapOf([["textAlign", "center"], ["width", "100%"], ["fontSize", "24rpx"], ["color", "rgba(255,255,255,0.8)"]]))], ["time-selector", padStyleMapOf(utsMapOf([["marginTop", "30rpx"], ["marginRight", "30rpx"], ["marginBottom", "30rpx"], ["marginLeft", "30rpx"]]))], ["tabs", padStyleMapOf(utsMapOf([["display", "flex"], ["justifyContent", "center"], ["backgroundImage", "none"], ["backgroundColor", "rgba(255,255,255,0.95)"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "6rpx"], ["paddingRight", "6rpx"], ["paddingBottom", "6rpx"], ["paddingLeft", "6rpx"], ["boxShadow", "0 4rpx 16rpx rgba(0, 0, 0, 0.08)"]]))], ["tab", utsMapOf([["", utsMapOf([["fontSize", "26rpx"], ["color", "#666666"], ["paddingTop", "16rpx"], ["paddingRight", "32rpx"], ["paddingBottom", "16rpx"], ["paddingLeft", "32rpx"], ["borderTopLeftRadius", "16rpx"], ["borderTopRightRadius", "16rpx"], ["borderBottomRightRadius", "16rpx"], ["borderBottomLeftRadius", "16rpx"], ["textAlign", "center"], ["transitionDuration", "0.3s"]])], [".active", utsMapOf([["backgroundImage", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"], ["backgroundColor", "rgba(0,0,0,0)"], ["color", "#FFFFFF"], ["fontWeight", "bold"]])]])], ["chart-card", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "rgba(255,255,255,0.95)"], ["marginTop", "30rpx"], ["marginRight", "30rpx"], ["marginBottom", "30rpx"], ["marginLeft", "30rpx"], ["borderTopLeftRadius", "20rpx"], ["borderTopRightRadius", "20rpx"], ["borderBottomRightRadius", "20rpx"], ["borderBottomLeftRadius", "20rpx"], ["paddingTop", "30rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "30rpx"], ["paddingLeft", "30rpx"], ["boxShadow", "0 8rpx 24rpx rgba(0, 0, 0, 0.1)"]]))], ["chart-header", padStyleMapOf(utsMapOf([["marginBottom", "20rpx"]]))], ["chart-title", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["fontWeight", "bold"], ["color", "#333333"], ["marginBottom", "8rpx"]]))], ["chart-subtitle", padStyleMapOf(utsMapOf([["fontSize", "22rpx"], ["color", "#666666"]]))], ["chart-container", padStyleMapOf(utsMapOf([["height", "400rpx"]]))], ["pie-chart-container", padStyleMapOf(utsMapOf([["height", "600rpx"]]))], ["loading-overlay", padStyleMapOf(utsMapOf([["position", "fixed"], ["top", 0], ["left", 0], ["right", 0], ["bottom", 0], ["backgroundImage", "none"], ["backgroundColor", "rgba(0,0,0,0.5)"], ["display", "flex"], ["alignItems", "center"], ["justifyContent", "center"], ["zIndex", 9999]]))], ["loading-text", padStyleMapOf(utsMapOf([["color", "#FFFFFF"], ["fontSize", "28rpx"]]))], ["empty-chart", padStyleMapOf(utsMapOf([["height", "100%"], ["display", "flex"], ["alignItems", "center"], ["justifyContent", "center"], ["backgroundColor", "#f5f7fa"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["marginTop", "20rpx"]]))], ["empty-text", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#999999"], ["fontWeight", "bold"]]))], ["custom-legend", padStyleMapOf(utsMapOf([["display", "flex"], ["flexWrap", "wrap"], ["justifyContent", "center"], ["marginTop", "20rpx"]]))], ["legend-item", padStyleMapOf(utsMapOf([["display", "flex"], ["alignItems", "center"], ["marginTop", 0], ["marginRight", "16rpx"], ["marginBottom", "12rpx"], ["marginLeft", 0]]))], ["legend-dot", padStyleMapOf(utsMapOf([["width", "20rpx"], ["height", "20rpx"], ["marginRight", "8rpx"]]))], ["legend-text", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#666666"]]))], ["@TRANSITION", utsMapOf([["tab", utsMapOf([["duration", "0.3s"]])]])]])];
+//# sourceMappingURL=analyze.uvue.map

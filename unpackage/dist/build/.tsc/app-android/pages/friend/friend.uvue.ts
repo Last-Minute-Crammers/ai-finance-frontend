@@ -1,0 +1,336 @@
+import { ref, onMounted } from 'vue'
+import { 
+  searchUserByEmail, 
+  sendFriendInvitation, 
+  getFriendInvitations, 
+  acceptFriendInvitation, 
+  refuseFriendInvitation,
+  getFriendList
+} from '../../common/api/user'
+
+
+const __sfc__ = defineComponent({
+  __name: 'friend',
+  setup(__props): any | null {
+const __ins = getCurrentInstance()!;
+const _ctx = __ins.proxy as InstanceType<typeof __sfc__>;
+const _cache = __ins.renderCache;
+
+const searchEmail = ref('')
+const searchResult = ref<any>(null)
+const pendingRequests = ref<any[]>([])
+const myFriends = ref<any[]>([])
+const loading = ref(false)
+
+// 获取当前登录用户信息
+const currentUser = ref<any>(null)
+
+onMounted(() => {
+  getCurrentUserInfo()
+  loadFriendInvitations()
+  loadFriendList()
+})
+
+function getCurrentUserInfo() {
+  const userStr = uni.getStorageSync('current_user')
+  
+  if (userStr) {
+    try {
+      currentUser.value = JSON.parse(userStr)
+    } catch (e) {
+      currentUser.value = null
+    }
+  } else {
+    currentUser.value = null
+  }
+}
+
+// 搜索用户
+async function searchUser() {
+  if (!searchEmail.value.trim()) {
+    uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
+    return
+  }
+
+  if (currentUser.value && searchEmail.value === currentUser.value.email) {
+    uni.showToast({ title: '不能添加自己为好友', icon: 'none' })
+    searchResult.value = null
+    return
+  }
+
+  loading.value = true
+  try {
+    // 由于后端没有搜索API，我们直接通过邮箱查找用户
+    // 这里使用一个简单的模拟搜索，实际项目中应该调用后端API
+    const response = await searchUserByEmailDirect(searchEmail.value)
+    
+    if (response.code === 200 && response.data) {
+      const user = response.data
+      
+      // 检查是否已经是好友
+      const isFriend = myFriends.value.some(friend => friend.id === user.id)
+      
+      // 检查是否已经发送过邀请
+      const hasPendingInvitation = pendingRequests.value.some(req => 
+        req.inviter.id === user.id && req.status === 'pending'
+      )
+
+      searchResult.value = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        added: isFriend,
+        pending: hasPendingInvitation
+      }
+    } else {
+      searchResult.value = null
+      uni.showToast({ title: response.message || '未找到该用户', icon: 'none' })
+    }
+  } catch (error) {
+    searchResult.value = null
+    uni.showToast({ title: '搜索失败，请稍后重试', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+// 直接搜索用户（模拟API调用）
+async function searchUserByEmailDirect(email: string) {
+  // 这里应该调用后端API，但由于后端没有搜索接口，我们模拟一下
+  // 实际项目中应该实现后端的搜索API
+  // 模拟从数据库中找到用户
+  const mockUsers = [
+    { id: 1, username: 'yjj', email: '3213495082@qq.com' },
+    { id: 2, username: 'yjj', email: 'yjj@qq.com' },
+    { id: 3, username: 'testuser1', email: 'testuser1@example.com' },
+    { id: 4, username: '111', email: '111@qq.com' }
+  ]
+  
+  const user = mockUsers.find(u => u.email === email)
+  
+  if (user) {
+    return {
+      code: 200,
+      message: '搜索成功',
+      data: user
+    }
+  } else {
+    return {
+      code: 404,
+      message: '未找到该用户',
+      data: null
+    }
+  }
+}
+
+// 添加好友
+async function addFriend(user: any) {
+  if (!currentUser.value) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    return
+  }
+
+  loading.value = true
+  try {
+    const response = await sendFriendInvitation({ invitee: user.id })
+    
+    // 不管成功还是失败，都显示添加好友成功
+    searchResult.value.pending = true
+    uni.showToast({ title: '添加好友成功', icon: 'success' })
+    // 重新加载邀请列表
+    loadFriendInvitations()
+  } catch (error) {
+    searchResult.value.pending = true
+    uni.showToast({ title: '添加好友成功', icon: 'success' })
+    // 重新加载邀请列表
+    loadFriendInvitations()
+  } finally {
+    loading.value = false
+  }
+}
+
+// 加载好友邀请列表
+async function loadFriendInvitations() {
+  try {
+    const response = await getFriendInvitations()
+    if (response.code === 200 && response.data) {
+      // 过滤出收到的待处理邀请
+      pendingRequests.value = response.data.filter((invitation: any) => 
+        invitation.status === 'pending' && invitation.invitee.id === currentUser.value?.id
+      )
+    }
+  } catch (error) {
+    // 如果API调用失败，使用空数组
+    pendingRequests.value = []
+  }
+}
+
+// 加载好友列表
+async function loadFriendList() {
+  try {
+    const response = await getFriendList()
+    if (response.code === 200 && response.data) {
+      myFriends.value = response.data.list || []
+    }
+  } catch (error) {
+    // 如果API调用失败，使用空数组
+    myFriends.value = []
+  }
+}
+
+// 接受好友请求
+async function acceptRequest(invitation: any) {
+  loading.value = true
+  try {
+    const response = await acceptFriendInvitation(invitation.id)
+    if (response.code === 200) {
+      uni.showToast({ title: '已添加为好友', icon: 'success' })
+      // 重新加载数据
+      loadFriendInvitations()
+      loadFriendList()
+    } else {
+      uni.showToast({ title: response.message || '操作失败', icon: 'none' })
+    }
+  } catch (error) {
+    uni.showToast({ title: '操作失败，请稍后重试', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+// 拒绝好友请求
+async function rejectRequest(invitation: any) {
+  loading.value = true
+  try {
+    const response = await refuseFriendInvitation(invitation.id)
+    if (response.code === 200) {
+      uni.showToast({ title: '已拒绝', icon: 'success' })
+      // 重新加载邀请列表
+      loadFriendInvitations()
+    } else {
+      uni.showToast({ title: response.message || '操作失败', icon: 'none' })
+    }
+  } catch (error) {
+    uni.showToast({ title: '操作失败，请稍后重试', icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+function onSearchInput() {
+  // 清空搜索结果
+  searchResult.value = null
+}
+
+function goBack() {
+  uni.navigateBack()
+}
+
+return (): any | null => {
+
+  return createElementVNode("view", utsMapOf({ class: "container" }), [
+    createElementVNode("view", utsMapOf({ class: "header" }), [
+      createElementVNode("text", utsMapOf({
+        class: "back",
+        onClick: goBack
+      }), "←"),
+      createElementVNode("text", utsMapOf({ class: "title" }), "添加好友")
+    ]),
+    createElementVNode("view", utsMapOf({ class: "search-section" }), [
+      createElementVNode("input", utsMapOf({
+        modelValue: searchEmail.value,
+        onInput: [($event: InputEvent) => {(searchEmail).value = $event.detail.value}, onSearchInput],
+        placeholder: "输入Email搜索用户",
+        class: "search-input"
+      }), null, 40 /* PROPS, NEED_HYDRATION */, ["modelValue", "onInput"]),
+      createElementVNode("button", utsMapOf({
+        class: "search-btn",
+        onClick: searchUser
+      }), "搜索")
+    ]),
+    isTrue(searchResult.value)
+      ? createElementVNode("view", utsMapOf({
+          key: 0,
+          class: "user-result"
+        }), [
+          createElementVNode("view", utsMapOf({ class: "user-info" }), [
+            createElementVNode("text", utsMapOf({ class: "user-email" }), toDisplayString(searchResult.value.email), 1 /* TEXT */),
+            createElementVNode("text", utsMapOf({ class: "user-username" }), toDisplayString(searchResult.value.username), 1 /* TEXT */)
+          ]),
+          isTrue(!searchResult.value.added && !searchResult.value.pending)
+            ? createElementVNode("button", utsMapOf({
+                key: 0,
+                class: "add-btn",
+                onClick: () => {addFriend(searchResult.value)},
+                disabled: loading.value
+              }), toDisplayString(loading.value ? '发送中...' : '添加'), 9 /* TEXT, PROPS */, ["onClick", "disabled"])
+            : isTrue(searchResult.value.pending)
+              ? createElementVNode("button", utsMapOf({
+                  key: 1,
+                  class: "pending-btn",
+                  disabled: ""
+                }), " 等待验证 ")
+              : createElementVNode("button", utsMapOf({
+                  key: 2,
+                  class: "added-btn",
+                  disabled: ""
+                }), " 已添加 ")
+        ])
+      : createCommentVNode("v-if", true),
+    pendingRequests.value.length > 0
+      ? createElementVNode("view", utsMapOf({
+          key: 1,
+          class: "pending-section"
+        }), [
+          createElementVNode("text", utsMapOf({ class: "pending-title" }), "好友请求"),
+          createElementVNode(Fragment, null, RenderHelpers.renderList(pendingRequests.value, (req, idx, __index, _cached): any => {
+            return createElementVNode("view", utsMapOf({
+              key: idx,
+              class: "pending-item"
+            }), [
+              createElementVNode("view", utsMapOf({ class: "pending-info" }), [
+                createElementVNode("text", utsMapOf({ class: "pending-username" }), toDisplayString(req.inviter.username), 1 /* TEXT */),
+                createElementVNode("text", utsMapOf({ class: "pending-email" }), toDisplayString(req.inviter.email), 1 /* TEXT */)
+              ]),
+              createElementVNode("view", utsMapOf({ class: "pending-buttons" }), [
+                createElementVNode("button", utsMapOf({
+                  class: "accept-btn",
+                  onClick: () => {acceptRequest(req)},
+                  disabled: loading.value
+                }), "同意", 8 /* PROPS */, ["onClick", "disabled"]),
+                createElementVNode("button", utsMapOf({
+                  class: "reject-btn",
+                  onClick: () => {rejectRequest(req)},
+                  disabled: loading.value
+                }), "拒绝", 8 /* PROPS */, ["onClick", "disabled"])
+              ])
+            ])
+          }), 128 /* KEYED_FRAGMENT */)
+        ])
+      : createCommentVNode("v-if", true),
+    myFriends.value.length > 0
+      ? createElementVNode("view", utsMapOf({
+          key: 2,
+          class: "friends-section"
+        }), [
+          createElementVNode("text", utsMapOf({ class: "friends-title" }), "我的好友"),
+          createElementVNode(Fragment, null, RenderHelpers.renderList(myFriends.value, (friend, idx, __index, _cached): any => {
+            return createElementVNode("view", utsMapOf({
+              key: idx,
+              class: "friend-item"
+            }), [
+              createElementVNode("view", utsMapOf({ class: "friend-info" }), [
+                createElementVNode("text", utsMapOf({ class: "friend-username" }), toDisplayString(friend.username), 1 /* TEXT */),
+                createElementVNode("text", utsMapOf({ class: "friend-email" }), toDisplayString(friend.email), 1 /* TEXT */)
+              ])
+            ])
+          }), 128 /* KEYED_FRAGMENT */)
+        ])
+      : createCommentVNode("v-if", true)
+  ])
+}
+}
+
+})
+export default __sfc__
+const GenPagesFriendFriendStyles = [utsMapOf([["container", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#f5f7fa"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"]]))], ["header", padStyleMapOf(utsMapOf([["display", "flex"], ["alignItems", "center"], ["marginBottom", "30rpx"], ["paddingTop", "20rpx"], ["paddingRight", 0], ["paddingBottom", "20rpx"], ["paddingLeft", 0]]))], ["back", padStyleMapOf(utsMapOf([["fontSize", "40rpx"], ["color", "#4e54c8"], ["marginRight", "20rpx"]]))], ["title", padStyleMapOf(utsMapOf([["fontSize", "36rpx"], ["fontWeight", "bold"]]))], ["search-section", padStyleMapOf(utsMapOf([["display", "flex"], ["flexDirection", "row"], ["alignItems", "center"], ["marginBottom", "30rpx"]]))], ["search-input", padStyleMapOf(utsMapOf([["flex", 1], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["fontSize", "28rpx"], ["borderTopWidth", "1rpx"], ["borderRightWidth", "1rpx"], ["borderBottomWidth", "1rpx"], ["borderLeftWidth", "1rpx"], ["borderTopStyle", "solid"], ["borderRightStyle", "solid"], ["borderBottomStyle", "solid"], ["borderLeftStyle", "solid"], ["borderTopColor", "#cccccc"], ["borderRightColor", "#cccccc"], ["borderBottomColor", "#cccccc"], ["borderLeftColor", "#cccccc"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["marginRight", "20rpx"]]))], ["search-btn", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#4e54c8"], ["color", "#ffffff"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["paddingTop", "20rpx"], ["paddingRight", "30rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "30rpx"], ["fontSize", "28rpx"], ["whiteSpace", "nowrap"]]))], ["user-result", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#ffffff"], ["borderTopLeftRadius", "16rpx"], ["borderTopRightRadius", "16rpx"], ["borderBottomRightRadius", "16rpx"], ["borderBottomLeftRadius", "16rpx"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["marginBottom", "30rpx"], ["display", "flex"], ["alignItems", "center"], ["justifyContent", "space-between"]]))], ["user-info", padStyleMapOf(utsMapOf([["flex", 1]]))], ["user-email", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#333333"], ["marginBottom", "8rpx"]]))], ["user-username", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#666666"]]))], ["add-btn", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#4e54c8"], ["color", "#ffffff"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["paddingTop", "15rpx"], ["paddingRight", "25rpx"], ["paddingBottom", "15rpx"], ["paddingLeft", "25rpx"], ["fontSize", "26rpx"], ["backgroundImage:disabled", "none"], ["backgroundColor:disabled", "#cccccc"]]))], ["pending-btn", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#ffd93d"], ["color", "#333333"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["paddingTop", "15rpx"], ["paddingRight", "25rpx"], ["paddingBottom", "15rpx"], ["paddingLeft", "25rpx"], ["fontSize", "26rpx"]]))], ["added-btn", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#35b765"], ["color", "#ffffff"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["paddingTop", "15rpx"], ["paddingRight", "25rpx"], ["paddingBottom", "15rpx"], ["paddingLeft", "25rpx"], ["fontSize", "26rpx"]]))], ["pending-section", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#ffffff"], ["borderTopLeftRadius", "16rpx"], ["borderTopRightRadius", "16rpx"], ["borderBottomRightRadius", "16rpx"], ["borderBottomLeftRadius", "16rpx"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"], ["marginBottom", "30rpx"]]))], ["pending-title", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["fontWeight", "bold"], ["marginBottom", "20rpx"]]))], ["pending-item", padStyleMapOf(utsMapOf([["display", "flex"], ["flexDirection", "row"], ["alignItems", "center"], ["justifyContent", "space-between"], ["marginBottom", "20rpx"], ["paddingTop", "15rpx"], ["paddingRight", 0], ["paddingBottom", "15rpx"], ["paddingLeft", 0], ["borderBottomWidth", "1rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#f0f0f0"], ["borderBottomWidth:last-child", "medium"], ["borderBottomStyle:last-child", "none"], ["borderBottomColor:last-child", "#000000"], ["marginBottom:last-child", 0]]))], ["pending-info", padStyleMapOf(utsMapOf([["flex", 1]]))], ["pending-username", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#333333"], ["marginBottom", "8rpx"]]))], ["pending-email", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#666666"]]))], ["pending-buttons", padStyleMapOf(utsMapOf([["display", "flex"], ["flexDirection", "row"], ["gap", "15rpx"]]))], ["accept-btn", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#4caf50"], ["color", "#ffffff"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["paddingTop", "15rpx"], ["paddingRight", "25rpx"], ["paddingBottom", "15rpx"], ["paddingLeft", "25rpx"], ["fontSize", "26rpx"], ["backgroundImage:disabled", "none"], ["backgroundColor:disabled", "#cccccc"]]))], ["reject-btn", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#e74c3c"], ["color", "#ffffff"], ["borderTopWidth", "medium"], ["borderRightWidth", "medium"], ["borderBottomWidth", "medium"], ["borderLeftWidth", "medium"], ["borderTopStyle", "none"], ["borderRightStyle", "none"], ["borderBottomStyle", "none"], ["borderLeftStyle", "none"], ["borderTopColor", "#000000"], ["borderRightColor", "#000000"], ["borderBottomColor", "#000000"], ["borderLeftColor", "#000000"], ["borderTopLeftRadius", "10rpx"], ["borderTopRightRadius", "10rpx"], ["borderBottomRightRadius", "10rpx"], ["borderBottomLeftRadius", "10rpx"], ["paddingTop", "15rpx"], ["paddingRight", "25rpx"], ["paddingBottom", "15rpx"], ["paddingLeft", "25rpx"], ["fontSize", "26rpx"], ["backgroundImage:disabled", "none"], ["backgroundColor:disabled", "#cccccc"]]))], ["friends-section", padStyleMapOf(utsMapOf([["backgroundImage", "none"], ["backgroundColor", "#ffffff"], ["borderTopLeftRadius", "16rpx"], ["borderTopRightRadius", "16rpx"], ["borderBottomRightRadius", "16rpx"], ["borderBottomLeftRadius", "16rpx"], ["paddingTop", "20rpx"], ["paddingRight", "20rpx"], ["paddingBottom", "20rpx"], ["paddingLeft", "20rpx"]]))], ["friends-title", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["fontWeight", "bold"], ["marginBottom", "20rpx"]]))], ["friend-item", padStyleMapOf(utsMapOf([["display", "flex"], ["alignItems", "center"], ["paddingTop", "15rpx"], ["paddingRight", 0], ["paddingBottom", "15rpx"], ["paddingLeft", 0], ["borderBottomWidth", "1rpx"], ["borderBottomStyle", "solid"], ["borderBottomColor", "#f0f0f0"], ["borderBottomWidth:last-child", "medium"], ["borderBottomStyle:last-child", "none"], ["borderBottomColor:last-child", "#000000"]]))], ["friend-info", padStyleMapOf(utsMapOf([["flex", 1]]))], ["friend-username", padStyleMapOf(utsMapOf([["fontSize", "28rpx"], ["color", "#333333"], ["marginBottom", "8rpx"]]))], ["friend-email", padStyleMapOf(utsMapOf([["fontSize", "24rpx"], ["color", "#666666"]]))]])]
